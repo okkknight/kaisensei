@@ -28,22 +28,8 @@ const stepMeta = {
   Build: { label: "Build", icon: IconPuzzle2 },
   Use: { label: "Use", icon: IconMessage2 },
 };
-const modeMeta = {
-  Normal: {
-    label: "快速模式",
-    shortLabel: "快速",
-  },
-  Advanced: {
-    label: "深度模式",
-    shortLabel: "深度",
-  },
-};
 
-const loadingMessages = ["Looking at your scene...", "Building your mini lesson..."];
-
-function getModeMeta(level) {
-  return modeMeta[level] || modeMeta.Normal;
-}
+const loadingMessages = ["正在查看你的场景…", "正在生成这节迷你课程…"];
 
 function normalizeText(text) {
   return String(text || "")
@@ -874,7 +860,6 @@ function LessonScreen({
   const currentStepNumber = stepOrder.indexOf(activeStep) + 1;
   const currentMeta = stepMeta[activeStep];
   const MetaIcon = currentMeta.icon;
-  const mode = getModeMeta(level);
 
   const footerDisabled =
     activeStep === "Build" ? !buildSolved : activeStep === "Use" ? !useSolved : false;
@@ -892,14 +877,16 @@ function LessonScreen({
               <span className="screen-progress-count">{currentStepNumber} / 4</span>
               <span className="screen-progress-label">{currentMeta.label}</span>
             </div>
-            <span className="level-chip">{mode.shortLabel}</span>
-          </div>
-          <div className="screen-header-icon">
-            <MetaIcon size={18} />
           </div>
         </div>
 
         <StepProgress current={currentStepNumber} />
+
+        <div className="step-icon-row" aria-hidden="true">
+          <button className="step-icon-button" type="button" tabIndex={-1}>
+            <MetaIcon size={18} />
+          </button>
+        </div>
 
         {activeStep === "See" && (
           <SeeStep lesson={lesson} photoPreviewUrl={photoPreviewUrl} onSpeak={onSpeak} speakingKey={speakingKey} onContinue={onContinue} />
@@ -951,14 +938,6 @@ function StepProgress({ current }) {
       <div className="step-progress-bar">
         <span style={{ width: `${(current / 4) * 100}%` }} />
       </div>
-      <div className="step-progress-list">
-        {stepOrder.map((label, index) => (
-          <div key={label} className={`step-pill ${current === index + 1 ? "active" : ""}`}>
-            <span>{index + 1} / 4</span>
-            <strong>{label}</strong>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -971,13 +950,7 @@ function SeeStep({ lesson, photoPreviewUrl, onSpeak, speakingKey }) {
           <div className="sentence-favorite">
             <IconStarFilled size={14} />
           </div>
-          <div>
-            <div className="section-title compact">
-              <h2>Here&apos;s a natural sentence for this scene.</h2>
-              <p>{lesson.photoSummary}</p>
-            </div>
-            <div className="sentence-text">{lesson.see.sentence}</div>
-          </div>
+          <div className="sentence-text">{lesson.see.sentence}</div>
         </div>
         <p className="sentence-chinese">{lesson.see.chinese}</p>
         <div className="sentence-actions">
@@ -1233,12 +1206,12 @@ function VoiceButton({ onClick, active = false, label = "Play", compact = false 
 function LoadingScreen({ message }) {
   return (
     <div className="screen loading-screen">
-      <div className="loading-card">
+      <div className="loading-stage">
         <div className="loading-icon">
           <IconSparkles size={20} />
         </div>
         <h2>{message}</h2>
-        <p>Building your mini lesson...</p>
+        <p>请稍等，马上开始。</p>
         <div className="loading-dots" aria-hidden="true">
           <span />
           <span />

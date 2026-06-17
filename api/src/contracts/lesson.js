@@ -1,6 +1,5 @@
 export const lessonContract = {
   level: "Normal",
-  photoSummary: "",
   see: {
     sentence: "",
     chinese: "",

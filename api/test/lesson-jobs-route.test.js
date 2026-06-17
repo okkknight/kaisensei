@@ -29,7 +29,6 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
   const jobStore = createLessonJobStore();
   const lesson = {
     level: "Normal",
-    photoSummary: "A desk with a coffee mug and a laptop.",
     see: {
       sentence: "A coffee mug is sitting next to a laptop on the desk.",
       chinese: "一个咖啡杯放在桌上，旁边是一台笔记本电脑。",

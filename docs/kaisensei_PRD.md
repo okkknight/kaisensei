@@ -720,7 +720,6 @@ export type UseExercise = {
 
 export type KaisenLesson = {
   level: Level;
-  photoSummary: string;
   see: {
     sentence: string;
     chinese: string;
@@ -742,7 +741,6 @@ export type KaisenLesson = {
 ```json
 {
   "level": "Normal",
-  "photoSummary": "A desk with a coffee mug, laptop, notebook, and plant.",
   "see": {
     "sentence": "A coffee mug is sitting next to a laptop on the desk.",
     "chinese": "一个咖啡杯放在桌上，旁边是一台笔记本电脑。",
@@ -892,7 +890,6 @@ Rules:
 Return this JSON shape:
 {
   "level": "Normal" | "Advanced",
-  "photoSummary": string,
   "see": {
     "sentence": string,
     "chinese": string,

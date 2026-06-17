@@ -155,7 +155,6 @@ Keep the contract shape aligned with the product doc:
 ```js
 export const lessonContract = {
   level: "Normal",
-  photoSummary: "",
   see: { sentence: "", chinese: "", speakText: "" },
   learn: { chunks: [], note: "" },
   build: { targetSentence: "", chunks: [], correctOrder: [] },

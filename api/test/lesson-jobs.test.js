@@ -5,7 +5,6 @@ import { createLessonJobStore } from "../src/stores/in-memory-job-store.js";
 
 test("lesson contract exposes the required top-level keys", () => {
   assert.equal(lessonContract.level, "Normal");
-  assert.ok(lessonContract.photoSummary !== undefined);
   assert.ok(lessonContract.see);
   assert.ok(lessonContract.learn);
   assert.ok(lessonContract.build);

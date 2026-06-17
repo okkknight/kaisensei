@@ -170,7 +170,6 @@ export function normalizeLessonPayload(payload) {
   }
 
   const level = ensureLevel(payload.level);
-  const photoSummary = ensureString(payload.photoSummary, "photoSummary");
   const see = isPlainObject(payload.see) ? payload.see : null;
   if (!see) {
     throw new LessonValidationError("Missing or invalid object at see", { path: "see" });
@@ -193,7 +192,6 @@ export function normalizeLessonPayload(payload) {
   return {
     ...lessonContract,
     level,
-    photoSummary,
     see: {
       sentence,
       chinese,

@@ -49,7 +49,6 @@ function buildPrompt(level) {
     "Return this JSON shape:",
     "{",
     '  "level": "Normal" | "Advanced",',
-    '  "photoSummary": string,',
     '  "see": {',
     '    "sentence": string,',
     '    "chinese": string,',

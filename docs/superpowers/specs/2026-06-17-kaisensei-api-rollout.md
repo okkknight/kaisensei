@@ -139,7 +139,6 @@ pending / running / succeeded / failed
   "status": "succeeded",
   "lesson": {
     "level": "Normal",
-    "photoSummary": "A desk with a coffee mug and a laptop.",
     "see": {
       "sentence": "A coffee mug is sitting next to a laptop on the desk.",
       "chinese": "一个咖啡杯放在桌上，旁边是一台笔记本电脑。",
@@ -184,7 +183,6 @@ pending / running / succeeded / failed
 后端返回的 lesson JSON 必须继续沿用当前产品的学习语义：
 
 - `level`
-- `photoSummary`
 - `see.sentence`
 - `learn.chunks`
 - `build.chunks`
@@ -266,4 +264,3 @@ pending / running / succeeded / failed
 - 失败时看到失败页而不是假数据
 - 当前开发环境不需要 OpenAI API key
 - 后续切换到 OpenAI 时，前端协议不需要重写
-
