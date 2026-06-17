@@ -943,18 +943,44 @@ function StepProgress({ current }) {
 }
 
 function SeeStep({ lesson, photoPreviewUrl, onSpeak, speakingKey }) {
+  const [translationOpen, setTranslationOpen] = useState(false);
+
   return (
     <div className="lesson-body lesson-body-see">
       <div className="sentence-card">
-        <div className="sentence-card-top">
-          <div className="sentence-favorite">
-            <IconStarFilled size={14} />
+        <div className="sentence-card-main">
+          <div className="sentence-card-top">
+            <div className="sentence-favorite">
+              <IconStarFilled size={14} />
+            </div>
+            <div className="sentence-text">{lesson.see.sentence}</div>
           </div>
-          <div className="sentence-text">{lesson.see.sentence}</div>
         </div>
-        <p className="sentence-chinese">{lesson.see.chinese}</p>
+
         <div className="sentence-actions">
-          <VoiceButton onClick={() => onSpeak(lesson.see.speakText, "see-sentence")} active={speakingKey === "see-sentence"} label="Play sentence" />
+          <VoiceButton
+            onClick={() => onSpeak(lesson.see.speakText, "see-sentence")}
+            active={speakingKey === "see-sentence"}
+            label="Play sentence"
+          />
+        </div>
+
+        <div className="sentence-translation-section">
+          <button
+            className={`translation-toggle ${translationOpen ? "open" : ""}`}
+            type="button"
+            onClick={() => setTranslationOpen((current) => !current)}
+            aria-expanded={translationOpen}
+            aria-controls="see-translation"
+          >
+            {translationOpen ? "收起中文" : "显示中文"}
+            <IconArrowRight size={14} />
+          </button>
+          {translationOpen ? (
+            <div className="sentence-translation-panel" id="see-translation">
+              <p className="sentence-translation">{lesson.see.chinese}</p>
+            </div>
+          ) : null}
         </div>
       </div>
 

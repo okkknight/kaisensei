@@ -875,6 +875,10 @@ Level: {Normal | Advanced}
 Rules:
 - Focus on one useful sentence from the photo.
 - The sentence should be natural spoken English.
+- For See and Build, describe the visible scene from an observer's perspective.
+- Prefer third-person or objective phrasing for See and Build.
+- Avoid first-person and second-person pronouns in See and Build unless they are clearly visible in the photo as text or speech.
+- If a person is visible, describe what they are doing or what is happening around them, not what the viewer is doing.
 - Do not list too many objects.
 - Teach chunks, not isolated words.
 - Build exercise should reconstruct the See sentence.
@@ -882,6 +886,7 @@ Rules:
 - Use exercise must provide a target answer.
 - Use answer must be split into 4-6 reusable chunks.
 - The user will reorder the chunks to answer the question.
+- Use may use first-person or second-person phrasing because it practices how the user would answer in real life.
 - Keep Chinese explanations short.
 - Avoid grammar jargon.
 - If something is uncertain in the image, say what seems visible instead of guessing.
