@@ -861,9 +861,10 @@ function LessonScreen({
   const currentMeta = stepMeta[activeStep];
   const MetaIcon = currentMeta.icon;
 
-  const footerDisabled =
-    activeStep === "Build" ? !buildSolved : activeStep === "Use" ? !useSolved : false;
-  const footerLabel = activeStep === "Use" ? "Finish" : "Continue";
+  const buildCanContinue = buildFeedback.tone === "success";
+  const useCanFinish = useFeedback.tone === "success";
+  const footerDisabled = false;
+  const footerLabel = "Continue";
 
   return (
     <div className="screen lesson-screen">
@@ -923,10 +924,34 @@ function LessonScreen({
       </div>
 
       <div className="lesson-footer">
-        <ActionButton disabled={footerDisabled} onClick={onContinue}>
-          {footerLabel}
-          {activeStep === "Use" ? <IconStarFilled size={16} /> : <IconArrowRight size={18} />}
-        </ActionButton>
+        {activeStep === "Build" ? (
+          <div className="lesson-footer-actions">
+            <button className="secondary-button" type="button" onClick={onBuildReset}>
+              <IconRefresh size={17} />
+              Reset
+            </button>
+            <button className="primary-button" type="button" onClick={buildCanContinue ? onContinue : onBuildCheck}>
+              {buildCanContinue ? "Continue" : "Check"}
+              {buildCanContinue ? <IconArrowRight size={18} /> : <IconCheck size={18} />}
+            </button>
+          </div>
+        ) : activeStep === "Use" ? (
+          <div className="lesson-footer-actions">
+            <button className="secondary-button" type="button" onClick={onUseReset}>
+              <IconRefresh size={17} />
+              Reset
+            </button>
+            <button className="primary-button" type="button" onClick={useCanFinish ? onContinue : onUseCheck}>
+              {useCanFinish ? "Finish" : "Check"}
+              {useCanFinish ? <IconStarFilled size={16} /> : <IconCheck size={18} />}
+            </button>
+          </div>
+        ) : (
+          <ActionButton disabled={footerDisabled} onClick={onContinue}>
+            {footerLabel}
+            <IconArrowRight size={18} />
+          </ActionButton>
+        )}
       </div>
     </div>
   );
@@ -1025,9 +1050,10 @@ function BuildStep({ lesson, selectedChunks, bank, feedback, onToggleChunk, onRe
   return (
     <div className="lesson-body lesson-body-build">
       <ReorderExercise
+        variant="build"
+        showActions={false}
         title="Build"
         subtitle="Put the chunks in order."
-        promptLabel="Your sentence"
         bank={bank}
         selectedChunks={selectedChunks}
         onToggleChunk={onToggleChunk}
@@ -1051,7 +1077,6 @@ function UseStep({ lesson, selectedChunks, bank, feedback, onToggleChunk, onRese
       <ReorderExercise
         title="Your answer"
         subtitle="Answer the question with the chunks."
-        promptLabel="Answer"
         bank={bank}
         selectedChunks={selectedChunks}
         onToggleChunk={onToggleChunk}
@@ -1063,6 +1088,7 @@ function UseStep({ lesson, selectedChunks, bank, feedback, onToggleChunk, onRese
         onSpeak={null}
         speaking={false}
         showVoiceButton={false}
+        showActions={false}
       />
     </div>
   );
@@ -1076,7 +1102,6 @@ function QuestionCard({ lesson, onSpeak, speaking }) {
         <span>Situation</span>
       </div>
       <strong className="question-text">{lesson.use.question}</strong>
-      <p className="question-chinese">{lesson.use.questionChinese}</p>
       <p className="question-situation">{lesson.use.situation}</p>
       <div className="sentence-actions">
         <VoiceButton onClick={() => onSpeak(lesson.use.speakText, "use-answer")} active={speaking} label="Play answer" />
@@ -1086,6 +1111,8 @@ function QuestionCard({ lesson, onSpeak, speaking }) {
 }
 
 function ReorderExercise({
+  variant = "default",
+  showActions = true,
   title,
   subtitle,
   promptLabel,
@@ -1102,7 +1129,7 @@ function ReorderExercise({
   showVoiceButton = false,
 }) {
   return (
-    <div className="reorder-exercise">
+    <div className={`reorder-exercise ${variant === "build" ? "build-layout" : ""}`}>
       <div className="reorder-head">
         <div>
           <h3>{title}</h3>
@@ -1110,9 +1137,9 @@ function ReorderExercise({
         </div>
         {showVoiceButton ? (
           <VoiceButton onClick={onSpeak} active={speaking} label="Play answer" />
-        ) : (
+        ) : promptLabel ? (
           <span className="reorder-prompt">{promptLabel}</span>
-        )}
+        ) : null}
       </div>
 
       <div className="answer-section">
@@ -1145,27 +1172,22 @@ function ReorderExercise({
         </div>
       </div>
 
-      <div className="exercise-actions">
-        <button className="secondary-button" type="button" onClick={onReset}>
-          <IconRefresh size={17} />
-          Reset
-        </button>
-        <button className="primary-button" type="button" onClick={onCheck}>
-          <IconCheck size={18} />
-          {primaryActionLabel}
-        </button>
-      </div>
-
       <FeedbackCard tone={feedback.tone} title={feedback.title} body={feedback.body} />
 
-      {showQuestion && feedback.tone === "success" && (
-        <div className="playback-rail">
-          <div className="playback-note">
-            <IconPlayerPlayFilled size={16} />
-            <span>{joinChunkText(selectedChunks)}</span>
+      {showActions ? (
+        <div className="exercise-footer">
+          <div className="exercise-actions">
+            <button className="secondary-button" type="button" onClick={onReset}>
+              <IconRefresh size={17} />
+              Reset
+            </button>
+            <button className="primary-button" type="button" onClick={onCheck}>
+              <IconCheck size={18} />
+              {primaryActionLabel}
+            </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

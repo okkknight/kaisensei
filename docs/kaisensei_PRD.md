@@ -711,7 +711,6 @@ export type ReorderExercise = {
 export type UseExercise = {
   situation: string;
   question: string;
-  questionChinese: string;
   targetAnswer: string;
   answerChunks: Chunk[];
   correctOrder: string[];
@@ -810,7 +809,6 @@ export type KaisenLesson = {
   "use": {
     "situation": "You are talking about your workspace.",
     "question": "What do you usually keep next to your laptop while you work?",
-    "questionChinese": "你工作时通常把什么放在笔记本电脑旁边？",
     "targetAnswer": "I usually keep a coffee mug next to my laptop while I work.",
     "answerChunks": [
       {
@@ -924,7 +922,6 @@ Return this JSON shape:
   "use": {
     "situation": string,
     "question": string,
-    "questionChinese": string,
     "targetAnswer": string,
     "answerChunks": [
       {

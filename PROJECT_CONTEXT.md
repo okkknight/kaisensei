@@ -21,15 +21,19 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current product state
 
-- Design is settled in `docs/kaisensei_PRD.md` and `AGENTS.md` has been aligned to match it
-- Visual reference is in `docs/image.png`
-- No app source has been created yet
-- No implementation task beyond this flow initialization has started
+- The app is fully implemented in `prototype/` and backed by a real `api/`
+- Camera mode, loading mode, and lesson mode all exist
+- Lesson mode now includes the four-step flow: See, Learn, Build, Use
+- The camera page uses a dark starfield fallback, real upload/capture controls, settings modal, and mode switch
+- Build and Use use chunk reordering with tolerant checking
+- The prompt and UI have been tightened so `See` and `Build` stay observer-focused
+- `Use` now omits `questionChinese`
+- The bottom navigation has been adjusted so Build and Use have clearer footer behavior
 
 ## Current latest task
 
-- Task: initialize flow skeleton and handoff pack
-- Status: completed in this turn
+- Task: remove `use.questionChinese`, align the Use page copy/UI, and refresh the handoff pack
+- Status: 已执行待验收
 
 ## Architecture or state flow
 
@@ -55,31 +59,31 @@ MVP behavior:
 - user can switch between Normal and Advanced
 - user can replay English audio with browser TTS
 - Build and Use both use click-to-order chunk reordering
-- Check logic should be tolerant of capitalization, punctuation, and spacing differences
+- Check logic ignores capitalization, punctuation, and spacing differences
 
 ## Key files
 
 - `docs/kaisensei_PRD.md` - source of truth for product behavior
+- `api/src/services/codex-cli-provider.js` - lesson generation prompt and Codex CLI bridge
+- `api/src/services/lesson-normalizer.js` - API payload validation and normalization
+- `api/src/contracts/lesson.js` - lesson contract shape
+- `prototype/src/App.jsx` - full mobile UI and lesson flow
+- `prototype/src/styles.css` - responsive styling for camera and lesson pages
 - `docs/image.png` - visual direction reference
-- `AGENTS.md` - project instructions and product constraints
-- `PROJECT_CONTEXT.md` - this summary for future agents
 - `docs/handoff/README.md` - short reading index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
-- `flow/task/TASK_TEMPLATE.md` - task card skeleton
-- `flow/issue/ISSUE_TEMPLATE.md` - issue skeleton
-- `flow/dev_report/DEV_REPORT_TEMPLATE.md` - development report skeleton
 
 ## Verified commands
 
-- `find . -maxdepth 3 ...` showed only `AGENTS.md` and `docs/` before initialization
-- `sed -n '1,260p' docs/kaisensei_PRD.md` confirmed the PRD content and MVP scope
-- `file docs/image.png` confirmed the reference image exists and is a 1536x1024 PNG
+- `node --test test/lesson-jobs-route.test.js test/lesson-jobs.test.js`
+- `npm run build` in `prototype/`
+- `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 
 ## Runtime notes
 
-- The repo was still an empty scaffold before this init flow pass
-- There was no `package.json` or source tree present when checked
-- The current focus is documentation and execution scaffolding, not app code
+- The API runs separately from the Vite prototype and must be restarted to pick up prompt/contract changes
+- The prototype uses Vite dev server hot reload for UI changes
+- Current local URLs are `http://localhost:5175/` for the prototype and `http://127.0.0.1:3001/` for the API
 
 ## Working rules
 
@@ -93,16 +97,22 @@ MVP behavior:
 
 ## Open decisions
 
-- None blocking the flow setup
-- Implementation stack is guided by the PRD, but no code-level decision is locked in yet
+- Whether `Use` should keep the current two-step footer behavior or be simplified further remains a UX judgment call
+- The current handoff status is intentionally compact; do not expand it into a second parallel spec
 
 ## Main risks and tradeoffs
 
 - Easy to drift back into the old snapspeak mode structure
-- Easy to overbuild before the mobile lesson flow exists
+- Easy to overbuild before the mobile lesson flow is stable
 - Lesson content should stay short and practical, or the 1-minute promise will break
 - If Build or Use scoring becomes too strict, the learning flow will feel exam-like instead of friendly
 
 ## Cross-feature impact
 
-This product is currently isolated to its own repo scope. No cross-feature dependencies are known yet.
+Changes to the lesson contract or prompt affect both the API generator and the prototype UI. Any future field removal or shape change should update:
+
+- `api/src/contracts/lesson.js`
+- `api/src/services/lesson-normalizer.js`
+- `api/src/services/codex-cli-provider.js`
+- `prototype/src/App.jsx`
+- `docs/kaisensei_PRD.md`

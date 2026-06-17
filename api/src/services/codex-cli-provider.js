@@ -83,7 +83,6 @@ function buildPrompt(level) {
     '  "use": {',
     '    "situation": string,',
     '    "question": string,',
-    '    "questionChinese": string,',
     '    "targetAnswer": string,',
     '    "answerChunks": [',
     "      {",

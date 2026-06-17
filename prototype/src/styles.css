@@ -889,6 +889,7 @@ img {
 .lesson-screen {
   gap: 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 252, 247, 0.96));
+  overflow: hidden;
 }
 
 .lesson-content {
@@ -899,6 +900,9 @@ img {
   gap: 14px;
   padding-top: 6px;
   padding-bottom: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .lesson-body {
@@ -928,10 +932,21 @@ img {
   flex: 0;
 }
 
+.lesson-body-build .reorder-exercise {
+  flex: 1;
+}
+
 .lesson-footer {
   margin-top: auto;
   padding-top: 4px;
-  padding-bottom: 4px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom));
+  flex: 0 0 auto;
+}
+
+.lesson-footer-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
 
 .screen-header-copy {
@@ -1258,10 +1273,6 @@ img {
   color: var(--muted);
 }
 
-.question-chinese {
-  font-size: 0.84rem;
-}
-
 .reorder-exercise {
   display: grid;
   gap: 14px;
@@ -1271,6 +1282,17 @@ img {
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(20, 33, 61, 0.08);
   box-shadow: 0 16px 32px rgba(20, 33, 61, 0.05);
+}
+
+.reorder-exercise.build-layout {
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .reorder-head {
@@ -1297,6 +1319,14 @@ img {
   gap: 12px;
 }
 
+.reorder-exercise.build-layout .answer-section {
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  flex: 0;
+}
+
 .answer-stage {
   min-height: 146px;
   padding: 14px;
@@ -1307,6 +1337,16 @@ img {
   border-radius: 18px;
   background: rgba(255, 248, 236, 0.85);
   border: 1px solid rgba(20, 33, 61, 0.08);
+}
+
+.reorder-exercise.build-layout .answer-stage {
+  min-height: 162px;
+  padding: 14px;
+  gap: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+  margin-bottom: 30px;
 }
 
 .answer-stage.empty {
@@ -1331,6 +1371,22 @@ img {
   gap: 8px;
 }
 
+.reorder-exercise.build-layout .available-row {
+  padding-top: 0;
+  gap: 10px;
+  border-top: 0;
+}
+
+.exercise-footer {
+  display: grid;
+  gap: 12px;
+}
+
+.exercise-footer.footer-aligned {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
 .chunk-chip {
   min-height: 38px;
   padding: 0 12px;
@@ -1340,6 +1396,11 @@ img {
   box-shadow: 0 8px 16px rgba(20, 33, 61, 0.05);
   font-size: 0.83rem;
   font-weight: 800;
+}
+
+.reorder-exercise.build-layout .chunk-chip {
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .chunk-chip.selected {
@@ -1360,6 +1421,10 @@ img {
 .exercise-actions {
   display: flex;
   gap: 10px;
+}
+
+.reorder-exercise.build-layout .exercise-actions {
+  margin-top: 0;
 }
 
 .primary-button,
@@ -1429,6 +1494,10 @@ img {
   border: 1px solid rgba(20, 33, 61, 0.08);
 }
 
+.reorder-exercise.build-layout .feedback-card {
+  margin-top: auto;
+}
+
 .feedback-card strong {
   display: block;
   font-size: 0.96rem;
@@ -1466,6 +1535,10 @@ img {
 
 .playback-rail {
   padding: 4px 0 0;
+}
+
+.reorder-exercise.build-layout .playback-rail {
+  padding-top: 0;
 }
 
 .playback-note {

@@ -156,7 +156,6 @@ function normalizeUse(use, expectedAnswer) {
   return {
     situation: ensureString(use.situation, "use.situation"),
     question: ensureString(use.question, "use.question"),
-    questionChinese: ensureString(use.questionChinese, "use.questionChinese"),
     targetAnswer,
     answerChunks,
     correctOrder,

@@ -58,7 +58,6 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
     use: {
       situation: "You are talking about your workspace.",
       question: "What do you usually keep next to your laptop while you work?",
-      questionChinese: "你工作时通常把什么放在笔记本电脑旁边？",
       targetAnswer: "I usually keep a coffee mug next to my laptop while I work.",
       answerChunks: [
         { id: "u1", text: "I usually keep", chinese: "我通常放" },

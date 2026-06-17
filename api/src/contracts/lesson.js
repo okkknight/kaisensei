@@ -17,7 +17,6 @@ export const lessonContract = {
   use: {
     situation: "",
     question: "",
-    questionChinese: "",
     targetAnswer: "",
     answerChunks: [],
     correctOrder: [],
