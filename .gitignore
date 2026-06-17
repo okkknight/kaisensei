@@ -1,0 +1,7 @@
+.DS_Store
+docs/.DS_Store
+prototype/node_modules/
+prototype/dist/
+prototype/.npm-cache/
+prototype/.tmp-shot*.png
+prototype/.vite/
