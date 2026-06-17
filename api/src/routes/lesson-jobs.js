@@ -31,48 +31,52 @@ function isValidLevel(level) {
 }
 
 export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
-  app.post("/v1/lesson-jobs", async (request, reply) => {
-    const { imageBuffer, mimeType, level } = await parseMultipartRequest(request);
+  const prefixes = ["/v1", "/api/v1"];
 
-    if (!imageBuffer) {
-      return reply.status(400).send({
-        error: {
-          code: "missing_image",
-          message: "Please upload a photo.",
-        },
+  for (const prefix of prefixes) {
+    app.post(`${prefix}/lesson-jobs`, async (request, reply) => {
+      const { imageBuffer, mimeType, level } = await parseMultipartRequest(request);
+
+      if (!imageBuffer) {
+        return reply.status(400).send({
+          error: {
+            code: "missing_image",
+            message: "Please upload a photo.",
+          },
+        });
+      }
+
+      if (!isValidLevel(level)) {
+        return reply.status(400).send({
+          error: {
+            code: "invalid_level",
+            message: "Level must be Normal or Advanced.",
+          },
+        });
+      }
+
+      const job = jobStore.create({ level });
+      jobRunner.enqueue(job.jobId, { imageBuffer, mimeType, level });
+
+      return reply.status(202).send({
+        jobId: job.jobId,
+        status: job.status,
       });
-    }
-
-    if (!isValidLevel(level)) {
-      return reply.status(400).send({
-        error: {
-          code: "invalid_level",
-          message: "Level must be Normal or Advanced.",
-        },
-      });
-    }
-
-    const job = jobStore.create({ level });
-    jobRunner.enqueue(job.jobId, { imageBuffer, mimeType, level });
-
-    return reply.status(202).send({
-      jobId: job.jobId,
-      status: job.status,
     });
-  });
 
-  app.get("/v1/lesson-jobs/:jobId", async (request, reply) => {
-    const job = jobStore.get(request.params.jobId);
+    app.get(`${prefix}/lesson-jobs/:jobId`, async (request, reply) => {
+      const job = jobStore.get(request.params.jobId);
 
-    if (!job) {
-      return reply.status(404).send({
-        error: {
-          code: "job_not_found",
-          message: "Job not found.",
-        },
-      });
-    }
+      if (!job) {
+        return reply.status(404).send({
+          error: {
+            code: "job_not_found",
+            message: "Job not found.",
+          },
+        });
+      }
 
-    return reply.send(job);
-  });
+      return reply.send(job);
+    });
+  }
 }

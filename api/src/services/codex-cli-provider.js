@@ -108,10 +108,11 @@ export function buildPrompt(level) {
 
 async function runCodexExec({ imagePath, prompt, cwd }) {
   const outputPath = join(cwd, "codex-last-message.txt");
+  const codexBinary = process.env.CODEX_BINARY || "codex";
 
   return await new Promise((resolve, reject) => {
     const child = spawn(
-      "codex",
+      codexBinary,
       [
         "exec",
         "--ephemeral",

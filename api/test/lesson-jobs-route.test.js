@@ -104,4 +104,12 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
   const fetched = getRes.json();
   assert.equal(fetched.status, "succeeded");
   assert.equal(fetched.lesson.see.sentence, lesson.see.sentence);
+
+  const gatewayStyleRes = await app.inject({
+    method: "GET",
+    url: `/api/v1/lesson-jobs/${created.jobId}`,
+  });
+
+  assert.equal(gatewayStyleRes.statusCode, 200);
+  assert.equal(gatewayStyleRes.json().lesson.see.sentence, lesson.see.sentence);
 });

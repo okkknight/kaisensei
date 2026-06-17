@@ -24,6 +24,7 @@ export function createApp({ jobStore, provider, jobRunner } = {}) {
   });
 
   app.get("/healthz", async () => ({ ok: true }));
+  app.get("/api/healthz", async () => ({ ok: true }));
   registerLessonJobRoutes(app, {
     jobStore: resolvedJobStore,
     jobRunner: resolvedJobRunner,
