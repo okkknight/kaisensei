@@ -20,12 +20,8 @@ import {
   IconStarFilled,
 } from "@tabler/icons-react";
 import {
-  colorSwatches,
-  flowSteps,
-  interactionNotes,
   mockLessons,
   photoUrl,
-  typographyTokens,
 } from "./lesson-data";
 import "./styles.css";
 
@@ -36,7 +32,7 @@ const stepMeta = {
   see: { label: "See", icon: IconEye, number: 2 },
   learn: { label: "Learn", icon: IconBook2, number: 3 },
   build: { label: "Build", icon: IconPuzzle2, number: 4 },
-  use: { label: "Use (Q&A)", icon: IconMessage2, number: 5 },
+  use: { label: "Use", icon: IconMessage2, number: 4 },
 };
 
 const toneMap = {
@@ -52,9 +48,9 @@ export function App() {
   const [level, setLevel] = useState("Normal");
   const lesson = mockLessons[level];
   const [journeyStep, setJourneyStep] = useState("camera");
-  const [cameraNote, setCameraNote] = useState("Take a photo. Learn one sentence.");
   const [flashOn, setFlashOn] = useState(false);
   const [speakingKey, setSpeakingKey] = useState("");
+  const [loadingMessage, setLoadingMessage] = useState("Looking at your scene...");
 
   const [buildSelected, setBuildSelected] = useState(() => lesson.build.correctOrder);
   const [buildFeedback, setBuildFeedback] = useState({
@@ -71,21 +67,34 @@ export function App() {
   });
 
   useEffect(() => {
-    setBuildSelected(lesson.build.correctOrder);
+    setBuildSelected([]);
     setBuildFeedback({
-      tone: "success",
-      title: "Great job! 🎉",
-      body: "You built the sentence.",
+      tone: "neutral",
+      title: "Ready",
+      body: "Tap chunks to build the sentence.",
     });
-    setUseSelected(lesson.use.correctOrder);
+    setUseSelected([]);
     setUseFeedback({
-      tone: "success",
-      title: "Nice! 🎉",
-      body: "Now you can use it in real life.",
+      tone: "neutral",
+      title: "Ready",
+      body: "Tap chunks to build your answer.",
     });
     setJourneyStep("camera");
-    setCameraNote("Take a photo. Learn one sentence.");
   }, [lesson]);
+
+  useEffect(() => {
+    if (journeyStep !== "loading") return undefined;
+
+    const first = window.setTimeout(() => setLoadingMessage("Looking at your scene..."), 0);
+    const second = window.setTimeout(() => setLoadingMessage("Building your mini lesson..."), 600);
+    const third = window.setTimeout(() => setJourneyStep("see"), 1200);
+
+    return () => {
+      window.clearTimeout(first);
+      window.clearTimeout(second);
+      window.clearTimeout(third);
+    };
+  }, [journeyStep]);
 
   function speak(text, key) {
     if (!window?.speechSynthesis) return;
@@ -174,8 +183,19 @@ export function App() {
   }
 
   function handleCapture() {
-    setCameraNote("Nice shot. Ready for your mini lesson.");
-    setJourneyStep("see");
+    setBuildSelected([]);
+    setBuildFeedback({
+      tone: "neutral",
+      title: "Ready",
+      body: "Tap chunks to build the sentence.",
+    });
+    setUseSelected([]);
+    setUseFeedback({
+      tone: "neutral",
+      title: "Ready",
+      body: "Tap chunks to build your answer.",
+    });
+    setJourneyStep("loading");
   }
 
   function handleContinue(step) {
@@ -184,81 +204,50 @@ export function App() {
     setJourneyStep(nextStep);
   }
 
-  const mobileStepIndex = stepSequence.indexOf(journeyStep);
+  function handleBack(step) {
+    const currentIndex = stepSequence.indexOf(step);
+    const previousStep = stepSequence[Math.max(currentIndex - 1, 0)];
+    setJourneyStep(previousStep);
+  }
 
   return (
     <div className="app-shell">
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
-
-      <header className="hero">
-        <div>
-          <div className="brand-row">
-            <span className="brand-mark">kaisensei</span>
-            <span className="brand-tag">One photo. One lesson. Learn from real life.</span>
-          </div>
-          <p className="brand-subtitle">Photo-based English micro-lesson</p>
-        </div>
-
-        <div className="flow-row">
-          {flowSteps.map((step, index) => {
-            const Icon = step.icon === "camera"
-              ? IconCamera
-              : step.icon === "eye"
-                ? IconEye
-                : step.icon === "book"
-                  ? IconBook2
-                  : step.icon === "puzzle"
-                    ? IconPuzzle2
-                    : IconMessage2;
-
-            return (
-              <div className="flow-item" key={step.id}>
-                <div className={`flow-icon flow-icon-${index + 1}`}>
-                  <Icon size={22} strokeWidth={2.1} />
-                </div>
-                <span>{step.label}</span>
-                {index < flowSteps.length - 1 && <IconArrowRight size={18} className="flow-arrow" />}
-              </div>
-            );
-          })}
-        </div>
-      </header>
-
-      <main className="prototype">
-        <section className="desktop-board">
-          <PhoneCard label="Camera" accent="Camera">
+      <main className="mobile-stage app-stage">
+        <div className="mobile-shell">
+          {journeyStep === "camera" && (
             <CameraScreen
               level={level}
               setLevel={setLevel}
-              cameraNote={cameraNote}
               flashOn={flashOn}
               setFlashOn={setFlashOn}
-              setCameraNote={setCameraNote}
               onCapture={handleCapture}
+              onBack={() => {}}
+              mobile
             />
-          </PhoneCard>
-
-          <PhoneCard label="See (1/4)" accent="See">
+          )}
+          {journeyStep === "loading" && <LoadingScreen message={loadingMessage} />}
+          {journeyStep === "see" && (
             <SeeScreen
               lesson={lesson}
               level={level}
               onContinue={() => handleContinue("see")}
+              onBack={() => handleBack("see")}
               onSpeak={speak}
               speakingKey={speakingKey}
+              mobile
             />
-          </PhoneCard>
-
-          <PhoneCard label="Learn (2/4)" accent="Learn">
+          )}
+          {journeyStep === "learn" && (
             <LearnScreen
               lesson={lesson}
               onContinue={() => handleContinue("learn")}
+              onBack={() => handleBack("learn")}
               onSpeak={speak}
               speakingKey={speakingKey}
+              mobile
             />
-          </PhoneCard>
-
-          <PhoneCard label="Build (3/4)" accent="Build">
+          )}
+          {journeyStep === "build" && (
             <BuildScreen
               lesson={lesson}
               selected={buildSelected}
@@ -287,12 +276,13 @@ export function App() {
               onReset={() => resetExercise("build")}
               feedback={buildFeedback}
               onContinue={() => handleContinue("build")}
+              onBack={() => handleBack("build")}
               onSpeak={speak}
               speakingKey={speakingKey}
+              mobile
             />
-          </PhoneCard>
-
-          <PhoneCard label="Use (Q&A) (4/4)" accent="Use">
+          )}
+          {journeyStep === "use" && (
             <UseScreen
               lesson={lesson}
               selected={useSelected}
@@ -321,260 +311,33 @@ export function App() {
               onReset={() => resetExercise("use")}
               feedback={useFeedback}
               onContinue={() => setJourneyStep("camera")}
+              onBack={() => handleBack("use")}
               onSpeak={speak}
               speakingKey={speakingKey}
+              mobile
             />
-          </PhoneCard>
-        </section>
-
-        <section className="mobile-stage">
-          <div className="mobile-shell">
-            <div className="mobile-top">
-              <div className="mobile-copy">
-                <span className="mobile-brand">kaisensei</span>
-                <h2>One photo. One lesson.</h2>
-                <p>Mobile mode keeps just the live lesson flow on screen.</p>
-              </div>
-
-              <div className="mobile-tabs" role="tablist" aria-label="Lesson flow">
-                {stepSequence.map((step, index) => (
-                  <button
-                    key={step}
-                    className={`mobile-tab ${mobileStepIndex === index ? "active" : ""}`}
-                    onClick={() => setJourneyStep(step)}
-                    type="button"
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mobile-stage-card">
-              {journeyStep === "camera" && (
-                <CameraScreen
-                  level={level}
-                  setLevel={setLevel}
-                  cameraNote={cameraNote}
-                  flashOn={flashOn}
-                  setFlashOn={setFlashOn}
-                  setCameraNote={setCameraNote}
-                  onCapture={handleCapture}
-                  mobile
-                />
-              )}
-              {journeyStep === "see" && (
-                <SeeScreen
-                  lesson={lesson}
-                  level={level}
-                  onContinue={() => handleContinue("see")}
-                  onSpeak={speak}
-                  speakingKey={speakingKey}
-                  mobile
-                />
-              )}
-              {journeyStep === "learn" && (
-                <LearnScreen
-                  lesson={lesson}
-                  onContinue={() => handleContinue("learn")}
-                  onSpeak={speak}
-                  speakingKey={speakingKey}
-                  mobile
-                />
-              )}
-              {journeyStep === "build" && (
-                <BuildScreen
-                  lesson={lesson}
-                  selected={buildSelected}
-                  bank={lesson.build.chunks}
-                  onToggle={(id) =>
-                    toggleChunk(
-                      buildSelected,
-                      setBuildSelected,
-                      id,
-                      lesson.build.correctOrder,
-                      setBuildFeedback,
-                    )
-                  }
-                  onCheck={() =>
-                    checkOrder(
-                      buildSelected,
-                      lesson.build.correctOrder,
-                      setBuildFeedback,
-                      { title: "Great job! 🎉", body: "You built the sentence." },
-                      {
-                        title: "Not quite yet.",
-                        body: "Try checking the order again and adjust a chunk or two.",
-                      },
-                    )
-                  }
-                  onReset={() => resetExercise("build")}
-                  feedback={buildFeedback}
-                  onContinue={() => handleContinue("build")}
-                  onSpeak={speak}
-                  speakingKey={speakingKey}
-                  mobile
-                />
-              )}
-              {journeyStep === "use" && (
-                <UseScreen
-                  lesson={lesson}
-                  selected={useSelected}
-                  bank={lesson.use.answerChunks}
-                  onToggle={(id) =>
-                    toggleChunk(
-                      useSelected,
-                      setUseSelected,
-                      id,
-                      lesson.use.correctOrder,
-                      setUseFeedback,
-                    )
-                  }
-                  onCheck={() =>
-                    checkOrder(
-                      useSelected,
-                      lesson.use.correctOrder,
-                      setUseFeedback,
-                      { title: "Nice! 🎉", body: "Now you can use it in real life." },
-                      {
-                        title: "Close.",
-                        body: "Try starting with “I usually keep...” and keep the answer practical.",
-                      },
-                    )
-                  }
-                  onReset={() => resetExercise("use")}
-                  feedback={useFeedback}
-                  onContinue={() => setJourneyStep("camera")}
-                  onSpeak={speak}
-                  speakingKey={speakingKey}
-                  mobile
-                />
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="library">
-          <div className="library-header">
-            <div>
-              <p className="eyebrow">Component Library</p>
-              <h3>Shared pieces used across the flow</h3>
-            </div>
-            <p className="library-note">The phone screens above reuse the same buttons, chips, and feedback states.</p>
-          </div>
-
-          <div className="library-grid">
-            <LibraryCard title="Step Progress">
-              <div className="step-list">
-                {stepSequence.map((step, index) => (
-                  <ProgressRow key={step} label={`${index + 1} / 4 ${stepMeta[step].label}`} progress={(index + 1) / 4} />
-                ))}
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Level Selector">
-              <div className="level-stack">
-                <LevelPill selected={level === "Normal"}>Normal</LevelPill>
-                <LevelPill selected={level === "Advanced"}>Advanced</LevelPill>
-                <p className="library-small">Normal: everyday situations. Advanced: richer vocabulary and longer sentences.</p>
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Buttons">
-              <div className="button-stack">
-                <Button styleType="primary">Primary Button</Button>
-                <Button styleType="secondary">Secondary Button</Button>
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Play Button">
-              <div className="play-sample">
-                <PlayBadge />
-                <div>
-                  <strong>Play sentence</strong>
-                  <p className="library-small">Tap to hear audio.</p>
-                </div>
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Chunk Chip">
-              <div className="library-chips">
-                {lesson.learn.chunks.slice(0, 4).map((chunk) => (
-                  <ChunkChip key={chunk.id} chunk={chunk} selected={false} onClick={() => {}} compact />
-                ))}
-              </div>
-              <p className="library-small">Tap to add. Tap again to remove it.</p>
-            </LibraryCard>
-
-            <LibraryCard title="Feedback Cards">
-              <div className="feedback-stack">
-                <FeedbackCard tone="success" title="Great job! 🎉" body="You built the sentence." />
-                <FeedbackCard tone="error" title="Not quite yet." body="Try again and check the order." />
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Color Palette">
-              <div className="palette-grid">
-                {colorSwatches.map((swatch) => (
-                  <div className="palette-item" key={swatch.name}>
-                    <span style={{ background: swatch.value }} />
-                    <div>
-                      <strong>{swatch.name}</strong>
-                      <p>{swatch.value}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </LibraryCard>
-
-            <LibraryCard title="Typography Scale">
-              <div className="type-stack">
-                {typographyTokens.map((token) => (
-                  <div key={token.label}>
-                    <strong>{token.label}</strong>
-                    <p>{token.note}</p>
-                  </div>
-                ))}
-              </div>
-            </LibraryCard>
-          </div>
-        </section>
-
-        <section className="notes-strip">
-          {interactionNotes.map((note) => (
-            <NoteCard key={note.title} title={note.title} note={note.note} />
-          ))}
-        </section>
+          )}
+        </div>
       </main>
     </div>
-  );
-}
-
-function PhoneCard({ label, accent, children }) {
-  return (
-    <article className="phone-card">
-      <div className="phone-card-label">
-        <span className={`step-badge step-badge-${accent.toLowerCase()}`}>{label}</span>
-      </div>
-      <div className="phone-frame">{children}</div>
-    </article>
   );
 }
 
 function CameraScreen({
   level,
   setLevel,
-  cameraNote,
   flashOn,
   setFlashOn,
-  setCameraNote,
   onCapture,
+  onBack,
   mobile = false,
 }) {
   return (
     <div className={`screen camera-screen ${mobile ? "mobile" : ""}`}>
       <div className="screen-top">
-        <IconArrowLeft size={18} strokeWidth={2} />
+        <button className="back-button camera-back" type="button" aria-label="Back" onClick={onBack}>
+          <IconArrowLeft size={18} />
+        </button>
         <div className="screen-tools">
           <button className={`tool-button ${flashOn ? "active" : ""}`} type="button" onClick={() => setFlashOn((value) => !value)} aria-label="Toggle flash">
             <IconBolt size={16} />
@@ -596,18 +359,6 @@ function CameraScreen({
       <div className="camera-preview">
         <div className="camera-grid" />
         <img src={photoUrl} alt="Desk with laptop and mug" className="camera-photo" />
-
-        <div className="camera-bubbles">
-          <div className="camera-bubble">
-            <IconSparkles size={16} />
-            <span>{cameraNote}</span>
-          </div>
-        </div>
-
-        <div className="camera-badges">
-          <button className="floating-badge" type="button" onClick={() => setCameraNote("Gallery works too. Try a clearer scene if you have one.")}>Gallery</button>
-          <button className="floating-badge" type="button" onClick={() => setCameraNote("Try a desk, kitchen, or street scene.")}>Tips</button>
-        </div>
       </div>
 
       <div className="camera-bottom">
@@ -635,71 +386,68 @@ function CameraScreen({
           </button>
         </div>
 
-        <div className="camera-hint">
-          <IconSparkles size={15} />
-          <span>Great shot! Make sure the main objects are clear.</span>
-        </div>
       </div>
     </div>
   );
 }
 
-function SeeScreen({ lesson, level, onContinue, onSpeak, speakingKey, mobile = false }) {
+function SeeScreen({ lesson, level, onContinue, onBack, onSpeak, speakingKey, mobile = false }) {
   const highlight = lesson.level === "Advanced" ? "beside" : "next to";
 
   return (
     <div className={`screen lesson-screen ${mobile ? "mobile" : ""}`}>
-      <ScreenHeader step="see" level={level} />
+      <div className="lesson-content">
+        <ScreenHeader step="see" level={level} onBack={onBack} />
 
-      <StepProgress current={1} />
+        <StepProgress current={1} />
 
-      <div className="section-title">
-        <h2>Here&apos;s a natural sentence for this scene.</h2>
-        <p>See what one good English sentence looks like.</p>
+        <div className="lesson-body lesson-body-see">
+          <SentenceCard
+            sentence={lesson.see.sentence}
+            highlight={highlight}
+            chinese={lesson.see.chinese}
+            onSpeak={() => onSpeak(lesson.see.speakText, "see-sentence")}
+            speaking={speakingKey === "see-sentence"}
+          />
+
+          <div className="scene-rail">
+            <img src={photoUrl} alt="Desk preview" className="scene-thumb" />
+          </div>
+        </div>
       </div>
 
-      <SentenceCard
-        sentence={lesson.see.sentence}
-        highlight={highlight}
-        chinese={lesson.see.chinese}
-        onSpeak={() => onSpeak(lesson.see.speakText, "see-sentence")}
-        speaking={speakingKey === "see-sentence"}
-      />
-
-      <div className="scene-rail">
-        <img src={photoUrl} alt="Desk preview" className="scene-thumb" />
+      <div className="lesson-footer">
+        <ActionButton onClick={onContinue}>Continue <IconArrowRight size={18} /></ActionButton>
       </div>
-
-      <ActionButton onClick={onContinue}>Continue <IconArrowRight size={18} /></ActionButton>
     </div>
   );
 }
 
-function LearnScreen({ lesson, onContinue, onSpeak, speakingKey, mobile = false }) {
+function LearnScreen({ lesson, onContinue, onBack, onSpeak, speakingKey, mobile = false }) {
   return (
     <div className={`screen lesson-screen ${mobile ? "mobile" : ""}`}>
-      <ScreenHeader step="learn" level={lesson.level} />
+      <div className="lesson-content">
+        <ScreenHeader step="learn" level={lesson.level} onBack={onBack} />
 
-      <StepProgress current={2} />
+        <StepProgress current={2} />
 
-      <div className="section-title compact">
-        <h2>Learn the useful chunks.</h2>
+        <div className="lesson-body lesson-body-learn">
+          <div className="chunk-list">
+            {lesson.learn.chunks.map((chunk) => (
+              <ChunkCard
+                key={chunk.id}
+                chunk={chunk}
+                onSpeak={() => onSpeak(chunk.text, `learn-${chunk.id}`)}
+                speaking={speakingKey === `learn-${chunk.id}`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="chunk-list">
-        {lesson.learn.chunks.map((chunk) => (
-          <ChunkCard
-            key={chunk.id}
-            chunk={chunk}
-            onSpeak={() => onSpeak(chunk.text, `learn-${chunk.id}`)}
-            speaking={speakingKey === `learn-${chunk.id}`}
-          />
-        ))}
+      <div className="lesson-footer">
+        <ActionButton onClick={onContinue}>Continue <IconArrowRight size={18} /></ActionButton>
       </div>
-
-      <TipCard note={lesson.learn.note} />
-
-      <ActionButton onClick={onContinue}>Continue <IconArrowRight size={18} /></ActionButton>
     </div>
   );
 }
@@ -713,6 +461,7 @@ function BuildScreen({
   onReset,
   feedback,
   onContinue,
+  onBack,
   onSpeak,
   speakingKey,
   mobile = false,
@@ -722,33 +471,34 @@ function BuildScreen({
 
   return (
     <div className={`screen lesson-screen ${mobile ? "mobile" : ""}`}>
-      <ScreenHeader step="build" level={lesson.level} />
+      <div className="lesson-content">
+        <ScreenHeader step="build" level={lesson.level} onBack={onBack} />
 
-      <StepProgress current={3} />
+        <StepProgress current={3} />
 
-      <div className="section-title compact">
-        <h2>Put the chunks in the right order.</h2>
+        <div className="lesson-body lesson-body-build">
+          <ReorderExercise
+            title="Your sentence"
+            bank={bank}
+            selected={selected.map((id) => lesson.build.chunks.find((chunk) => chunk.id === id)).filter(Boolean)}
+            onToggle={onToggle}
+            onCheck={onCheck}
+            onReset={onReset}
+            feedback={feedback}
+            showQuestion={false}
+            correct={correct}
+            speakText={lesson.see.speakText}
+            onSpeak={() => onSpeak(lesson.see.speakText, "build-see")}
+            speaking={speakingKey === "build-see"}
+          />
+        </div>
       </div>
 
-      <ReorderExercise
-        title="Your sentence"
-        subtitle="Tap the chunks to move them in and out of your answer."
-        bank={bank}
-        selected={selected.map((id) => lesson.build.chunks.find((chunk) => chunk.id === id)).filter(Boolean)}
-        onToggle={onToggle}
-        onCheck={onCheck}
-        onReset={onReset}
-        feedback={feedback}
-        showQuestion={false}
-        correct={correct}
-        speakText={lesson.see.speakText}
-        onSpeak={() => onSpeak(lesson.see.speakText, "build-see")}
-        speaking={speakingKey === "build-see"}
-      />
-
-      <ActionButton disabled={!correct} onClick={onContinue}>
-        Continue <IconArrowRight size={18} />
-      </ActionButton>
+      <div className="lesson-footer">
+        <ActionButton disabled={!correct} onClick={onContinue}>
+          Continue <IconArrowRight size={18} />
+        </ActionButton>
+      </div>
     </div>
   );
 }
@@ -762,6 +512,7 @@ function UseScreen({
   onReset,
   feedback,
   onContinue,
+  onBack,
   onSpeak,
   speakingKey,
   mobile = false,
@@ -771,48 +522,45 @@ function UseScreen({
 
   return (
     <div className={`screen lesson-screen ${mobile ? "mobile" : ""}`}>
-      <ScreenHeader step="use" level={lesson.level} />
+      <div className="lesson-content">
+        <ScreenHeader step="use" level={lesson.level} onBack={onBack} />
 
-      <StepProgress current={4} />
+        <StepProgress current={4} />
 
-      <div className="section-title compact">
-        <h2>Answer the question.</h2>
+        <div className="lesson-body lesson-body-use">
+          <QuestionCard question={lesson.use.question} />
+
+          <ReorderExercise
+            title="Your answer"
+            bank={bank}
+            selected={selected.map((id) => lesson.use.answerChunks.find((chunk) => chunk.id === id)).filter(Boolean)}
+            onToggle={onToggle}
+            onCheck={onCheck}
+            onReset={onReset}
+            feedback={feedback}
+            showQuestion={true}
+            correct={correct}
+            speakText={lesson.use.speakText}
+            onSpeak={() => onSpeak(lesson.use.speakText, "use-answer")}
+            speaking={speakingKey === "use-answer"}
+          />
+        </div>
       </div>
 
-      <QuestionCard
-        situation={lesson.use.situation}
-        question={lesson.use.question}
-        questionChinese={lesson.use.questionChinese}
-      />
-
-      <ReorderExercise
-        title="Your answer"
-        subtitle="Choose chunks to build a real-life response."
-        bank={bank}
-        selected={selected.map((id) => lesson.use.answerChunks.find((chunk) => chunk.id === id)).filter(Boolean)}
-        onToggle={onToggle}
-        onCheck={onCheck}
-        onReset={onReset}
-        feedback={feedback}
-        showQuestion={true}
-        correct={correct}
-        speakText={lesson.use.speakText}
-        onSpeak={() => onSpeak(lesson.use.speakText, "use-answer")}
-        speaking={speakingKey === "use-answer"}
-      />
-
-      <ActionButton disabled={!correct} onClick={onContinue}>
-        Finish <IconStarFilled size={16} />
-      </ActionButton>
+      <div className="lesson-footer">
+        <ActionButton disabled={!correct} onClick={onContinue}>
+          Finish <IconStarFilled size={16} />
+        </ActionButton>
+      </div>
     </div>
   );
 }
 
-function ScreenHeader({ step, level }) {
+function ScreenHeader({ step, level, onBack }) {
   const MetaIcon = stepMeta[step].icon;
   return (
     <div className="screen-header">
-      <button className="back-button" type="button" aria-label="Back">
+      <button className="back-button" type="button" aria-label="Back" onClick={onBack}>
         <IconArrowLeft size={18} />
       </button>
       <div className="screen-header-copy">
@@ -842,6 +590,25 @@ function StepProgress({ current }) {
             <strong>{label}</strong>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function LoadingScreen({ message }) {
+  return (
+    <div className="screen loading-screen">
+      <div className="loading-card">
+        <div className="loading-icon">
+          <IconSparkles size={20} />
+        </div>
+        <h2>{message}</h2>
+        <p>Building your mini lesson...</p>
+        <div className="loading-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     </div>
   );
@@ -911,23 +678,16 @@ function ChunkChip({ chunk, selected = false, onClick, compact = false, ghost = 
   );
 }
 
-function QuestionCard({ situation, question, questionChinese }) {
+function QuestionCard({ question }) {
   return (
     <div className="question-card">
-      <div className="question-head">
-        <div className="question-badge">Q</div>
-        <span>Question</span>
-      </div>
-      <p className="question-situation">{situation}</p>
       <strong className="question-text">{question}</strong>
-      <p className="question-chinese">{questionChinese}</p>
     </div>
   );
 }
 
 function ReorderExercise({
   title,
-  subtitle,
   bank,
   selected,
   onToggle,
@@ -945,7 +705,6 @@ function ReorderExercise({
       <div className="reorder-head">
         <div>
           <h3>{title}</h3>
-          <p>{subtitle}</p>
         </div>
         <VoiceButton onClick={onSpeak} active={speaking} label={showQuestion ? "Play answer" : "Play sentence"} />
       </div>
@@ -1014,7 +773,6 @@ function FeedbackCard({ tone, title, body }) {
       </div>
       <div>
         <strong>{title}</strong>
-        <p>{body}</p>
       </div>
     </div>
   );
