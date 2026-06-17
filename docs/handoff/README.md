@@ -6,6 +6,7 @@ Reading order:
 
 1. `PROJECT_CONTEXT.md`
 2. `docs/handoff/CHANGELOG.md`
+3. `docs/KAISENSEI_VPS_RUNBOOK.md`
 
 Notes:
 

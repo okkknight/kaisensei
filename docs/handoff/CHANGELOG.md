@@ -4,6 +4,7 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Added `docs/KAISENSEI_VPS_RUNBOOK.md` with the live `/kaisensei/` deployment steps, gateway path, and verification flow
 - Separated camera bottom track modes from difficulty settings so `快速 / 深度` stays on the camera screen while `Normal / Advanced` lives in the settings modal
 - Tightened the Codex prompt and lesson normalizer so `See` stays a single sentence and richness is driven by word count and vocabulary level rather than sentence chaining
 - Refined the lesson prompt so `See` and `Build` stay observer-focused while `Use` remains a user-response exercise
