@@ -177,7 +177,6 @@ export function normalizeLessonPayload(payload) {
   const sentence = ensureString(see.sentence, "see.sentence");
   const chinese = ensureString(see.chinese, "see.chinese");
   const speakText = ensureString(see.speakText, "see.speakText");
-
   const learn = normalizeLearn(payload.learn);
   const build = normalizeReorderExercise(payload.build, "build", sentence);
   const use = normalizeUse(payload.use);

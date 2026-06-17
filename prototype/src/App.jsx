@@ -70,8 +70,28 @@ function buildHint(targetChunks) {
   return `Almost. Try starting with "${first}"...`;
 }
 
+const chunkToneOrder = ["yellow", "blue", "green", "mint", "pink", "purple"];
+const chunkToneSurfaces = {
+  purple: "rgba(236, 231, 255, 0.92)",
+  yellow: "rgba(255, 244, 201, 0.92)",
+  pink: "rgba(255, 232, 240, 0.92)",
+  blue: "rgba(232, 241, 255, 0.92)",
+  green: "rgba(233, 248, 231, 0.92)",
+  mint: "rgba(228, 247, 242, 0.92)",
+};
+
+function resolveChunkTone(chunk) {
+  if (chunk?.tone && toneMap[chunk.tone]) {
+    return chunk.tone;
+  }
+
+  const seed = String(chunk?.id || chunk?.text || "");
+  return chunkToneOrder[hashString(seed) % chunkToneOrder.length];
+}
+
 export function App() {
   const [level, setLevel] = useState("Normal");
+  const [courseMode, setCourseMode] = useState("quick");
   const [screen, setScreen] = useState("camera");
   const [lesson, setLesson] = useState(null);
   const [activeStep, setActiveStep] = useState("See");
@@ -665,6 +685,8 @@ export function App() {
     return (
       <CameraScreen
         level={level}
+        courseMode={courseMode}
+        onCourseModeChange={setCourseMode}
         onLevelChange={handleLevelChange}
         onCapture={handleCapturePhoto}
         onUpload={openPicker}
@@ -699,6 +721,8 @@ export function App() {
 
 function CameraScreen({
   level,
+  courseMode,
+  onCourseModeChange,
   onLevelChange,
   onCapture,
   onSettings,
@@ -749,22 +773,24 @@ function CameraScreen({
       </div>
 
       <div className="camera-bottom">
-        <div className="camera-mode-toggle" aria-label="Lesson mode">
+        <div className="camera-mode-toggle" aria-label="Course mode">
           <button
-            className={`level-pill ${level === "Normal" ? "selected" : ""}`}
+            className={`level-pill ${courseMode === "quick" ? "selected" : ""}`}
             type="button"
-            onClick={() => onLevelChange("Normal")}
+            onClick={() => onCourseModeChange("quick")}
           >
             快速
           </button>
           <button
-            className={`level-pill ${level === "Advanced" ? "selected" : ""}`}
+            className={`level-pill ${courseMode === "depth" ? "selected" : ""}`}
             type="button"
-            onClick={() => onLevelChange("Advanced")}
+            onClick={() => onCourseModeChange("depth")}
           >
             深度
           </button>
         </div>
+
+        {courseMode === "depth" ? <p className="camera-mode-note">深度模式预留中，当前仍是快速课程。</p> : null}
 
         <div className="camera-action-row" aria-label="Camera actions">
           <button className="camera-side-button" type="button" onClick={onUpload} aria-label="Upload photo">
@@ -785,6 +811,7 @@ function CameraScreen({
             <div className="camera-modal-header">
               <div>
                 <h2>模式设置</h2>
+                <p>这里设置的是难度，不是底部的课程形态。</p>
               </div>
               <button className="camera-modal-close" type="button" aria-label="Close settings" onClick={onCloseSettings}>
                 <IconX size={16} />
@@ -801,6 +828,7 @@ function CameraScreen({
                   <strong>Normal</strong>
                   {level === "Normal" ? <span>已选</span> : null}
                 </div>
+                <p>更轻快、直接，适合当前的一分钟课程。</p>
               </button>
 
               <button
@@ -812,6 +840,7 @@ function CameraScreen({
                   <strong>Advanced</strong>
                   {level === "Advanced" ? <span>已选</span> : null}
                 </div>
+                <p>表达更成熟一些，适合更高阶的句子。</p>
               </button>
             </div>
           </div>
@@ -1193,9 +1222,11 @@ function ReorderExercise({
 }
 
 function ChunkCard({ chunk, onSpeak, speaking }) {
+  const tone = resolveChunkTone(chunk);
+
   return (
-    <article className="chunk-card">
-      <div className={`chunk-card-accent ${toneMap[chunk.tone] || toneMap.purple}`} />
+    <article className="chunk-card" style={{ "--chunk-card-surface": chunkToneSurfaces[tone] || chunkToneSurfaces.purple }}>
+      <div className={`chunk-card-accent ${toneMap[tone] || toneMap.purple}`} />
       <div className="chunk-card-main">
         <div>
           <strong>{chunk.text}</strong>
@@ -1208,9 +1239,11 @@ function ChunkCard({ chunk, onSpeak, speaking }) {
 }
 
 function ChunkChip({ chunk, selected = false, ghost = false, onClick }) {
+  const tone = resolveChunkTone(chunk);
+
   return (
     <button
-      className={`chunk-chip ${toneMap[chunk.tone] || toneMap.purple} ${selected ? "selected" : ""} ${ghost ? "ghost-selected" : ""}`}
+      className={`chunk-chip ${toneMap[tone] || toneMap.purple} ${selected ? "selected" : ""} ${ghost ? "ghost-selected" : ""}`}
       type="button"
       onClick={onClick}
     >

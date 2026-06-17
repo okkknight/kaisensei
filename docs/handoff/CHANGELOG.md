@@ -4,6 +4,8 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Separated camera bottom track modes from difficulty settings so `快速 / 深度` stays on the camera screen while `Normal / Advanced` lives in the settings modal
+- Tightened the Codex prompt and lesson normalizer so `See` stays a single sentence and richness is driven by word count and vocabulary level rather than sentence chaining
 - Refined the lesson prompt so `See` and `Build` stay observer-focused while `Use` remains a user-response exercise
 - Removed `use.questionChinese` from the lesson contract, normalizer, prompt, prototype UI, and PRD
 - Tightened the mobile lesson layout so Build and Use use clearer footer behavior and the lesson screen scrolls correctly on small viewports

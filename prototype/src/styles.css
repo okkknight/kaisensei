@@ -714,6 +714,14 @@ img {
   gap: 12px;
 }
 
+.camera-mode-note {
+  margin: -2px 0 0;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .camera-side-button {
   display: inline-flex;
   align-items: center;
@@ -1196,7 +1204,7 @@ img {
   grid-template-columns: 6px 1fr;
   overflow: hidden;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, var(--chunk-card-surface, rgba(255, 255, 255, 0.9)), rgba(255, 255, 255, 0.92));
   border: 1px solid rgba(20, 33, 61, 0.08);
   box-shadow: 0 14px 30px rgba(20, 33, 61, 0.06);
 }
