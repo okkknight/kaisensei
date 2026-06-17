@@ -745,14 +745,13 @@ img {
 .shutter-button {
   display: grid;
   place-items: center;
-  width: 76px;
-  height: 76px;
+  width: 66px;
+  height: 66px;
   margin: 0 auto;
   border-radius: 50%;
-  background: linear-gradient(180deg, #ffe56b, #ffbf2f);
-  box-shadow:
-    0 10px 18px rgba(255, 211, 77, 0.42),
-    inset 0 0 0 6px rgba(255, 255, 255, 0.16);
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
 }
 
 .shutter-button:disabled {
@@ -762,11 +761,12 @@ img {
 }
 
 .shutter-button span {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.12);
+  border: 3px solid rgba(255, 255, 255, 0.96);
+  background: #ffc83d;
+  box-shadow: none;
 }
 
 .camera-modal-backdrop {
