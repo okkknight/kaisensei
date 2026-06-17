@@ -6,6 +6,9 @@ export default defineConfig({
     include: ["react", "react-dom/client"],
   },
   server: {
+    proxy: {
+      "/v1": "http://127.0.0.1:3001",
+    },
     warmup: {
       clientFiles: ["./src/main.jsx"],
     },
