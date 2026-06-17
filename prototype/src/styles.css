@@ -888,6 +888,8 @@ img {
 
 .lesson-screen {
   gap: 0;
+  padding-left: 24px;
+  padding-right: 24px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 252, 247, 0.96));
   overflow: hidden;
 }

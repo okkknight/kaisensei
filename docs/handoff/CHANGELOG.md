@@ -7,6 +7,7 @@ Append-only resume log.
 - Refined the lesson prompt so `See` and `Build` stay observer-focused while `Use` remains a user-response exercise
 - Removed `use.questionChinese` from the lesson contract, normalizer, prompt, prototype UI, and PRD
 - Tightened the mobile lesson layout so Build and Use use clearer footer behavior and the lesson screen scrolls correctly on small viewports
+- Unified the lesson page horizontal padding to 24px so all four steps breathe a little more on mobile
 - Refreshed the handoff pack to reflect the current API-backed prototype instead of the initial scaffold state
 
 ## 2026-06-17
