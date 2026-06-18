@@ -769,7 +769,7 @@ function CameraScreen({
         )}
         <div className="camera-watermark">
           <IconSparkles size={12} />
-          <span>拍下真实一刻，学会自然表达</span>
+          <span>拍下真实一刻，学会自然英语表达</span>
         </div>
       </div>
 
