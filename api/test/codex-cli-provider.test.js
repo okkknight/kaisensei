@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPrompt } from "../src/services/codex-cli-provider.js";
+import { buildPrompt } from "../src/services/lesson-prompt.js";
 import { normalizeLessonPayload } from "../src/services/lesson-normalizer.js";
 import { repairBuildExercise } from "../src/services/build-chunking.js";
 
@@ -19,12 +19,17 @@ test("buildPrompt asks for richer See and Learn output", () => {
   assert.match(prompt, /do not make it sound academic, literary, or essay-like/i);
   assert.match(prompt, /Do not add extra keys beyond the required JSON shape\./);
   assert.match(prompt, /Learn chunks should be cut naturally from the sentence/i);
+  assert.match(prompt, /learn\.note must be one short Chinese sentence/i);
+  assert.match(prompt, /learn\.note and every field named chinese must be Chinese only/i);
+  assert.match(prompt, /Prefer short reusable phrases, usually 2-5 words/i);
   assert.match(prompt, /usually 3-4 for simple scenes and 4-5 for richer scenes/i);
   assert.match(prompt, /Do not mechanically slice the sentence clause by clause or into equal-looking pieces\./);
   assert.match(prompt, /merging obvious neighbors into one phrase/i);
+  assert.match(prompt, /Avoid a single long modifier chain such as 'with colleagues visible in the background'/i);
   assert.match(prompt, /rebuild the sentence with natural-language chunks/i);
   assert.match(prompt, /not copied one-for-one from Learn/i);
   assert.match(prompt, /subject, verb, object, adverb, and prepositional phrase boundaries/i);
+  assert.match(prompt, /Build chunks should also stay short and natural, usually 2-6 words/i);
   assert.match(prompt, /Keep fixed collocations intact when they sound natural as one unit\./i);
   assert.match(prompt, /slightly more challenging than Learn/i);
   assert.match(prompt, /Use must feel like a real conversation, not a generic prompt\./);

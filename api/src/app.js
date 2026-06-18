@@ -2,8 +2,24 @@ import Fastify from "fastify";
 import multipart from "@fastify/multipart";
 import { createLessonJobStore } from "./stores/in-memory-job-store.js";
 import { createCodexCliProvider } from "./services/codex-cli-provider.js";
+import { createGeminiApiProvider } from "./services/gemini-api-provider.js";
 import { createLessonJobRunner } from "./services/job-runner.js";
 import { registerLessonJobRoutes } from "./routes/lesson-jobs.js";
+
+function createConfiguredProvider() {
+  const providerName = String(process.env.LESSON_PROVIDER || "codex").toLowerCase();
+
+  if (providerName === "gemini") {
+    return createGeminiApiProvider({
+      apiKey: process.env.GEMINI_API_KEY,
+      model: process.env.GEMINI_MODEL,
+    });
+  }
+
+  return createCodexCliProvider({
+    model: process.env.CODEX_MODEL,
+  });
+}
 
 export function createApp({ jobStore, provider, jobRunner } = {}) {
   const app = Fastify({
@@ -11,7 +27,7 @@ export function createApp({ jobStore, provider, jobRunner } = {}) {
   });
 
   const resolvedJobStore = jobStore ?? createLessonJobStore();
-  const resolvedProvider = provider ?? createCodexCliProvider();
+  const resolvedProvider = provider ?? createConfiguredProvider();
   const resolvedJobRunner = jobRunner ?? createLessonJobRunner({
     jobStore: resolvedJobStore,
     provider: resolvedProvider,

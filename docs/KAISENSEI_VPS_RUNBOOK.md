@@ -30,6 +30,9 @@ Current service settings:
 - `ExecStart=/usr/bin/node src/server.js`
 - `PORT=3001`
 - `CODEX_BINARY=/usr/bin/codex`
+- `CODEX_MODEL=gpt-5.4-mini`
+- `LESSON_PROVIDER=codex` or `gemini`
+- `GEMINI_MODEL=gemini-2.5-flash`
 - `HOME=/var/lib/shipnow`
 - `CODEX_HOME=/var/lib/shipnow/.codex`
 - `TMPDIR=/opt/boringmax/workspace/kaisensei-tmp`
@@ -233,3 +236,4 @@ ssh root@89.208.242.44 'sudo -u shipnow /usr/bin/codex --version'
 - Keep the API on `/kaisensei/api/*` so it stays inside the `boringapi` convention.
 - Do not point the frontend at `/v1/*` directly in production.
 - If the gateway registry changes, restart `boringapi` after editing `/etc/boringapi/boringapi.env`.
+- If switching the lesson model provider, set `LESSON_PROVIDER` in `/etc/kaisensei/kaisensei.env` and restart `kaisensei.service`.

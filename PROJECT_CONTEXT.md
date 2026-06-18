@@ -40,7 +40,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: remove `use.questionChinese`, align the Use page copy/UI, and refresh the handoff pack
+- Task: tighten the shared lesson prompt so `learn.note` stays Chinese and Learn/Build chunking is shorter and more natural across GPT and Gemini
 - Status: 已执行待验收
 
 ## Architecture or state flow

@@ -4,6 +4,7 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Tightened the shared lesson prompt so `learn.note` must be short Chinese only and Learn/Build chunks stay shorter, more reusable, and less clause-like across providers
 - Simplified the VPS release path so the normal publish flow only syncs `prototype/dist/` and no longer rsyncs repo source to the VPS
 - Tightened Use again so the answer must reuse 1-2 Learn chunks or collocations without copying See, keeping the reply connected but not repetitive
 - Hardened Use prompts again so they cannot mention the picture/photo/image/scene and must read like a real conversational follow-up
