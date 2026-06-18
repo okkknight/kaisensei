@@ -26,9 +26,17 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Lesson mode now includes the four-step flow: See, Learn, Build, Use
 - The camera page uses a dark starfield fallback, real upload/capture controls, settings modal, and mode switch
 - Build and Use use chunk reordering with tolerant checking
+- Build re-segments the sentence naturally instead of reusing Learn chunks one-for-one
+- Learn chunks are cut naturally around high-frequency phrases and fixed expressions rather than mechanically slicing the sentence
+- Build is slightly more challenging than Learn and uses different, more sentence-like segmentation
+- Use answers must naturally reuse 1-2 Learn chunks or collocations without copying the See sentence, so the reply stays connected but not repetitive
+- Use questions must not mention the picture/photo/image/scene and should sound like a real conversational follow-up
 - The prompt and UI have been tightened so `See` and `Build` stay observer-focused
+- Use now behaves like a real conversation with a specific speaker and setting, not a generic photo prompt
 - `Use` now omits `questionChinese`
 - The bottom navigation has been adjusted so Build and Use have clearer footer behavior
+- The repo root now has a single `npm run dev` entry that starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
+- Switching Normal / Advanced only changes the next generated lesson; it does not regenerate the current photo's lesson
 
 ## Current latest task
 
@@ -75,6 +83,7 @@ MVP behavior:
 
 ## Verified commands
 
+- `npm run dev` from the repo root starts both local services
 - `node --test test/lesson-jobs-route.test.js test/lesson-jobs.test.js`
 - `npm run build` in `prototype/`
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
@@ -82,8 +91,9 @@ MVP behavior:
 ## Runtime notes
 
 - The API runs separately from the Vite prototype and must be restarted to pick up prompt/contract changes
+- The root `npm run dev` script launches both services together and keeps local requests same-origin through the Vite `/v1` proxy
 - The prototype uses Vite dev server hot reload for UI changes
-- Current local URLs are `http://localhost:5175/` for the prototype and `http://127.0.0.1:3001/` for the API
+- Current local URLs are `http://127.0.0.1:5173/` for the prototype and `http://127.0.0.1:3001/` for the API
 
 ## Working rules
 

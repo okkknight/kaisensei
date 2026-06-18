@@ -55,7 +55,23 @@ Relevant rule:
 
 - `/kaisensei/api* -> 127.0.0.1:8091`
 
-## Local build
+## Local development
+
+From the repo root:
+
+```bash
+cd /Users/linpeiwen/knightspace/kaisensei
+npm run dev
+```
+
+That launches both services together:
+
+- frontend on `http://127.0.0.1:5173/`
+- API on `http://127.0.0.1:3001/`
+
+The browser only needs the frontend URL. Vite forwards local `/v1/*` requests to the API in the background.
+
+## Production build
 
 From the repo root:
 
@@ -66,7 +82,7 @@ cd prototype
 VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm run build
 ```
 
-The Vite build must be produced with:
+The Vite production build must be produced with:
 
 - `VITE_KAISENSEI_BASE_PATH=/kaisensei/`
 - `VITE_KAISENSEI_API_BASE=/kaisensei/api`

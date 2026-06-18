@@ -1,0 +1,12 @@
+{
+  "name": "kaisensei",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sh ./scripts/dev.sh",
+    "dev:web": "npm --prefix prototype run dev",
+    "dev:api": "npm --prefix api start",
+    "build:web": "npm --prefix prototype run build",
+    "test:api": "npm --prefix api test"
+  }
+}

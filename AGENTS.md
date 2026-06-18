@@ -485,13 +485,15 @@ A coffee mug is sitting next to a laptop on the desk.
 
 - richer expression
 - more natural phrasing
-- may include atmosphere or context
+- can use higher-level but common vocabulary and collocations
+- still practical and useful in everyday life
+- may add a little more detail or nuance, but should not sound academic or abstract
 - still should not be too long
 
 Example:
 
 ```text
-A coffee mug sits beside the laptop, making the desk feel like a calm workspace.
+A coffee mug sits beside the laptop, ready for a long afternoon of work.
 ```
 
 ### Level Switching
@@ -499,7 +501,7 @@ A coffee mug sits beside the laptop, making the desk feel like a calm workspace.
 MVP rule:
 
 ```text
-Switching level regenerates the whole lesson for the current photo.
+Switching level changes the difficulty for the next generated lesson only.
 ```
 
 If there is no backend yet, switch mock lesson data.
@@ -672,8 +674,17 @@ Rules:
 - Prefer practical, high-frequency vocabulary and sentence patterns, but avoid babyish phrasing.
 - Do not list too many objects.
 - Teach chunks, not isolated words.
-- Build exercise should use chunks from the sentence.
-- Use step should ask one real-life question and provide a chunk-reordering answer exercise.
+- Learn chunks should be cut naturally from the sentence, centered on high-frequency words, phrases, collocations, and fixed expressions rather than mechanical sentence slices. Prefer 3-4 chunks for simple scenes and 4-5 for richer scenes.
+- Avoid clause-by-clause slicing or equal-sized chunks; merge obvious neighbors when that reads more naturally.
+- Build exercise should rebuild the sentence with natural-language chunks that are re-segmented for sentence assembly, not copied one-for-one from Learn.
+- Build chunks should follow natural phrasing boundaries such as noun phrases, verb phrases, and prepositional phrases, and may differ from Learn in size and boundaries. Build should be slightly more challenging than Learn.
+- Use step should feel like a real conversation: a specific person in a specific setting says something natural, and the user answers in chunks.
+- Avoid generic prompts that only ask the learner to describe the photo.
+- Do not use photo-centric wording in Use.question such as picture, photo, image, or scene.
+- Prefer conversational follow-ups that feel like reaction, confirmation, opinion, or a simple personal answer.
+- Use.targetAnswer should naturally reuse 1-2 chunks or collocations from Learn.chunks, but not all of them.
+- The reused Learn chunks should fit the reply naturally and should not make the answer sound copied from See.
+- Use.targetAnswer should add at least one new idea, reaction, opinion, or personal detail so it feels like a real reply instead of a paraphrase.
 - Keep the answer practical and reusable.
 - Keep Chinese explanations short.
 - Avoid grammar jargon.

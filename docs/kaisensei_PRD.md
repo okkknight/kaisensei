@@ -661,14 +661,15 @@ A coffee mug is sitting next to a laptop on the desk.
 特点：
 
 - 更地道
-- 表达更丰富
-- 可以加入氛围、细节或更自然的说法
+- 可以用更高级但常见的词汇和搭配
+- 依然要实用、口语化，像真实生活里会说的话
+- 可以加入一点细节或更顺滑的句法，但不要学术化
 - 但不要变成长篇
 
 示例：
 
 ```text
-A coffee mug sits beside the laptop, making the desk feel like a calm workspace.
+A coffee mug sits beside the laptop, ready for a long afternoon of work.
 ```
 
 ### 切换规则
@@ -676,7 +677,7 @@ A coffee mug sits beside the laptop, making the desk feel like a calm workspace.
 MVP 可采用：
 
 ```text
-切换 Normal / Advanced → 重新生成整节课
+切换 Normal / Advanced → 仅影响下一次生成，不重做当前课程
 ```
 
 如果使用 mock 数据：
@@ -879,9 +880,17 @@ Rules:
 - If a person is visible, describe what they are doing or what is happening around them, not what the viewer is doing.
 - Do not list too many objects.
 - Teach chunks, not isolated words.
-- Build exercise should reconstruct the See sentence.
-- Use exercise must ask one real-life question related to the photo.
+- Learn chunks should be cut naturally from the sentence, centered on high-frequency words, phrases, collocations, and fixed expressions rather than mechanical sentence slices. Prefer 3-4 chunks for simple scenes and 4-5 for richer scenes.
+- Avoid clause-by-clause slicing or equal-sized chunks; merge obvious neighbors when that sounds more natural.
+- Build exercise should reconstruct the See sentence with re-segmented natural-language chunks, not the same chunking used in Learn.
+- Build chunks should be chosen around grammar and flow, such as noun phrases, verb phrases, and prepositional phrases, so the sentence feels like real assembly. Build should be slightly more challenging than Learn.
+- Use exercise must feel like a real conversation in a specific setting, not a generic photo prompt.
+- Use exercise must ask a concrete spoken question from a specific person, such as a coworker, friend, teacher, barista, roommate, or interviewer.
+- Use question must not mention the picture, photo, image, or scene.
+- Use question should feel like a conversational follow-up, such as a reaction, confirmation, opinion, or simple personal answer.
 - Use exercise must provide a target answer.
+- Use answer must naturally reuse 1-2 chunks or collocations from Learn, but not all of them.
+- Use answer should add at least one new idea, reaction, opinion, or personal detail so it feels like a real reply instead of a paraphrase of See.
 - Use answer must be split into 4-6 reusable chunks.
 - The user will reorder the chunks to answer the question.
 - Use may use first-person or second-person phrasing because it practices how the user would answer in real life.

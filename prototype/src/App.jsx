@@ -416,9 +416,6 @@ export function App() {
   function handleLevelChange(nextLevel) {
     setLevel(nextLevel);
     setSettingsOpen(false);
-    if (selectedFileRef.current) {
-      void generateLessonFromFile(selectedFileRef.current, nextLevel);
-    }
   }
 
   function handleRetakePhoto() {
@@ -809,10 +806,7 @@ function CameraScreen({
         <div className="camera-modal-backdrop" role="presentation" onClick={onCloseSettings}>
           <div className="camera-modal" role="dialog" aria-modal="true" aria-label="Camera settings" onClick={(event) => event.stopPropagation()}>
             <div className="camera-modal-header">
-              <div>
-                <h2>模式设置</h2>
-                <p>这里设置的是难度，不是底部的课程形态。</p>
-              </div>
+              <h2>模式设置</h2>
               <button className="camera-modal-close" type="button" aria-label="Close settings" onClick={onCloseSettings}>
                 <IconX size={16} />
               </button>
@@ -828,7 +822,6 @@ function CameraScreen({
                   <strong>Normal</strong>
                   {level === "Normal" ? <span>已选</span> : null}
                 </div>
-                <p>更轻快、直接，适合当前的一分钟课程。</p>
               </button>
 
               <button
@@ -840,7 +833,6 @@ function CameraScreen({
                   <strong>Advanced</strong>
                   {level === "Advanced" ? <span>已选</span> : null}
                 </div>
-                <p>表达更成熟一些，适合更高阶的句子。</p>
               </button>
             </div>
           </div>
@@ -1105,7 +1097,7 @@ function UseStep({ lesson, selectedChunks, bank, feedback, onToggleChunk, onRese
       <QuestionCard lesson={lesson} onSpeak={onSpeak} speaking={speakingKey === "use-answer"} />
       <ReorderExercise
         title="Your answer"
-        subtitle="Answer the question with the chunks."
+        subtitle="Answer the person like you are in the conversation."
         bank={bank}
         selectedChunks={selectedChunks}
         onToggleChunk={onToggleChunk}
@@ -1128,7 +1120,7 @@ function QuestionCard({ lesson, onSpeak, speaking }) {
     <div className="question-card">
       <div className="question-head">
         <span className="question-badge">Q</span>
-        <span>Situation</span>
+        <span>Conversation</span>
       </div>
       <strong className="question-text">{lesson.use.question}</strong>
       <p className="question-situation">{lesson.use.situation}</p>

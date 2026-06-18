@@ -1,4 +1,5 @@
 import { lessonContract } from "../contracts/lesson.js";
+import { repairBuildExercise } from "./build-chunking.js";
 
 export class LessonValidationError extends Error {
   constructor(message, details = {}) {
@@ -178,14 +179,10 @@ export function normalizeLessonPayload(payload) {
   const chinese = ensureString(see.chinese, "see.chinese");
   const speakText = ensureString(see.speakText, "see.speakText");
   const learn = normalizeLearn(payload.learn);
-  const build = normalizeReorderExercise(payload.build, "build", sentence);
+  const buildSource = normalizeReorderExercise(payload.build, "build", sentence);
   const use = normalizeUse(payload.use);
 
-  if (build.targetSentence !== sentence) {
-    throw new LessonValidationError("build.targetSentence must match see.sentence", {
-      path: "build.targetSentence",
-    });
-  }
+  const build = repairBuildExercise(buildSource.chunks, [...buildSource.chunks, ...learn.chunks], sentence);
 
   return {
     ...lessonContract,

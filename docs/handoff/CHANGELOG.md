@@ -4,6 +4,17 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Tightened Use again so the answer must reuse 1-2 Learn chunks or collocations without copying See, keeping the reply connected but not repetitive
+- Hardened Use prompts again so they cannot mention the picture/photo/image/scene and must read like a real conversational follow-up
+- Tightened Learn and Build chunking again so Learn prefers 3-4 natural phrase chunks on simple scenes and Build uses a slightly more sentence-like segmentation instead of clause-by-clause slicing
+- Changed Learn chunking so it is cut naturally around high-frequency phrases and fixed expressions instead of mechanically slicing the sentence
+- Changed Build generation so it re-segments the sentence naturally instead of copying the Learn chunking, making sentence assembly feel less trivial
+- Changed Use generation so the question feels like a real conversation with a specific speaker and setting instead of a generic prompt
+- Changed Advanced prompt guidance so it stays practical and spoken while allowing higher-level IELTS/TOEFL-friendly vocabulary and collocations
+- Changed Normal / Advanced switching so it only affects the next generated lesson and no longer retriggers the current photo's generation
+- Added a root one-command local dev entry that starts API and frontend together without asking the browser to talk to the API port directly
+- Removed the stale local `5175` reference from the project context and aligned the local URL notes with the actual dev server
+- Split the runbook into local development versus production build so the local path no longer looks like a deployment recipe
 - Added `docs/KAISENSEI_VPS_RUNBOOK.md` with the live `/kaisensei/` deployment steps, gateway path, and verification flow
 - Separated camera bottom track modes from difficulty settings so `快速 / 深度` stays on the camera screen while `Normal / Advanced` lives in the settings modal
 - Tightened the Codex prompt and lesson normalizer so `See` stays a single sentence and richness is driven by word count and vocabulary level rather than sentence chaining

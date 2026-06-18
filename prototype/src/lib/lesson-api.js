@@ -1,3 +1,4 @@
+// Leave this empty in local dev so Vite can proxy `/v1` to the API.
 const API_BASE = import.meta.env.VITE_KAISENSEI_API_BASE ?? "";
 
 export class LessonApiError extends Error {
