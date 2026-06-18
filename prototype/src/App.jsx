@@ -767,6 +767,10 @@ function CameraScreen({
             <div className="camera-grid" aria-hidden="true" />
           </>
         )}
+        <div className="camera-watermark">
+          <IconSparkles size={12} />
+          <span>拍下真实一刻，学会自然表达</span>
+        </div>
       </div>
 
       <div className="camera-bottom">
