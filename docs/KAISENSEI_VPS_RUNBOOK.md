@@ -91,21 +91,15 @@ That keeps the static asset URLs and API requests aligned with the live subpath.
 
 ## Publish to VPS
 
-### 1) Sync source
+Default release flow:
 
-```bash
-rsync -a --delete \
-  --exclude node_modules \
-  --exclude dist \
-  --exclude .git \
-  --exclude .DS_Store \
-  --exclude '.tmp-shot*' \
-  --exclude '.npm-cache' \
-  /Users/linpeiwen/knightspace/kaisensei/ \
-  root@89.208.242.44:/opt/boringmax/kaisensei/
-```
+- rebuild the frontend
+- sync `prototype/dist/` to the VPS static directory
+- restart the services
 
-### 2) Build and sync static files
+We do not sync repo source to the VPS as part of the normal publish path.
+
+### 1) Build and sync static files
 
 ```bash
 cd /Users/linpeiwen/knightspace/kaisensei/prototype
@@ -113,7 +107,7 @@ VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm 
 rsync -a --delete dist/ root@89.208.242.44:/opt/boringmax/site/kaisensei/
 ```
 
-### 3) Restart services
+### 2) Restart services
 
 ```bash
 ssh root@89.208.242.44 'systemctl restart kaisensei.service boringapi.service caddy'

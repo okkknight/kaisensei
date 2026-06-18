@@ -4,6 +4,7 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Simplified the VPS release path so the normal publish flow only syncs `prototype/dist/` and no longer rsyncs repo source to the VPS
 - Tightened Use again so the answer must reuse 1-2 Learn chunks or collocations without copying See, keeping the reply connected but not repetitive
 - Hardened Use prompts again so they cannot mention the picture/photo/image/scene and must read like a real conversational follow-up
 - Tightened Learn and Build chunking again so Learn prefers 3-4 natural phrase chunks on simple scenes and Build uses a slightly more sentence-like segmentation instead of clause-by-clause slicing
