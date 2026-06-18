@@ -37,11 +37,12 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - The bottom navigation has been adjusted so Build and Use have clearer footer behavior
 - The repo root now has a single `npm run dev` entry that starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
 - Switching Normal / Advanced only changes the next generated lesson; it does not regenerate the current photo's lesson
+- Deep Mode V2 is planned as a separate mode entered from the existing camera-page mode switch, sharing only generic shell capabilities and keeping its course system independent
 
 ## Current latest task
 
-- Task: slim the shared lesson prompt by merging repetitive chunk rules while keeping Learn/Build/Use constraints strong
-- Status: 已执行待验收
+- Task: rework Deep Mode V2 UI and interaction direction after removing the stale Compass Rail spec
+- Status: 进行中
 
 ## Architecture or state flow
 
@@ -109,6 +110,8 @@ MVP behavior:
 
 - Whether `Use` should keep the current two-step footer behavior or be simplified further remains a UX judgment call
 - The current handoff status is intentionally compact; do not expand it into a second parallel spec
+- Deep Mode V2 is now spec'd as a separate mode entered from the existing camera-page switch; remaining work is implementation sequencing, not product boundary definition
+- Deep Mode V2 interaction direction is open again and will be redesigned before implementation; only the product boundary remains locked
 
 ## Main risks and tradeoffs
 

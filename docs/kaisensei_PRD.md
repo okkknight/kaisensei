@@ -1050,7 +1050,7 @@ Nice. This sentence is yours now.
 - 复杂积分系统
 - 口语跟读评分
 - 用户录音
-- Deep Lesson 完整实现
+- Deep Mode 完整实现（作为独立 V2，不属于本 PRD 的 Quick Lesson 首版）
 - 社区分享
 - 支付
 - iOS 原生 App
@@ -1121,3 +1121,45 @@ kaisensei 的第一版闭环应该是：
 它不是“AI 帮你描述照片”，而是：
 
 > 用一张照片，练出一句真实能用的英语。
+
+---
+
+## 25. Deep Mode V2 边界确认
+
+Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加长版。
+
+### 入口
+
+- Deep Mode 通过现有相机页里的模式切换进入
+- 不新增独立首页，不把入口拆到别的页面
+
+### 共享能力
+
+- 只要是与具体课程实现无关的能力，都可以在 Quick Mode 和 Deep Mode 之间共享
+- 例如拍照入口、上传、loading 壳、基础按钮、通用反馈、基础 TTS 播放能力都可以复用
+- 课程生成、课程结构、校验逻辑、题型和课程 UI flow 必须独立
+
+### 首发范围
+
+- Deep Mode V1 必须一次性覆盖完整能力，不做半成品交付
+- 路线可以拆阶段，但整体计划必须包含全部能力
+- 课程必须支持真实图片端到端生成
+
+### 输出与校验
+
+- Deep Mode 使用独立输出 schema，结构与 Quick Lesson 分开
+- `short_answer` 先只做 tolerant 文本匹配
+- 对结构严重错误的输出先严格拒绝，不做轻量补全
+- 后续是否补轻量修复，再根据验收情况决定
+
+### 输入与播放
+
+- Deep Mode 前期不做语音输入
+- 英文 TTS 播放保留，题目朗读按钮保留
+- 只是不做语音作答
+
+### 课程目标
+
+- Deep Mode 的目标是文字版场景口语训练
+- 它不是图片描述课、单词表、语法课或聊天机器人
+- 课程要覆盖：`See it -> Read it -> Need it -> Say it -> Handle it -> Scene Wrap`

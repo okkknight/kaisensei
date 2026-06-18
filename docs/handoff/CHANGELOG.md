@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-18
 
+- Drafted the Deep Mode V2 spec and implementation plan, locking the separate-mode boundary, shared-shell scope, strict deep-output validation, and full end-to-end release requirement
+- Confirmed Deep Mode V2 will live as a separate mode in the existing camera-page switch, with only generic shell capabilities shared and the course system kept independent
+- Confirmed the Deep Mode V2 first release must be complete end-to-end, with tolerant short-answer matching, strict rejection for malformed output, preserved English TTS and question playback, and no speech input
 - Slimmed the shared lesson prompt by merging repetitive chunk rules and tightening the Learn/Build/Use wording without weakening the actual constraints
 - Tightened the shared lesson prompt so `learn.note` must be short Chinese only and Learn/Build chunks stay shorter, more reusable, and less clause-like across providers
 - Simplified the VPS release path so the normal publish flow only syncs `prototype/dist/` and no longer rsyncs repo source to the VPS
