@@ -43,6 +43,103 @@ function joinChunkText(chunks) {
   return chunks.map((chunk) => chunk.text).join(" ");
 }
 
+function sortChunksBySentence(chunks, sentence) {
+  const normalizedSentence = normalizeText(sentence);
+
+  return [...chunks]
+    .map((chunk, index) => {
+      const normalizedChunk = normalizeText(chunk?.text);
+      const matchIndex = normalizedChunk ? normalizedSentence.indexOf(normalizedChunk) : -1;
+
+      return {
+        chunk,
+        index,
+        matchIndex: matchIndex >= 0 ? matchIndex : Number.POSITIVE_INFINITY,
+      };
+    })
+    .sort((left, right) => {
+      if (left.matchIndex !== right.matchIndex) {
+        return left.matchIndex - right.matchIndex;
+      }
+
+      return left.index - right.index;
+    })
+    .map((item) => item.chunk);
+}
+
+function buildSeeSentenceSegments(sentence, chunks) {
+  const rawSentence = String(sentence || "");
+  if (!rawSentence) {
+    return [];
+  }
+
+  const lowerSentence = rawSentence.toLowerCase();
+  const orderedChunks = sortChunksBySentence(chunks, rawSentence);
+  const matches = [];
+  let cursor = 0;
+
+  for (const chunk of orderedChunks) {
+    const needle = String(chunk?.text || "").trim().toLowerCase();
+    if (!needle) continue;
+
+    let start = lowerSentence.indexOf(needle, cursor);
+    if (start < 0) {
+      start = lowerSentence.indexOf(needle);
+    }
+    if (start < 0) {
+      continue;
+    }
+
+    const end = start + needle.length;
+    if (end <= cursor) {
+      continue;
+    }
+
+    matches.push({
+      chunk,
+      start,
+      end,
+    });
+    cursor = end;
+  }
+
+  if (matches.length === 0) {
+    return [{ type: "text", text: rawSentence }];
+  }
+
+  matches.sort((left, right) => left.start - right.start || left.end - right.end);
+
+  const segments = [];
+  let textCursor = 0;
+
+  for (const match of matches) {
+    if (match.start > textCursor) {
+      segments.push({
+        type: "text",
+        text: rawSentence.slice(textCursor, match.start),
+      });
+    }
+
+    const normalizedStart = Math.max(match.start, textCursor);
+    const normalizedEnd = Math.max(normalizedStart, match.end);
+    segments.push({
+      type: "chunk",
+      chunk: match.chunk,
+      text: rawSentence.slice(normalizedStart, normalizedEnd) || match.chunk.text,
+    });
+    textCursor = normalizedEnd;
+  }
+
+  if (textCursor < rawSentence.length) {
+    segments.push({
+      type: "text",
+      text: rawSentence.slice(textCursor),
+    });
+  }
+
+  return segments;
+}
+
 function hashString(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
@@ -70,6 +167,24 @@ function buildHint(targetChunks) {
   return `Almost. Try starting with "${first}"...`;
 }
 
+function createTraceId() {
+  return `flow_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function logClientTrace(event, data = {}) {
+  console.info(
+    `[kaisensei][client] ${JSON.stringify({
+      at: new Date().toISOString(),
+      event,
+      ...data,
+    })}`,
+  );
+}
+
+function roundMs(value) {
+  return Math.round(value);
+}
+
 const chunkToneOrder = ["yellow", "blue", "green", "mint", "pink", "purple"];
 const chunkToneSurfaces = {
   purple: "rgba(236, 231, 255, 0.92)",
@@ -79,6 +194,77 @@ const chunkToneSurfaces = {
   green: "rgba(233, 248, 231, 0.92)",
   mint: "rgba(228, 247, 242, 0.92)",
 };
+
+const MAX_UPLOAD_EDGE = 1280;
+const MIN_UPLOAD_SIZE_FOR_COMPRESSION = 500 * 1024;
+const UPLOAD_JPEG_QUALITY = 0.8;
+
+function stripFileExtension(name) {
+  return String(name || "photo").replace(/\.[^.]+$/, "");
+}
+
+function loadImageFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = url;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, quality);
+  });
+}
+
+async function compressUploadImage(file) {
+  const shouldCompress = file.size >= MIN_UPLOAD_SIZE_FOR_COMPRESSION || file.type !== "image/jpeg";
+  if (!shouldCompress) {
+    return file;
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await loadImageFromUrl(objectUrl);
+    const width = image.naturalWidth || image.width || 0;
+    const height = image.naturalHeight || image.height || 0;
+
+    if (!width || !height) {
+      return file;
+    }
+
+    const scale = Math.min(1, MAX_UPLOAD_EDGE / Math.max(width, height));
+    const targetWidth = Math.max(1, Math.round(width * scale));
+    const targetHeight = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return file;
+    }
+
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, targetWidth, targetHeight);
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const blob = await canvasToBlob(canvas, "image/jpeg", UPLOAD_JPEG_QUALITY);
+    if (!blob) {
+      return file;
+    }
+
+    return new File([blob], `${stripFileExtension(file.name)}.jpg`, {
+      type: "image/jpeg",
+      lastModified: file.lastModified || Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
 
 function resolveChunkTone(chunk) {
   if (chunk?.tone && toneMap[chunk.tone]) {
@@ -208,20 +394,34 @@ export function App() {
     setScreen("error");
   }
 
-  async function pollJob(jobId, requestId) {
+  async function pollJob(jobId, requestId, traceId, flowStartedAt) {
     pollTimerRef.current = window.setTimeout(async () => {
       try {
+        const pollStartedAt = performance.now();
         const job = await getLessonJob(jobId);
         if (requestIdRef.current !== requestId) return;
 
+        logClientTrace("poll_status", {
+          traceId,
+          jobId,
+          status: job.status,
+          pollMs: roundMs(performance.now() - pollStartedAt),
+          elapsedMs: roundMs(performance.now() - flowStartedAt),
+        });
+
         if (job.status === "queued" || job.status === "running") {
-          await pollJob(jobId, requestId);
+          await pollJob(jobId, requestId, traceId, flowStartedAt);
           return;
         }
 
         stopLoadingTicker();
 
         if (job.status === "succeeded") {
+          logClientTrace("flow_done", {
+            traceId,
+            jobId,
+            totalMs: roundMs(performance.now() - flowStartedAt),
+          });
           setLesson(job.lesson);
           setLevel(job.lesson.level);
           setScreen("lesson");
@@ -230,40 +430,102 @@ export function App() {
           return;
         }
 
+        logClientTrace("flow_failed", {
+          traceId,
+          jobId,
+          totalMs: roundMs(performance.now() - flowStartedAt),
+          status: job.status,
+        });
         showError(job.error?.message || "Try again.");
       } catch (error) {
         if (requestIdRef.current !== requestId) return;
         stopLoadingTicker();
         const message =
           error instanceof LessonApiError ? error.message : "Try again.";
+        logClientTrace("poll_error", {
+          traceId,
+          jobId,
+          elapsedMs: roundMs(performance.now() - flowStartedAt),
+          message,
+        });
         showError(message);
       }
     }, 900);
   }
 
-  async function generateLessonFromFile(file, nextLevel) {
+  async function generateLessonFromFile(file, nextLevel, source = "upload") {
     if (!file) return;
 
     cancelPendingWork();
     const requestId = requestIdRef.current;
+    const traceId = createTraceId();
+    const flowStartedAt = performance.now();
     setErrorState(null);
     setScreen("loading");
     setLevel(nextLevel);
     startLoadingTicker();
 
+    logClientTrace("flow_start", {
+      traceId,
+      source,
+      level: nextLevel,
+      fileName: file.name,
+      fileType: file.type,
+      fileBytes: file.size,
+    });
+
     try {
-      const created = await createLessonJob({
-        image: file,
+      const compressStartedAt = performance.now();
+      const uploadFile = await compressUploadImage(file);
+      if (requestIdRef.current !== requestId) return;
+
+      logClientTrace("compress_done", {
+        traceId,
+        source,
+        inputBytes: file.size,
+        outputBytes: uploadFile.size,
+        compressed: uploadFile !== file,
+        elapsedMs: roundMs(performance.now() - compressStartedAt),
+      });
+
+      selectedFileRef.current = uploadFile;
+
+      const uploadStartedAt = performance.now();
+      logClientTrace("upload_start", {
+        traceId,
+        source,
         level: nextLevel,
+        uploadBytes: uploadFile.size,
+        uploadType: uploadFile.type,
+      });
+
+      const created = await createLessonJob({
+        image: uploadFile,
+        level: nextLevel,
+        traceId,
       });
 
       if (requestIdRef.current !== requestId) return;
-      await pollJob(created.jobId, requestId);
+
+      logClientTrace("upload_done", {
+        traceId,
+        jobId: created.jobId,
+        elapsedMs: roundMs(performance.now() - uploadStartedAt),
+      });
+
+      await pollJob(created.jobId, requestId, traceId, flowStartedAt);
     } catch (error) {
       if (requestIdRef.current !== requestId) return;
       stopLoadingTicker();
       const message =
         error instanceof LessonApiError ? error.message : "Try again.";
+      logClientTrace("flow_failed", {
+        traceId,
+        source,
+        level: nextLevel,
+        message,
+        totalMs: roundMs(performance.now() - flowStartedAt),
+      });
       showError(message);
     }
   }
@@ -381,14 +643,14 @@ export function App() {
     });
 
     stopCameraStream();
-    handleFileChosen(file);
+    handleFileChosen(file, "camera");
   }
 
-  function handleFileChosen(file) {
+  function handleFileChosen(file, source = "upload") {
     if (!file) return;
     selectedFileRef.current = file;
     setPreviewFromFile(file);
-    void generateLessonFromFile(file, level);
+    void generateLessonFromFile(file, level, source);
   }
 
   function openPicker() {
@@ -410,7 +672,7 @@ export function App() {
   function handleFileInputChange(event) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    handleFileChosen(file);
+    handleFileChosen(file, "upload");
   }
 
   function handleLevelChange(nextLevel) {
@@ -437,7 +699,7 @@ export function App() {
 
   function handleRetry() {
     if (selectedFileRef.current) {
-      void generateLessonFromFile(selectedFileRef.current, level);
+      void generateLessonFromFile(selectedFileRef.current, level, "retry");
       return;
     }
 
@@ -994,16 +1256,74 @@ function StepProgress({ current }) {
 
 function SeeStep({ lesson, photoPreviewUrl, onSpeak, speakingKey }) {
   const [translationOpen, setTranslationOpen] = useState(false);
+  const [activeChunkId, setActiveChunkId] = useState("");
+
+  useEffect(() => {
+    setActiveChunkId("");
+    setTranslationOpen(false);
+  }, [lesson?.see?.sentence]);
+
+  useEffect(() => {
+    function handlePointerDown(event) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      if (!target.closest(".see-chunk-wrap")) {
+        setActiveChunkId("");
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
+
+  const sentenceSegments = buildSeeSentenceSegments(lesson.see.sentence, lesson.learn.chunks);
 
   return (
     <div className="lesson-body lesson-body-see">
-      <div className="sentence-card">
+      <div className="sentence-card see-sentence-card">
         <div className="sentence-card-main">
           <div className="sentence-card-top">
             <div className="sentence-favorite">
               <IconStarFilled size={14} />
             </div>
-            <div className="sentence-text">{lesson.see.sentence}</div>
+            <div className="sentence-text see-sentence-text" aria-label={lesson.see.sentence}>
+              {sentenceSegments.map((segment, index) => {
+                if (segment.type === "text") {
+                  return <span key={`see-text-${index}`}>{segment.text}</span>;
+                }
+
+                const chunk = segment.chunk;
+                const isActive = chunk.id === activeChunkId;
+                return (
+                  <span className="see-chunk-wrap" key={chunk.id}>
+                    {isActive ? (
+                      <span className="see-chunk-popover" role="status" aria-live="polite">
+                        {chunk.chinese}
+                      </span>
+                    ) : null}
+                    <span
+                      className={`see-chunk ${isActive ? "active" : ""}`}
+                      onClick={() => setActiveChunkId((current) => (current === chunk.id ? "" : chunk.id))}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isActive}
+                      aria-label={`${chunk.text}，${chunk.chinese}`}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setActiveChunkId((current) => (current === chunk.id ? "" : chunk.id));
+                        }
+                      }}
+                    >
+                      {segment.text}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
 

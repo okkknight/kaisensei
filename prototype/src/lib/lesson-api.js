@@ -23,10 +23,13 @@ async function readErrorMessage(response) {
   }
 }
 
-export async function createLessonJob({ image, level, signal }) {
+export async function createLessonJob({ image, level, traceId, signal }) {
   const formData = new FormData();
   formData.append("image", image, image.name || "photo.jpg");
   formData.append("level", level);
+  if (traceId) {
+    formData.append("traceId", traceId);
+  }
 
   const response = await fetch(resolveUrl("/v1/lesson-jobs"), {
     method: "POST",
