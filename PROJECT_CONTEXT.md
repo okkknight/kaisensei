@@ -28,6 +28,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - The AI calling底座已从 feature 逻辑里拆出到 `api/src/shared/ai/`，Quick Mode 继续保留自己的 prompt / normalizer / provider 实现
 - The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
 - The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells
+- Quick Mode has already been further split into a lesson container plus quick-owned step, feedback, loading, error, and empty-state files
 - Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
@@ -82,6 +83,7 @@ Deep Mode planned states:
 - `prototype/src/app/AppShell.jsx` - thin shell that routes between camera, Quick Mode, and Deep Mode
 - `prototype/src/app/CameraEntry.jsx` - shared first-screen camera and mode selector
 - `prototype/src/quick/QuickModeApp.jsx` - current Quick Mode entry that can start from a captured file
+- `prototype/src/quick/lesson/` - quick-owned lesson container, step views, and state/effect helpers
 - `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold with overview and module shells
 - `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
 - `api/src/quick/services/codex-cli-provider.js` - Quick Mode lesson generation prompt and Codex CLI bridge

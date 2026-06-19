@@ -133,3 +133,32 @@ export function buildHint(targetChunks) {
   const first = targetChunks[0]?.text || "the first chunk";
   return `Almost. Try starting with "${first}"...`;
 }
+
+export const chunkToneOrder = ["yellow", "blue", "green", "mint", "pink", "purple"];
+
+export const chunkToneSurfaces = {
+  purple: "rgba(236, 231, 255, 0.92)",
+  yellow: "rgba(255, 244, 201, 0.92)",
+  pink: "rgba(255, 232, 240, 0.92)",
+  blue: "rgba(232, 241, 255, 0.92)",
+  green: "rgba(233, 248, 231, 0.92)",
+  mint: "rgba(228, 247, 242, 0.92)",
+};
+
+export const toneMap = {
+  purple: "tone-purple",
+  yellow: "tone-yellow",
+  pink: "tone-pink",
+  blue: "tone-blue",
+  green: "tone-green",
+  mint: "tone-mint",
+};
+
+export function resolveChunkTone(chunk) {
+  if (chunk?.tone && toneMap[chunk.tone]) {
+    return chunk.tone;
+  }
+
+  const seed = String(chunk?.id || chunk?.text || "");
+  return chunkToneOrder[hashString(seed) % chunkToneOrder.length];
+}

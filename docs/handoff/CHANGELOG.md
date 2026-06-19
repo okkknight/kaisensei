@@ -4,6 +4,12 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Split Quick Mode into a slimmer container plus quick-owned lesson subfiles for loading, error, empty, step, and feedback UI
+- Kept the shared camera entry as the only first-screen input surface and left Deep Mode on its own scaffolded path
+- Verified the updated prototype again with `cd prototype && npm run build`
+
+## 2026-06-19
+
 - Split the frontend into a thin shell, a shared `CameraEntry`, a Quick entry that can start from a captured file, and a Deep scaffold with overview and module shells
 - Moved Quick lesson sentence/chunk helpers into `prototype/src/quick/lesson/lesson-helpers.js`, added quick/deep storage and copy namespaces, and removed the stale shared lesson helper file
 - Verified the updated prototype with `cd prototype && npm run build`
