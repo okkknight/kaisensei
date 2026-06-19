@@ -41,7 +41,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: rework Deep Mode V2 UI and interaction direction after removing the stale Compass Rail spec
+- Task: rework Deep Mode V2 UI and interaction direction from scratch
 - Status: 进行中
 
 ## Architecture or state flow
@@ -110,8 +110,7 @@ MVP behavior:
 
 - Whether `Use` should keep the current two-step footer behavior or be simplified further remains a UX judgment call
 - The current handoff status is intentionally compact; do not expand it into a second parallel spec
-- Deep Mode V2 is now spec'd as a separate mode entered from the existing camera-page switch; remaining work is implementation sequencing, not product boundary definition
-- Deep Mode V2 interaction direction is open again and will be redesigned before implementation; only the product boundary remains locked
+- Deep Mode V2 remains a separate mode entered from the existing camera-page switch; the product boundary is locked, but the interaction direction will be redesigned before implementation
 
 ## Main risks and tradeoffs
 
