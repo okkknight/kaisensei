@@ -65,8 +65,9 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
 
         let attempt = 0;
         let lastError = null;
+        const maxAttempts = String(payload.mode || "quick").toLowerCase() === "deep" ? 3 : 2;
 
-        while (attempt < 2) {
+        while (attempt < maxAttempts) {
           attempt += 1;
 
           try {
@@ -105,7 +106,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           } catch (error) {
             lastError = error;
 
-            if (attempt < 2) {
+            if (attempt < maxAttempts) {
               continue;
             }
           }

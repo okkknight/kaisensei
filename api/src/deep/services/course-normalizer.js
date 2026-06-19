@@ -89,9 +89,36 @@ function normalizeReorderExercise(exercise, path) {
   };
 }
 
+function normalizeFocusExercise(exercise, path) {
+  if (!isPlainObject(exercise)) {
+    fail(`Missing or invalid object at ${path}`, { path });
+  }
+
+  const sentenceWithBlanks = ensureString(exercise.sentenceWithBlanks, `${path}.sentenceWithBlanks`);
+  const choices = ensureStringArray(exercise.choices, `${path}.choices`);
+  const distractors = ensureOptionalStringArray(exercise.distractors, `${path}.distractors`);
+  const answer = ensureStringArray(exercise.answer, `${path}.answer`);
+
+  ensureUnique(choices, `${path}.choices`);
+  ensureUnique(distractors, `${path}.distractors`);
+  ensureAnswerCoverage(answer, choices, `${path}.answer`);
+
+  return {
+    ...exercise,
+    sentenceWithBlanks,
+    choices,
+    distractors,
+    answer,
+  };
+}
+
 function normalizeMaybeReorderExercise(exercise, path) {
   if (!isPlainObject(exercise)) {
     fail(`Missing or invalid object at ${path}`, { path });
+  }
+
+  if ("sentenceWithBlanks" in exercise || "choices" in exercise) {
+    return normalizeFocusExercise(exercise, path);
   }
 
   if (!Array.isArray(exercise.chunks) && !Array.isArray(exercise.distractors) && !Array.isArray(exercise.answer)) {

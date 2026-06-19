@@ -35,7 +35,16 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   });
 
   assert.equal(prompts.length, 1);
-  assert.match(prompts[0], /Generate one complete kaisensei Deep Mode course/);
+  assert.match(prompts[0], /You are the Deep Mode course generator for kaisensei/);
+  assert.match(prompts[0], /The learner must progress through four stages/);
+  assert.match(prompts[0], /"modules": \{/);
+  assert.match(prompts[0], /REQUIRED INNER SHAPES:/);
+  assert.match(prompts[0], /"baseExample": \{/);
+  assert.match(prompts[0], /"quickResponses": \[/);
+  assert.match(prompts[0], /Every Understand block must include chunks, distractors, and answer arrays/);
+  assert.match(prompts[0], /NOTICE:/);
+  assert.match(prompts[0], /INTERACT:/);
+  assert.match(prompts[0], /STEP IN:/);
   assert.equal(course.mode, "deep");
   assert.equal(course.level, "normal");
 });

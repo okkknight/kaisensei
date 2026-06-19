@@ -37,3 +37,47 @@ test("normalizeDeepCoursePayload rejects missing modules", () => {
     }),
   );
 });
+
+test("normalizeDeepCoursePayload accepts focus-style exercises", () => {
+  const normalized = normalizeDeepCoursePayload({
+    ...validCourse,
+    modules: {
+      ...validCourse.modules,
+      notice: {
+        ...validCourse.modules.notice,
+        expressionPacks: [
+          {
+            id: "notice-1",
+            coreExpression: "next to",
+            meaningChinese: "在……旁边",
+            baseExample: {
+              english: "A laptop is next to the mug.",
+              chinese: "一台笔记本电脑在杯子旁边。",
+              understand: {
+                chunks: ["A laptop", "is next to", "the mug."],
+                distractors: ["under the chair"],
+                answer: ["A laptop", "is next to", "the mug."],
+              },
+              focus: {
+                sentenceWithBlanks: "A laptop is ____ ____ the mug.",
+                choices: ["next", "to", "under"],
+                answer: ["next", "to"],
+              },
+              build: {
+                promptChinese: "把中文变成英文：一台笔记本电脑在杯子旁边。",
+                chunks: ["A laptop", "is next to", "the mug."],
+                distractors: ["under the chair"],
+                answer: ["A laptop", "is next to", "the mug."],
+              },
+            },
+            variations: [],
+            quickResponses: [],
+          },
+        ],
+      },
+    },
+  });
+
+  assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.focus.sentenceWithBlanks, "A laptop is ____ ____ the mug.");
+  assert.deepEqual(normalized.modules.notice.expressionPacks[0].baseExample.focus.answer, ["next", "to"]);
+});

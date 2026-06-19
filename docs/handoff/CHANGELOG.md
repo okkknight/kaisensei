@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Tightened the Deep Mode backend contract so the prompt now emits the design-aligned inner shapes for Notice / Interpret / Interact / Step In, including focus-style exercises and Step In text turns
+- Added a Deep-only retry bump in the job runner so the real provider has an extra recovery chance without changing Quick Mode behavior
+- Verified the updated Deep Mode backend end-to-end through `POST /v1/lesson-jobs` with a real image, resulting in a succeeded deep job and a populated deep course payload
+
 - Refined the Deep Mode scaffold into a clearer architecture baseline by extracting `useDeepModeFlow` and a standalone completion screen, while keeping the phase placeholders and behavior intact
 - Updated the Deep Mode spec and structure plan so the current phase is explicitly architecture-first rather than feature-complete
 - Verified the prototype still builds successfully with `cd prototype && npm run build`
