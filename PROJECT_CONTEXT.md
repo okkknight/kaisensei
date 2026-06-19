@@ -27,11 +27,12 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Build and Use use chunk reordering with tolerant checking
 - The AI calling底座已从 feature 逻辑里拆出到 `api/src/shared/ai/`，Quick Mode 继续保留自己的 prompt / normalizer / provider 实现
 - The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
-- The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells
+- The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells plus a Deep flow hook and completion screen
 - Quick Mode has already been further split into a lesson container plus quick-owned step, feedback, loading, error, and empty-state files
 - Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
+- The Deep Mode architecture baseline is being refined before feature work lands, so `deep/` should stay isolated from `quick/`
 
 ## Current scan notes before the next split
 
@@ -41,6 +42,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Step In reuses the dialogue flow again, but only with expressions already earned in earlier modules
 - Deep Mode needs its own copy, storage namespace, and course state boundaries so it can later become a standalone project
 - The next structural split should therefore center on mode entry, shell routing, and clear mode-owned feature domains, not on trying to share lesson-level components between Quick and Deep
+- Deep Mode is currently in an architecture-first phase: the flow hook and completion page have been separated, but Notice / Interpret / Interact / Step In business logic is still pending
 
 ## Current latest task
 

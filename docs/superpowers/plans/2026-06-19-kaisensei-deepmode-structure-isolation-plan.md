@@ -77,6 +77,8 @@ prototype/src/
       deep-course-schema.js
     overview/
       DeepOverviewScreen.jsx
+    completion/
+      DeepCompletionScreen.jsx
     course/
       DeepCourseShell.jsx
       ModuleProgress.jsx
@@ -91,6 +93,7 @@ prototype/src/
         StepInModule.jsx
     state/
       deep-course-state.js
+      useDeepModeFlow.js
 ```
 
 ## Current Baseline Mapping
@@ -103,6 +106,8 @@ The split should start from the current working code, not from a blank theoretic
 - `prototype/src/shared/media/image.js` can stay shared because it is mode-agnostic.
 - `prototype/src/quick/lesson/lesson-helpers.js` should own the current Quick lesson sentence/chunk helpers; anything truly mode-agnostic can be lifted into `shared/` later if needed.
 - `prototype/src/deep/DeepModeApp.jsx` should become the Deep entry point shaped by the real Deep Mode product design.
+- `prototype/src/deep/state/useDeepModeFlow.js` should own the phase flow, preview URL lifecycle, and navigation shell state.
+- `prototype/src/deep/completion/DeepCompletionScreen.jsx` should keep the completion screen isolated from the course shell.
 
 ---
 
@@ -254,6 +259,7 @@ Then smoke test the running app and confirm:
 - Create: `prototype/src/deep/copy.js`
 - Create: `prototype/src/deep/schema/deep-course-schema.js`
 - Create: `prototype/src/deep/overview/DeepOverviewScreen.jsx`
+- Create: `prototype/src/deep/completion/DeepCompletionScreen.jsx`
 - Create: `prototype/src/deep/course/DeepCourseShell.jsx`
 - Create: `prototype/src/deep/course/ModuleProgress.jsx`
 - Create: `prototype/src/deep/course/module-registry.js`
@@ -262,6 +268,7 @@ Then smoke test the running app and confirm:
 - Create: `prototype/src/deep/course/interact/InteractModule.jsx`
 - Create: `prototype/src/deep/course/step-in/StepInModule.jsx`
 - Create: `prototype/src/deep/state/deep-course-state.js`
+- Create: `prototype/src/deep/state/useDeepModeFlow.js`
 
 - [ ] **Step 1: Encode the Deep Mode phase order from the design**
 
@@ -278,6 +285,7 @@ Overview -> Notice -> Interpret -> Interact -> Step In -> Completion
 `DeepModeApp.jsx` should mount a Deep-specific flow, starting from an overview page rather than jumping straight into the first exercise.
 
 The Deep entry should not import Quick lesson components.
+The phase flow, preview URL lifecycle, and next/back navigation should live in `deep/state/useDeepModeFlow.js`, not in the entry component itself.
 
 - [ ] **Step 3: Give Deep Mode its own schema and copy namespace**
 

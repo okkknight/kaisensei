@@ -269,6 +269,61 @@ Deep Mode 必须有自己独立的模式文案。
 - 为了省事把 Deep Mode 直接塞进 Quick Mode 现有组件树里
 - 让 `App.jsx` 继续承担所有模式、页面和状态细节
 
+### 3.20 代码架构基线
+
+Deep Mode 的代码架构需要先于功能实现稳定下来。当前阶段的目标不是把 Notice / Interpret / Interact / Step In 做完，而是先把它们放进清晰、可迁移的目录与依赖边界里。
+
+#### 3.20.1 入口层
+
+入口层只做三件事：
+
+- 接收相机页传入的图片与基础上下文
+- 进入 Deep Mode 自己的 overview / course / completion 路由
+- 将返回行为收束回相机页或上一个 Deep 页面
+
+建议的入口拆分：
+
+- `prototype/src/App.jsx` 只保留最外层壳
+- `prototype/src/app/AppShell.jsx` 只负责 mode 路由
+- `prototype/src/deep/DeepModeApp.jsx` 只负责 Deep Mode 入口编排
+
+#### 3.20.2 Deep Mode 内部边界
+
+Deep Mode 内部继续拆成明确职责层：
+
+- `overview/`：纵览页
+- `course/`：课程壳、模块壳、模块进度
+- `completion/`：课程完成页
+- `state/`：Deep Mode 的 phase flow、preview 生命周期、恢复状态等
+- `schema/`：Deep Mode 的课程协议与 schema
+- `storage.js`：Deep Mode 独立存储命名空间
+- `copy.js`：Deep Mode 独立文案
+
+#### 3.20.3 依赖方向
+
+必须保持单向依赖：
+
+```text
+AppShell -> DeepModeApp -> (overview / course / completion / state / schema)
+```
+
+规则：
+
+- Deep Mode 不能反向依赖 Quick Mode
+- 课程壳不能反向依赖具体模块题型
+- state 层不能知道 UI 细节，只能暴露 phase / navigation / preview 一类行为
+- schema 层只定义数据结构，不写交互逻辑
+
+#### 3.20.4 Phase 0 交付物
+
+在任何 Notice / Interpret / Interact / Step In 功能落地前，Deep Mode 先完成以下架构交付物：
+
+- `DeepModeApp` 的薄入口化
+- `useDeepModeFlow` 的 phase / preview / navigation 编排
+- `DeepCompletionScreen` 的独立完成页
+- Deep Mode 目录与命名空间稳定下来
+- 以后所有 Deep 课程逻辑都从 `deep/` 内部继续生长，不回流到 Quick
+
 ---
 
 ## 4. 总体流程

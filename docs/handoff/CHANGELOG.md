@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Refined the Deep Mode scaffold into a clearer architecture baseline by extracting `useDeepModeFlow` and a standalone completion screen, while keeping the phase placeholders and behavior intact
+- Updated the Deep Mode spec and structure plan so the current phase is explicitly architecture-first rather than feature-complete
+- Verified the prototype still builds successfully with `cd prototype && npm run build`
+
 - Reviewed the Quick Mode split into lifecycle and interaction hooks, plus the quick-specific trace helper, and found no spec-compliance issues in the current workspace
 - Verified the prototype still builds successfully with `npm --prefix prototype run build`
 
