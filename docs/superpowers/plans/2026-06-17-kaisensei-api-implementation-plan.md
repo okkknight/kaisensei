@@ -20,8 +20,8 @@
 - Create: `api/src/contracts/lesson.js`
 - Create: `api/src/contracts/job.js`
 - Create: `api/src/stores/in-memory-job-store.js`
-- Create: `api/src/services/codex-cli-provider.js`
-- Create: `api/src/services/lesson-normalizer.js`
+- Create: `api/src/quick/services/codex-cli-provider.js`
+- Create: `api/src/quick/services/lesson-normalizer.js`
 - Create: `api/src/services/job-runner.js`
 - Create: `api/src/routes/lesson-jobs.js`
 - Create: `api/test/health.test.js`
@@ -180,8 +180,8 @@ git commit -m "feat: add kaisensei lesson job store"
 ### Task 3: Implement the Codex CLI provider adapter and lesson normalization
 
 **Files:**
-- Create: `api/src/services/codex-cli-provider.js`
-- Create: `api/src/services/lesson-normalizer.js`
+- Create: `api/src/quick/services/codex-cli-provider.js`
+- Create: `api/src/quick/services/lesson-normalizer.js`
 - Create: `api/test/codex-cli-provider.test.js`
 
 - [ ] **Step 1: Write the failing test**
@@ -235,7 +235,7 @@ Expected: pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add api/src/services/codex-cli-provider.js api/src/services/lesson-normalizer.js api/test/codex-cli-provider.test.js
+git add api/src/quick/services/codex-cli-provider.js api/src/quick/services/lesson-normalizer.js api/test/codex-cli-provider.test.js
 git commit -m "feat: add codex cli lesson provider"
 ```
 

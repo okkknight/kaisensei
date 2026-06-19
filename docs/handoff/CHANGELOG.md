@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Split the API AI-call layer so provider adapters and shared workspace / CLI helpers live under `api/src/shared/ai/`, while Quick Mode keeps its own prompt, normalizer, and provider modules under `api/src/quick/services/`
+- Verified the refactor with `node --test test/*.test.js` in `api/` and kept Quick Mode behavior unchanged
+- Refreshed `PROJECT_CONTEXT.md` to mark the isolation work complete and to point at the new shared AI / Quick feature paths
 - Added `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` as the next execution step for splitting Quick Mode and Deep Mode
 - Marked the current latest task as the structure split and isolation pass that should happen before Deep Mode implementation begins
 - Marked `docs/kaisensei_deep_mode_product_design.md` as the authoritative Deep Mode product fact source

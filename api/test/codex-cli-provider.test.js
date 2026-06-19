@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPrompt } from "../src/services/lesson-prompt.js";
-import { normalizeLessonPayload } from "../src/services/lesson-normalizer.js";
-import { repairBuildExercise } from "../src/services/build-chunking.js";
+import { buildPrompt } from "../src/quick/services/lesson-prompt.js";
+import { normalizeLessonPayload } from "../src/quick/services/lesson-normalizer.js";
+import { repairBuildExercise } from "../src/quick/services/build-chunking.js";
 
 test("normalizeLessonPayload rejects missing required fields", () => {
   assert.throws(() => normalizeLessonPayload({ level: "Normal" }));

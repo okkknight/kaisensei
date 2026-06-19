@@ -126,6 +126,7 @@ app shell
 - 按钮、卡片、弹层、进度条、图标这类纯 UI 基元
 - 颜色、间距、字号、圆角这类 design tokens
 - 通用文本格式化、时间格式化、图片压缩、通用媒体工具
+- 纯 AI 调用底座，如 provider 适配、请求封装、超时重试、统一错误对象、trace 日志、图片输入包装
 
 禁止放进共享层的东西：
 
@@ -136,7 +137,55 @@ app shell
 - 任何课程专属文案
 - 任何 Deep Mode 专属生成协议
 
-### 3.9 目录级建议
+### 3.13 AI 调用层边界
+
+AI 调用层可以共享，但只能共享“怎么调用”，不能共享“调用什么”。
+
+允许共享的 AI 基础能力：
+
+- provider 适配器
+- CLI / HTTP 请求封装
+- 环境变量读取
+- 超时、重试、错误归一化
+- trace / log 标记
+- 图片或多模态输入传输包装
+- 通用 job runner 外壳
+
+禁止共享的 AI 业务能力：
+
+- 具体 prompt
+- mode-specific schema
+- normalizer
+- 失败重试时的业务修正文案
+- 生成规则
+- 输出字段结构
+
+要求：
+
+- Quick Mode 和 Deep Mode 都可以依赖同一套 AI 调用底座
+- 但两边必须各自维护自己的 prompt、schema 和校验逻辑
+- shared AI 层不能理解 lesson、deepmode、quickmode 这些业务语义
+- shared AI 层一旦开始知道产品规则，就说明边界太肥了，需要再收窄
+
+### 3.14 第一阶段边界
+
+Deep Mode 落地的第一阶段只做项目结构拆分和隔离基础，不改 Quick Mode 的既有学习逻辑。
+
+第一阶段目标：
+
+- 把 Quick Mode 和 Deep Mode 放进独立目录域
+- 让 app shell 只负责模式分发
+- 让共享层只保留无业务语义的基础能力
+- 为后续 Deep Mode 独立实现课程流预留入口和状态边界
+
+第一阶段非目标：
+
+- 不重做 Quick Mode 的课程内容
+- 不改 Build / Use 的现有判定
+- 不推进 Deep Mode 课程题型实现
+- 不把 Deep Mode 的课程页面和 Quick Mode 组件继续耦合在一起
+
+### 3.15 目录级建议
 
 后续代码目录建议按下面思路拆，不要求一次性完全到位，但方向要按这个收敛：
 
@@ -170,7 +219,7 @@ prototype/src/
 - `deep/` 放 Deep Mode 全部业务
 - `shared/` 只放不带模式语义的通用层
 
-### 3.10 独立 entry 组件
+### 3.16 独立 entry 组件
 
 Quick Mode 和 Deep Mode 都必须有自己的 entry 组件。
 
@@ -182,7 +231,7 @@ Quick Mode 和 Deep Mode 都必须有自己的 entry 组件。
 - entry 组件里可以接收相机输入、图片输入和基础上下文
 - entry 组件之外不要再把两种模式混成同一套页面树
 
-### 3.11 独立存储命名空间
+### 3.17 独立存储命名空间
 
 Deep Mode 必须使用自己独立的存储 key 命名空间。
 
@@ -194,7 +243,7 @@ Deep Mode 必须使用自己独立的存储 key 命名空间。
 - 不共用题目状态 key
 - 如果未来拆成独立项目，Deep Mode 的数据读取方式不需要先清洗 Quick Mode 的历史键
 
-### 3.12 独立文案命名空间
+### 3.18 独立文案命名空间
 
 Deep Mode 必须有自己独立的模式文案。
 
@@ -205,25 +254,7 @@ Deep Mode 必须有自己独立的模式文案。
 - 加载、错误、完成、继续等 Deep Mode 专属文案不要从 Quick Mode 复用
 - 可以复用通用语气，但文本内容由 Deep Mode 自己维护
 
-### 3.13 第一阶段边界
-
-Deep Mode 落地的第一阶段只做项目结构拆分和隔离基础，不改 Quick Mode 的既有学习逻辑。
-
-第一阶段目标：
-
-- 把 Quick Mode 和 Deep Mode 放进独立目录域
-- 让 app shell 只负责模式分发
-- 让共享层只保留无业务语义的基础能力
-- 为后续 Deep Mode 独立实现课程流预留入口和状态边界
-
-第一阶段非目标：
-
-- 不重做 Quick Mode 的课程内容
-- 不改 Build / Use 的现有判定
-- 不推进 Deep Mode 课程题型实现
-- 不把 Deep Mode 的课程页面和 Quick Mode 组件继续耦合在一起
-
-### 3.10 迁移策略
+### 3.19 迁移策略
 
 为了不伤 Quick Mode，改造顺序要遵守：
 

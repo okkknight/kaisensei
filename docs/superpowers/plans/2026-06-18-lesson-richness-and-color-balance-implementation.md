@@ -13,7 +13,7 @@
 ### Task 1: Richer lesson generation rules in the API provider
 
 **Files:**
-- Modify: `api/src/services/codex-cli-provider.js`
+- Modify: `api/src/quick/services/codex-cli-provider.js`
 - Modify: `api/test/codex-cli-provider.test.js`
 
 - [ ] **Step 1: Write the failing test**
@@ -65,7 +65,7 @@ Expected: pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add api/src/services/codex-cli-provider.js api/test/codex-cli-provider.test.js
+git add api/src/quick/services/codex-cli-provider.js api/test/codex-cli-provider.test.js
 git commit -m "feat: enrich lesson generation prompt"
 ```
 
@@ -145,4 +145,3 @@ Check that:
 - [ ] **Step 3: Commit any follow-up polish**
 
 If the browser reveals clipping, overlap, or unreadable color contrast, patch the related CSS and rebuild before committing.
-

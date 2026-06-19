@@ -1,14 +1,6 @@
-import { lessonContract } from "../contracts/lesson.js";
+import { lessonContract } from "../../contracts/lesson.js";
 import { repairBuildExercise } from "./build-chunking.js";
-
-export class LessonValidationError extends Error {
-  constructor(message, details = {}) {
-    super(message);
-    this.name = "LessonValidationError";
-    this.code = "lesson_validation_error";
-    this.details = details;
-  }
-}
+import { LessonValidationError } from "../../shared/ai/errors.js";
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);

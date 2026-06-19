@@ -1,6 +1,7 @@
-import { normalizeLessonPayload, LessonValidationError } from "./lesson-normalizer.js";
-import { traceLog } from "./trace-log.js";
+import { normalizeLessonPayload } from "./lesson-normalizer.js";
 import { buildPrompt } from "./lesson-prompt.js";
+import { traceLog } from "../../services/trace-log.js";
+import { LessonValidationError } from "../../shared/ai/errors.js";
 
 function mimeTypeToGeminiName(mimeType) {
   switch (mimeType) {

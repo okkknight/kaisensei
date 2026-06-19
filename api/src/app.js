@@ -1,8 +1,8 @@
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
 import { createLessonJobStore } from "./stores/in-memory-job-store.js";
-import { createCodexCliProvider } from "./services/codex-cli-provider.js";
-import { createGeminiApiProvider } from "./services/gemini-api-provider.js";
+import { createCodexCliProvider } from "./quick/services/codex-cli-provider.js";
+import { createGeminiApiProvider } from "./quick/services/gemini-api-provider.js";
 import { createLessonJobRunner } from "./services/job-runner.js";
 import { registerLessonJobRoutes } from "./routes/lesson-jobs.js";
 

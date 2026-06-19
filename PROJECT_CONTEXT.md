@@ -25,6 +25,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Camera mode, loading mode, and lesson mode all exist for Quick Mode
 - Lesson mode currently follows the four-step flow: See, Learn, Build, Use
 - Build and Use use chunk reordering with tolerant checking
+- The AI calling底座已从 feature 逻辑里拆出到 `api/src/shared/ai/`，Quick Mode 继续保留自己的 prompt / normalizer / provider 实现
 - The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
 - Deep Mode is now being defined as a separate mode, but the actual code implementation has not landed yet
 - Deep Mode must stay isolated from Quick Mode and should be easy to split into its own project later
@@ -33,8 +34,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: split the project structure so Quick Mode and Deep Mode are isolated before Deep Mode implementation begins
-- Status: 未执行
+- Task: finish the Quick/Deep isolation layer so Deep Mode can start without touching Quick Mode behavior
+- Status: 已完成
 
 ## Architecture or state flow
 
@@ -69,8 +70,9 @@ Deep Mode planned states:
 - `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - current Deep Mode implementation spec
 - `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` - next execution plan for the structure split
 - `prototype/src/App.jsx` - current Quick Mode prototype shell
-- `api/src/services/codex-cli-provider.js` - current lesson generation prompt and Codex CLI bridge
-- `api/src/services/lesson-normalizer.js` - API payload validation and normalization
+- `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
+- `api/src/quick/services/codex-cli-provider.js` - Quick Mode lesson generation prompt and Codex CLI bridge
+- `api/src/quick/services/lesson-normalizer.js` - Quick Mode API payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
 - `docs/handoff/README.md` - short reading index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
@@ -101,7 +103,7 @@ Deep Mode planned states:
 
 ## Open decisions
 
-- The next work is the structure split and isolation pass; after that, Deep Mode implementation can start without touching Quick Mode behavior
+- The next work is Deep Mode implementation on top of the isolated structure; Quick Mode should stay untouched unless a cross-mode shell fix is explicitly needed
 
 ## Main risks and tradeoffs
 

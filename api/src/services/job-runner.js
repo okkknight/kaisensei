@@ -1,5 +1,5 @@
-import { LessonValidationError } from "./lesson-normalizer.js";
 import { traceLog } from "./trace-log.js";
+import { LessonValidationError } from "../shared/ai/errors.js";
 
 function toJobError(error) {
   if (error instanceof LessonValidationError) {
