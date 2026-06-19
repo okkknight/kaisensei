@@ -33,8 +33,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: unify the project context and Deep Mode spec so future work starts from the correct state
-- Status: 验收通过
+- Task: split the project structure so Quick Mode and Deep Mode are isolated before Deep Mode implementation begins
+- Status: 未执行
 
 ## Architecture or state flow
 
@@ -67,6 +67,7 @@ Deep Mode planned states:
 - `docs/kaisensei_PRD.md` - product boundary and Deep Mode V2 confirmation
 - `docs/kaisensei_deep_mode_product_design.md` - detailed Deep Mode product design
 - `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - current Deep Mode implementation spec
+- `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` - next execution plan for the structure split
 - `prototype/src/App.jsx` - current Quick Mode prototype shell
 - `api/src/services/codex-cli-provider.js` - current lesson generation prompt and Codex CLI bridge
 - `api/src/services/lesson-normalizer.js` - API payload validation and normalization
@@ -100,7 +101,7 @@ Deep Mode planned states:
 
 ## Open decisions
 
-- Deep Mode implementation has not started in code yet, so the next work should begin from the design doc and spec while keeping Quick Mode untouched
+- The next work is the structure split and isolation pass; after that, Deep Mode implementation can start without touching Quick Mode behavior
 
 ## Main risks and tradeoffs
 

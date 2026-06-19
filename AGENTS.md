@@ -26,6 +26,7 @@ See → Learn → Build → Use
 - Do not change the existing Quick Mode flow unless the user explicitly asks for it
 - Treat `docs/kaisensei_deep_mode_product_design.md` as the authoritative Deep Mode product fact source
 - Use `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation boundary
+- Use `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` as the next execution step
 - Keep the app shell thin so Deep Mode can later split into its own project with minimal friction
 
 ---

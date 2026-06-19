@@ -205,6 +205,24 @@ Deep Mode 必须有自己独立的模式文案。
 - 加载、错误、完成、继续等 Deep Mode 专属文案不要从 Quick Mode 复用
 - 可以复用通用语气，但文本内容由 Deep Mode 自己维护
 
+### 3.13 第一阶段边界
+
+Deep Mode 落地的第一阶段只做项目结构拆分和隔离基础，不改 Quick Mode 的既有学习逻辑。
+
+第一阶段目标：
+
+- 把 Quick Mode 和 Deep Mode 放进独立目录域
+- 让 app shell 只负责模式分发
+- 让共享层只保留无业务语义的基础能力
+- 为后续 Deep Mode 独立实现课程流预留入口和状态边界
+
+第一阶段非目标：
+
+- 不重做 Quick Mode 的课程内容
+- 不改 Build / Use 的现有判定
+- 不推进 Deep Mode 课程题型实现
+- 不把 Deep Mode 的课程页面和 Quick Mode 组件继续耦合在一起
+
 ### 3.10 迁移策略
 
 为了不伤 Quick Mode，改造顺序要遵守：

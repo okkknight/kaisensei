@@ -4,6 +4,8 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Added `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` as the next execution step for splitting Quick Mode and Deep Mode
+- Marked the current latest task as the structure split and isolation pass that should happen before Deep Mode implementation begins
 - Marked `docs/kaisensei_deep_mode_product_design.md` as the authoritative Deep Mode product fact source
 - Marked `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation boundary source
 - Aligned the project context, PRD, and handoff reading order so future work starts from the same Deep Mode/Quick Mode separation
