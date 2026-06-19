@@ -9,6 +9,8 @@ Append-only resume log.
 - Added a local Deep Mode scene asset at `prototype/public/deep-mode-default.jpg` for the overview and completion screens
 - Filled out the Deep Mode data schema in `prototype/src/deep-mode/deepModeData.js` so the storyboard cards can render loading, overview, Notice, Interpret, Interact, Step In, completion, and design-note states
 - Verified the result in a real browser and confirmed `npm run build` passes for `prototype/`
+- Reworked the storyboard preview into a real Deep Mode course flow with separate Overview, Notice, Interpret, Interact, Step In, and Completion screens, shared exercise/dialogue components, local persistence, and a photo modal
+- Verified the real Deep Mode course flow in Chrome end-to-end from Overview to Course Complete, including the fixed bottom action bar and auto-advance behavior
 
 ## 2026-06-18
 

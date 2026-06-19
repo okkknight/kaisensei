@@ -40,8 +40,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode V2 is planned as a separate mode entered from the existing camera-page mode switch, sharing only photo capture/upload/input capability and keeping its course system independent
 - Deep Mode V2 keeps English TTS and question reading, but those are implemented inside the mode rather than treated as cross-mode shared shell
 - The upcoming backend should stay mode-driven so Quick Mode and Deep Mode can share one job entry while producing separate schemas
-- The prototype UI now has a Deep Mode storyboard board in `prototype/src/DeepModeApp.jsx` that follows `docs/deepmodeimage.png` as the visual reference, with loading, overview, Notice, Interpret, Interact, Step In, completion, and design-note panels
-- `prototype/src/App.jsx` is now a thin wrapper over the Deep Mode storyboard entry, and `prototype/src/styles.css` has been rewritten around the lavender/yellow reference palette
+- The prototype UI now has a real Deep Mode course flow in `prototype/src/DeepModeApp.jsx` that follows `docs/deepmodeimage.png` for visual language while rendering separate loading, overview, Notice, Interpret, Interact, Step In, and completion screens with shared reusable exercise/dialogue components
+- `prototype/src/App.jsx` is now a thin wrapper over the Deep Mode course entry, and `prototype/src/styles.css` has been rewritten around the lavender/yellow mobile palette with a fixed bottom action bar and mobile-safe spacing
 
 ## Current latest task
 
@@ -80,9 +80,9 @@ MVP behavior:
 - `api/src/services/codex-cli-provider.js` - lesson generation prompt and Codex CLI bridge
 - `api/src/services/lesson-normalizer.js` - API payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
-- `prototype/src/App.jsx` - thin wrapper that mounts the Deep Mode storyboard app
-- `prototype/src/DeepModeApp.jsx` - Deep Mode storyboard UI and screen previews
-- `prototype/src/styles.css` - responsive lavender/yellow storyboard styling
+- `prototype/src/App.jsx` - thin wrapper that mounts the Deep Mode course app
+- `prototype/src/DeepModeApp.jsx` - Deep Mode course flow, reusable exercise/dialogue components, persistence, and screen transitions
+- `prototype/src/styles.css` - responsive lavender/yellow Deep Mode course styling
 - `docs/deepmodeimage.png` - current Deep Mode visual reference
 - `docs/handoff/README.md` - short reading index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
