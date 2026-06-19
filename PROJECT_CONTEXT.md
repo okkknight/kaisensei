@@ -27,15 +27,24 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Build and Use use chunk reordering with tolerant checking
 - The AI calling底座已从 feature 逻辑里拆出到 `api/src/shared/ai/`，Quick Mode 继续保留自己的 prompt / normalizer / provider 实现
 - The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
-- Deep Mode is now being defined as a separate mode, but the actual code implementation has not landed yet
-- Deep Mode must stay isolated from Quick Mode and should be easy to split into its own project later
+- The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells
+- Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
 
+## Current scan notes before the next split
+
+- Deep Mode is not a simple alternate lesson template; it has its own overview page plus Notice, Interpret, Interact, Step In, and completion flow
+- Notice and Interpret reuse the same three-step micro-exercise skeleton, but the content generation rules are different
+- Interact is task-pack based and includes a short dialogue loop, not just static chunk reordering
+- Step In reuses the dialogue flow again, but only with expressions already earned in earlier modules
+- Deep Mode needs its own copy, storage namespace, and course state boundaries so it can later become a standalone project
+- The next structural split should therefore center on mode entry, shell routing, and clear mode-owned feature domains, not on trying to share lesson-level components between Quick and Deep
+
 ## Current latest task
 
-- Task: finish the Quick/Deep isolation layer so Deep Mode can start without touching Quick Mode behavior
-- Status: 已完成
+- Task: complete the first-pass Quick/Deep shell split and continue carving the Quick lesson domain into smaller owned files
+- Status: 进行中
 
 ## Architecture or state flow
 
@@ -70,6 +79,10 @@ Deep Mode planned states:
 - `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - current Deep Mode implementation spec
 - `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` - next execution plan for the structure split
 - `prototype/src/App.jsx` - current Quick Mode prototype shell
+- `prototype/src/app/AppShell.jsx` - thin shell that routes between camera, Quick Mode, and Deep Mode
+- `prototype/src/app/CameraEntry.jsx` - shared first-screen camera and mode selector
+- `prototype/src/quick/QuickModeApp.jsx` - current Quick Mode entry that can start from a captured file
+- `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold with overview and module shells
 - `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
 - `api/src/quick/services/codex-cli-provider.js` - Quick Mode lesson generation prompt and Codex CLI bridge
 - `api/src/quick/services/lesson-normalizer.js` - Quick Mode API payload validation and normalization

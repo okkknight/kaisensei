@@ -1,5 +1,7 @@
-export const DEEP_MODE_STORAGE_PREFIX = "kaisensei:deep:";
+export const DEEP_STORAGE_PREFIX = "deep:";
 
-export function createDeepStorageKey(name) {
-  return `${DEEP_MODE_STORAGE_PREFIX}${name}`;
-}
+export const DEEP_STORAGE_KEYS = {
+  courseState: `${DEEP_STORAGE_PREFIX}course-state`,
+  draft: `${DEEP_STORAGE_PREFIX}draft`,
+  progress: `${DEEP_STORAGE_PREFIX}progress`,
+};

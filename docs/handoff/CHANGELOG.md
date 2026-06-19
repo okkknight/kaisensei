@@ -4,6 +4,12 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Split the frontend into a thin shell, a shared `CameraEntry`, a Quick entry that can start from a captured file, and a Deep scaffold with overview and module shells
+- Moved Quick lesson sentence/chunk helpers into `prototype/src/quick/lesson/lesson-helpers.js`, added quick/deep storage and copy namespaces, and removed the stale shared lesson helper file
+- Verified the updated prototype with `cd prototype && npm run build`
+
+## 2026-06-19
+
 - Split the API AI-call layer so provider adapters and shared workspace / CLI helpers live under `api/src/shared/ai/`, while Quick Mode keeps its own prompt, normalizer, and provider modules under `api/src/quick/services/`
 - Verified the refactor with `node --test test/*.test.js` in `api/` and kept Quick Mode behavior unchanged
 - Refreshed `PROJECT_CONTEXT.md` to mark the isolation work complete and to point at the new shared AI / Quick feature paths

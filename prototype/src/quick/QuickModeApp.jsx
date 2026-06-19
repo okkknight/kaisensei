@@ -20,7 +20,8 @@ import {
 } from "@tabler/icons-react";
 import { createLessonJob, getLessonJob, LessonApiError } from "../lib/lesson-api.js";
 import "../styles.css";
-import { buildHint, buildSeeSentenceSegments, joinChunkText, normalizeText, shuffleChunks, hashString } from "../shared/utils/lesson.js";
+import { QUICK_COPY } from "./copy.js";
+import { buildHint, buildSeeSentenceSegments, joinChunkText, normalizeText, shuffleChunks, hashString } from "./lesson/lesson-helpers.js";
 import { compressUploadImage } from "../shared/media/image.js";
 
 const stepOrder = ["See", "Learn", "Build", "Use"];
@@ -31,7 +32,7 @@ const stepMeta = {
   Use: { label: "Use", icon: IconMessage2 },
 };
 
-const loadingMessages = ["正在查看你的场景…", "正在生成这节迷你课程…"];
+const loadingMessages = QUICK_COPY.loadingMessages;
 
 function createTraceId() {
   return `flow_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -70,10 +71,10 @@ function resolveChunkTone(chunk) {
   return chunkToneOrder[hashString(seed) % chunkToneOrder.length];
 }
 
-export function App() {
-  const [level, setLevel] = useState("Normal");
+export function App({ initialFile = null, initialLevel = "Normal", onExitToCamera } = {}) {
+  const [level, setLevel] = useState(initialLevel);
   const [courseMode, setCourseMode] = useState("quick");
-  const [screen, setScreen] = useState("camera");
+  const [screen, setScreen] = useState(initialFile ? "loading" : "camera");
   const [lesson, setLesson] = useState(null);
   const [activeStep, setActiveStep] = useState("See");
   const [buildSelectedIds, setBuildSelectedIds] = useState([]);
@@ -141,6 +142,18 @@ export function App() {
     });
     setActiveStep("See");
   }, [lesson]);
+
+  useEffect(() => {
+    if (!initialFile) {
+      return undefined;
+    }
+
+    selectedFileRef.current = initialFile;
+    setPreviewFromFile(initialFile);
+    setLevel(initialLevel);
+    void generateLessonFromFile(initialFile, initialLevel, "entry");
+    return undefined;
+  }, [initialFile, initialLevel]);
 
   useEffect(
     () => () => {
@@ -477,6 +490,11 @@ export function App() {
 
   function handleRetakePhoto() {
     cancelPendingWork();
+    if (onExitToCamera) {
+      onExitToCamera();
+      return;
+    }
+
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = "";
@@ -848,7 +866,7 @@ function CameraScreen({
           </button>
         </div>
 
-        {courseMode === "depth" ? <p className="camera-mode-note">深度模式预留中，当前仍是快速课程。</p> : null}
+        {courseMode === "depth" ? <p className="camera-mode-note">{QUICK_COPY.deepModeNote}</p> : null}
 
         <div className="camera-action-row" aria-label="Camera actions">
           <button className="camera-side-button" type="button" onClick={onUpload} aria-label="Upload photo">
