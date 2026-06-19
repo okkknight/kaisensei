@@ -1,3 +1,5 @@
+export const deepModuleOrder = ["notice", "interpret", "interact", "stepIn"];
+
 export const deepCourseContract = {
   mode: "deep",
   level: "normal",
@@ -7,9 +9,25 @@ export const deepCourseContract = {
     startPromptChinese: "",
   },
   modules: {
-    notice: { title: "Notice", goal: "", expressionPacks: [] },
-    interpret: { title: "Interpret", goal: "", expressionPacks: [] },
-    interact: { title: "Interact", goal: "", taskPacks: [] },
-    stepIn: { title: "Step In", goal: "", dialogue: {} },
+    notice: {
+      title: "Notice",
+      goal: "Describe what is visible in the photo.",
+      expressionPacks: [],
+    },
+    interpret: {
+      title: "Interpret",
+      goal: "Infer what may be happening in the scene.",
+      expressionPacks: [],
+    },
+    interact: {
+      title: "Interact",
+      goal: "Express a need and respond naturally.",
+      taskPacks: [],
+    },
+    stepIn: {
+      title: "Step In",
+      goal: "Complete one full scene conversation.",
+      dialogue: {},
+    },
   },
 };

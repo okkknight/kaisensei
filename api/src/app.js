@@ -1,36 +1,22 @@
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
 import { createLessonJobStore } from "./stores/in-memory-job-store.js";
-import { createCodexCliProvider } from "./quick/services/codex-cli-provider.js";
-import { createGeminiApiProvider } from "./quick/services/gemini-api-provider.js";
 import { createLessonJobRunner } from "./services/job-runner.js";
 import { registerLessonJobRoutes } from "./routes/lesson-jobs.js";
+import { createProviderRegistry } from "./services/provider-registry.js";
 
-function createConfiguredProvider() {
-  const providerName = String(process.env.LESSON_PROVIDER || "codex").toLowerCase();
-
-  if (providerName === "gemini") {
-    return createGeminiApiProvider({
-      apiKey: process.env.GEMINI_API_KEY,
-      model: process.env.GEMINI_MODEL,
-    });
-  }
-
-  return createCodexCliProvider({
-    model: process.env.CODEX_MODEL,
-  });
-}
-
-export function createApp({ jobStore, provider, jobRunner } = {}) {
+export function createApp({ jobStore, provider, providers, jobRunner } = {}) {
   const app = Fastify({
     logger: false,
   });
 
   const resolvedJobStore = jobStore ?? createLessonJobStore();
-  const resolvedProvider = provider ?? createConfiguredProvider();
+  const resolvedProviders = providers ?? (provider ? { quick: provider } : (jobRunner ? null : createProviderRegistry()));
+  const resolvedProvider = provider ?? resolvedProviders?.quick ?? null;
   const resolvedJobRunner = jobRunner ?? createLessonJobRunner({
     jobStore: resolvedJobStore,
     provider: resolvedProvider,
+    providers: resolvedProviders || undefined,
   });
 
   app.register(multipart, {
