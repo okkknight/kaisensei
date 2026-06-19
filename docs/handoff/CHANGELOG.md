@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Reviewed the Quick Mode split into lifecycle and interaction hooks, plus the quick-specific trace helper, and found no spec-compliance issues in the current workspace
+- Verified the prototype still builds successfully with `npm --prefix prototype run build`
+
 - Split Quick Mode into a slimmer container plus quick-owned lesson subfiles for loading, error, empty, step, and feedback UI
 - Kept the shared camera entry as the only first-screen input surface and left Deep Mode on its own scaffolded path
 - Verified the updated prototype again with `cd prototype && npm run build`
