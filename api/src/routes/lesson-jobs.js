@@ -1,4 +1,5 @@
 import { traceLog } from "../services/trace-log.js";
+import { lessonJobModes } from "../contracts/job.js";
 
 async function readFileStream(fileStream) {
   const chunks = [];
@@ -13,6 +14,7 @@ async function parseMultipartRequest(request) {
   let imageBuffer = null;
   let mimeType = "application/octet-stream";
   let level = "Normal";
+  let mode = "quick";
   let traceId = "";
 
   for await (const part of request.parts()) {
@@ -27,6 +29,11 @@ async function parseMultipartRequest(request) {
       continue;
     }
 
+    if (part.type === "field" && part.fieldname === "mode") {
+      mode = String(part.value || "").trim() || "quick";
+      continue;
+    }
+
     if (part.type === "field" && part.fieldname === "traceId") {
       traceId = String(part.value || "").trim();
     }
@@ -36,6 +43,7 @@ async function parseMultipartRequest(request) {
     imageBuffer,
     mimeType,
     level,
+    mode,
     traceId,
     parseMs: Date.now() - startedAt,
   };
@@ -45,13 +53,17 @@ function isValidLevel(level) {
   return level === "Normal" || level === "Advanced";
 }
 
+function isValidMode(mode) {
+  return lessonJobModes.includes(mode);
+}
+
 export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
   const prefixes = ["/v1", "/api/v1"];
 
   for (const prefix of prefixes) {
     app.post(`${prefix}/lesson-jobs`, async (request, reply) => {
       const requestStartedAt = Date.now();
-      const { imageBuffer, mimeType, level, traceId, parseMs } = await parseMultipartRequest(request);
+      const { imageBuffer, mimeType, level, mode, traceId, parseMs } = await parseMultipartRequest(request);
 
       if (!imageBuffer) {
         traceLog("route", "job_rejected_missing_image", {
@@ -81,18 +93,33 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         });
       }
 
-      const job = jobStore.create({ level });
+      if (!isValidMode(mode)) {
+        traceLog("route", "job_rejected_invalid_mode", {
+          traceId,
+          mode,
+          parseMs,
+        });
+        return reply.status(400).send({
+          error: {
+            code: "invalid_mode",
+            message: "Mode must be quick or deep.",
+          },
+        });
+      }
+
+      const job = jobStore.create({ level, mode });
       traceLog("route", "job_received", {
         traceId,
         jobId: job.jobId,
         level,
+        mode,
         mimeType,
         imageBytes: imageBuffer.length,
         parseMs,
         totalMs: Date.now() - requestStartedAt,
       });
 
-      jobRunner.enqueue(job.jobId, { imageBuffer, mimeType, level, traceId });
+      jobRunner.enqueue(job.jobId, { imageBuffer, mimeType, level, mode, traceId });
 
       return reply.status(202).send({
         jobId: job.jobId,

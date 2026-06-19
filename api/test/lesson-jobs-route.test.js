@@ -113,3 +113,45 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
   assert.equal(gatewayStyleRes.statusCode, 200);
   assert.equal(gatewayStyleRes.json().lesson.see.sentence, lesson.see.sentence);
 });
+
+test("POST /v1/lesson-jobs persists mode and keeps the legacy quick default", async () => {
+  const jobStore = createLessonJobStore();
+  const calls = [];
+  const jobRunner = {
+    enqueue(jobId, payload) {
+      calls.push({ jobId, payload });
+    },
+  };
+  const app = createApp({ jobStore, jobRunner });
+
+  const deepBody = buildMultipartBody({
+    fields: { level: "Normal", mode: "deep", traceId: "trace-deep" },
+  });
+
+  const deepRes = await app.inject({
+    method: "POST",
+    url: "/v1/lesson-jobs",
+    headers: { "content-type": deepBody.contentType },
+    payload: deepBody.body,
+  });
+
+  assert.equal(deepRes.statusCode, 202);
+  const deepCreated = deepRes.json();
+  assert.equal(jobStore.get(deepCreated.jobId).mode, "deep");
+  assert.equal(calls[0].payload.mode, "deep");
+
+  const quickBody = buildMultipartBody({
+    fields: { level: "Advanced", traceId: "trace-quick" },
+  });
+
+  const quickRes = await app.inject({
+    method: "POST",
+    url: "/v1/lesson-jobs",
+    headers: { "content-type": quickBody.contentType },
+    payload: quickBody.body,
+  });
+
+  assert.equal(quickRes.statusCode, 202);
+  const quickCreated = quickRes.json();
+  assert.equal(jobStore.get(quickCreated.jobId).mode, "quick");
+});

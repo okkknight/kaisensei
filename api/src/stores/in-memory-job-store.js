@@ -12,10 +12,11 @@ export function createLessonJobStore() {
   const jobs = new Map();
 
   return {
-    create({ level }) {
+    create({ level, mode = "quick" }) {
       const job = {
         jobId: createJobId(),
         level,
+        mode,
         status: "queued",
         createdAt: nowIso(),
         updatedAt: nowIso(),
