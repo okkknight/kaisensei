@@ -1135,9 +1135,8 @@ Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加�
 
 ### 共享能力
 
-- 只要是与具体课程实现无关的能力，都可以在 Quick Mode 和 Deep Mode 之间共享
-- 例如拍照入口、上传、loading 壳、基础按钮、通用反馈、基础 TTS 播放能力都可以复用
-- 课程生成、课程结构、校验逻辑、题型和课程 UI flow 必须独立
+- 只共享拍照入口、上传和图片输入能力
+- Deep Mode 的 loading 壳、基础按钮、通用反馈、英文 TTS 播放、题目朗读、课程生成、课程结构、校验逻辑、题型和课程 UI flow 都按 Deep Mode 自己的 schema 实现，不能算作 Quick Mode 的共享壳层能力
 
 ### 首发范围
 
@@ -1147,6 +1146,7 @@ Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加�
 
 ### 输出与校验
 
+- 课程生成入口可以是 mode-driven 的统一 job 系统，由 `mode` 分流到 Quick Mode 或 Deep Mode
 - Deep Mode 使用独立输出 schema，结构与 Quick Lesson 分开
 - `short_answer` 先只做 tolerant 文本匹配
 - 对结构严重错误的输出先严格拒绝，不做轻量补全
@@ -1157,6 +1157,12 @@ Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加�
 - Deep Mode 前期不做语音输入
 - 英文 TTS 播放保留，题目朗读按钮保留
 - 只是不做语音作答
+
+### 状态恢复
+
+- MVP 只要求同设备同浏览器可恢复
+- 恢复状态先按浏览器端持久化设计，字段结构与未来服务端恢复保持一致
+- 后续如果扩展服务端恢复，优先复用同一组状态字段，不要另起一套恢复模型
 
 ### 课程目标
 
