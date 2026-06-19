@@ -2,6 +2,14 @@
 
 Append-only resume log.
 
+## 2026-06-19
+
+- Replaced the prototype quick mode shell with a Deep Mode storyboard board that follows `docs/deepmodeimage.png` as the visual reference
+- Added `prototype/src/DeepModeApp.jsx` as the new Deep Mode entry, kept `prototype/src/App.jsx` as a thin wrapper, and rewrote `prototype/src/styles.css` around the lavender/yellow palette
+- Added a local Deep Mode scene asset at `prototype/public/deep-mode-default.jpg` for the overview and completion screens
+- Filled out the Deep Mode data schema in `prototype/src/deep-mode/deepModeData.js` so the storyboard cards can render loading, overview, Notice, Interpret, Interact, Step In, completion, and design-note states
+- Verified the result in a real browser and confirmed `npm run build` passes for `prototype/`
+
 ## 2026-06-18
 
 - Reset the Deep Mode V2 UI and interaction direction so it can be redesigned from scratch
@@ -29,6 +37,10 @@ Append-only resume log.
 - Tightened the mobile lesson layout so Build and Use use clearer footer behavior and the lesson screen scrolls correctly on small viewports
 - Unified the lesson page horizontal padding to 24px so all four steps breathe a little more on mobile
 - Refreshed the handoff pack to reflect the current API-backed prototype instead of the initial scaffold state
+- Locked Deep Mode V2 shared capability boundaries to photo capture, upload, and image input only; TTS and question reading stay inside the mode rather than being shared shell behavior
+- Chose a mode-driven unified job entry for Quick Mode and Deep Mode, with separate output schemas per mode instead of parallel job systems
+- Defined Deep Mode V2 recovery as same-device, same-browser only for MVP, with browser-side persistence now and service-side restore left for later
+- Split Deep Mode V2 into a dedicated spec and implementation plan so task cards can now be derived without re-litigating product boundaries
 
 ## 2026-06-17
 
