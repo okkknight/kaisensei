@@ -1128,6 +1128,10 @@ kaisensei 的第一版闭环应该是：
 
 Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加长版。
 
+`docs/kaisensei_deep_mode_product_design.md` 是 Deep Mode 的权威产品设计事实来源；当前实现边界以后续 spec 为准。
+
+Deep Mode 的具体落地细节以后续 spec 为准，当前实现对齐口径见 `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`。
+
 ### 入口
 
 - Deep Mode 通过现有相机页里的模式切换进入
@@ -1168,4 +1172,4 @@ Deep Mode 是与 Quick Mode 并列的独立模式，不是 Quick Lesson 的加�
 
 - Deep Mode 的目标是文字版场景口语训练
 - 它不是图片描述课、单词表、语法课或聊天机器人
-- 课程要覆盖：`See it -> Read it -> Need it -> Say it -> Handle it -> Scene Wrap`
+- 课程要覆盖：`Notice -> Interpret -> Interact -> Step In`

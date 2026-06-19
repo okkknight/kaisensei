@@ -21,69 +21,56 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current product state
 
-- The app is fully implemented in `prototype/` and backed by a real `api/`
-- Camera mode, loading mode, and lesson mode all exist
-- Lesson mode now includes the four-step flow: See, Learn, Build, Use
-- The camera page uses a dark starfield fallback, real upload/capture controls, settings modal, and mode switch
+- The current codebase is still the Quick Mode prototype in `prototype/` with a real `api/`
+- Camera mode, loading mode, and lesson mode all exist for Quick Mode
+- Lesson mode currently follows the four-step flow: See, Learn, Build, Use
 - Build and Use use chunk reordering with tolerant checking
-- Build re-segments the sentence naturally instead of reusing Learn chunks one-for-one
-- Learn chunks are cut naturally around high-frequency phrases and fixed expressions rather than mechanically slicing the sentence
-- Build is slightly more challenging than Learn and uses different, more sentence-like segmentation
-- Use answers must naturally reuse 1-2 Learn chunks or collocations without copying the See sentence, so the reply stays connected but not repetitive
-- Use questions must not mention the picture/photo/image/scene and should sound like a real conversational follow-up
-- The prompt and UI have been tightened so `See` and `Build` stay observer-focused
-- Use now behaves like a real conversation with a specific speaker and setting, not a generic photo prompt
-- `Use` now omits `questionChinese`
-- The bottom navigation has been adjusted so Build and Use have clearer footer behavior
-- The repo root now has a single `npm run dev` entry that starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
-- Switching Normal / Advanced only changes the next generated lesson; it does not regenerate the current photo's lesson
-- Deep Mode V2 is planned as a separate mode entered from the existing camera-page mode switch, sharing only photo capture/upload/input capability and keeping its course system independent
-- Deep Mode V2 keeps English TTS and question reading, but those are implemented inside the mode rather than treated as cross-mode shared shell
-- The upcoming backend should stay mode-driven so Quick Mode and Deep Mode can share one job entry while producing separate schemas
-- The prototype UI now has a real Deep Mode course flow in `prototype/src/DeepModeApp.jsx` that follows `docs/deepmodeimage.png` for visual language while rendering separate loading, overview, Notice, Interpret, Interact, Step In, and completion screens with shared reusable exercise/dialogue components
-- `prototype/src/App.jsx` is now a thin wrapper over the Deep Mode course entry, and `prototype/src/styles.css` has been rewritten around the lavender/yellow mobile palette with a fixed bottom action bar and mobile-safe spacing
+- The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
+- Deep Mode is now being defined as a separate mode, but the actual code implementation has not landed yet
+- Deep Mode must stay isolated from Quick Mode and should be easy to split into its own project later
+- The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
+- The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
 
 ## Current latest task
 
-- Task: split Deep Mode V2 into a dedicated spec and implementation plan
-- Status: complete
+- Task: unify the project context and Deep Mode spec so future work starts from the correct state
+- Status: 验收通过
 
 ## Architecture or state flow
 
-Planned app states:
+Current implemented Quick Mode states:
 
 1. Camera Mode
 2. Loading Mode
 3. Lesson Mode
 
-Lesson steps:
+Current implemented lesson steps:
 
 1. See
 2. Learn
 3. Build
 4. Use
 
-MVP behavior:
+Deep Mode planned states:
 
-- user takes or uploads a photo
-- app shows a loading state
-- app generates or mocks a lesson
-- user completes the four-step lesson
-- user can switch between Normal and Advanced
-- user can replay English audio with browser TTS
-- Build and Use both use click-to-order chunk reordering
-- Check logic ignores capitalization, punctuation, and spacing differences
+1. Camera entry with mode selection
+2. Loading / generation
+3. Overview
+4. Notice
+5. Interpret
+6. Interact
+7. Step In
+8. Completion
 
 ## Key files
 
-- `docs/kaisensei_PRD.md` - source of truth for product behavior
-- `api/src/services/codex-cli-provider.js` - lesson generation prompt and Codex CLI bridge
+- `docs/kaisensei_PRD.md` - product boundary and Deep Mode V2 confirmation
+- `docs/kaisensei_deep_mode_product_design.md` - detailed Deep Mode product design
+- `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - current Deep Mode implementation spec
+- `prototype/src/App.jsx` - current Quick Mode prototype shell
+- `api/src/services/codex-cli-provider.js` - current lesson generation prompt and Codex CLI bridge
 - `api/src/services/lesson-normalizer.js` - API payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
-- `prototype/src/App.jsx` - thin wrapper that mounts the Deep Mode course app
-- `prototype/src/DeepModeApp.jsx` - Deep Mode course flow, reusable exercise/dialogue components, persistence, and screen transitions
-- `prototype/src/styles.css` - responsive lavender/yellow Deep Mode course styling
-- `docs/deepmodeimage.png` - current Deep Mode visual reference
 - `docs/handoff/README.md` - short reading index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
 
@@ -104,30 +91,24 @@ MVP behavior:
 ## Working rules
 
 - Keep the product mobile-first
-- Preserve the `See -> Learn -> Build -> Use` flow
-- Do not revive the old `Describe / Explain / Comment / Practice` structure
-- Use step is a full question-and-answer reordering exercise, not a simple displayed sentence
-- Prefer practical, high-frequency vocabulary and sentence patterns without sounding childish
+- Preserve the current Quick Mode flow while Deep Mode is being added
+- Do not let Deep Mode changes alter existing Quick Mode behavior
+- Use the Deep Mode spec as the source of truth for the new mode
+- Prefer isolated feature boundaries so Deep Mode can become a standalone project later
 - Keep docs compact and source-of-truth oriented
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
 
-- The current handoff status is intentionally compact; do not expand it into a second parallel spec
+- Deep Mode implementation has not started in code yet, so the next work should begin from the design doc and spec while keeping Quick Mode untouched
 
 ## Main risks and tradeoffs
 
 - Easy to drift back into the old snapspeak mode structure
-- Easy to overbuild before the mobile lesson flow is stable
+- Easy to overcouple Deep Mode with Quick Mode if the entry boundary is not kept thin
+- Deep Mode should not inherit Quick Mode implementation shortcuts that make later extraction harder
 - Lesson content should stay short and practical, or the 1-minute promise will break
-- If Build or Use scoring becomes too strict, the learning flow will feel exam-like instead of friendly
 
 ## Cross-feature impact
 
-Changes to the lesson contract or prompt affect both the API generator and the prototype UI. Any future field removal or shape change should update:
-
-- `api/src/contracts/lesson.js`
-- `api/src/services/lesson-normalizer.js`
-- `api/src/services/codex-cli-provider.js`
-- `prototype/src/App.jsx`
-- `docs/kaisensei_PRD.md`
+Changes to the shared lesson contract or prompt still affect Quick Mode and any future shared API path. Deep Mode-specific work should stay in its own feature domain and avoid changing Quick Mode unless explicitly required.

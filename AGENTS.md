@@ -20,6 +20,16 @@ See → Learn → Build → Use
 
 ---
 
+## Current execution focus
+
+- Deep Mode is being added as a separate mode and should stay isolated from Quick Mode
+- Do not change the existing Quick Mode flow unless the user explicitly asks for it
+- Treat `docs/kaisensei_deep_mode_product_design.md` as the authoritative Deep Mode product fact source
+- Use `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation boundary
+- Keep the app shell thin so Deep Mode can later split into its own project with minimal friction
+
+---
+
 ## Product Positioning
 
 kaisensei is not a generic AI photo describer.

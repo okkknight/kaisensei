@@ -4,6 +4,19 @@ Append-only resume log.
 
 ## 2026-06-19
 
+- Marked `docs/kaisensei_deep_mode_product_design.md` as the authoritative Deep Mode product fact source
+- Marked `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation boundary source
+- Aligned the project context, PRD, and handoff reading order so future work starts from the same Deep Mode/Quick Mode separation
+
+## 2026-06-19
+
+- Aligned the project context and handoff pack to the current real repo state: Quick Mode remains the implemented prototype, while Deep Mode is now starting from spec rather than code
+- Added `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation source of truth
+- Kept the Quick Mode prototype state in `prototype/` as the feature baseline that should not be modified by Deep Mode work
+- Treat earlier Deep Mode implementation notes in this changelog as stale relative to the current checkout; they are historical context, not the present code state
+
+## 2026-06-19
+
 - Replaced the prototype quick mode shell with a Deep Mode storyboard board that follows `docs/deepmodeimage.png` as the visual reference
 - Added `prototype/src/DeepModeApp.jsx` as the new Deep Mode entry, kept `prototype/src/App.jsx` as a thin wrapper, and rewrote `prototype/src/styles.css` around the lavender/yellow palette
 - Added a local Deep Mode scene asset at `prototype/public/deep-mode-default.jpg` for the overview and completion screens
