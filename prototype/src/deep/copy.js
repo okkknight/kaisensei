@@ -1,7 +1,37 @@
 export const DEEP_COPY = {
   loading: ["正在生成深度课程…", "正在整理场景里的线索…"],
+  loadingStages: [
+    {
+      title: "Reading the scene",
+      description: "Finding visible objects and the main setup.",
+    },
+    {
+      title: "Building your practice",
+      description: "Shaping Notice and Interpret exercises.",
+    },
+    {
+      title: "Preparing your challenge",
+      description: "Setting up Interact and Step In.",
+    },
+  ],
   overviewPrompt: "点击开始这次学习之旅",
+  startPractice: "Start Practice",
   backConfirm: "退出这节深度课程吗？返回后可以重新拍照并切换模式。",
   retry: "The lesson got lost on the way.",
   finish: "You finished the deep lesson.",
+  interactSummary: "You can now ask for what you need and respond naturally.",
+  stepInSummary: "You can finish the full scene conversation.",
+  dialogueNeedPrompt: "Build the Need line.",
+  dialogueHandlePrompt: "Now respond naturally.",
+  continueToInterpret: "Continue to Interpret",
+  continueToStepIn: "Continue to Step In",
+  backToCamera: "Back to camera",
+  repeatPractice: "Practice again",
+  reset: "Reset",
+  hint: "Hint",
+  check: "Check",
+  continue: "Continue",
+  finishAction: "Finish",
+  correct: "Nice. This sentence is yours now.",
+  incorrect: "Almost. Try again.",
 };
