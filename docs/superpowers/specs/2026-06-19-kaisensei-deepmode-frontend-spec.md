@@ -110,6 +110,76 @@ Deep Mode 第一阶段只使用：
 4. 练习容器
 5. 视觉样式
 
+### 3.5 字段级写法要求
+
+每个页面的结构说明都必须落到可实现的字段和组件层级，不能只写抽象概念。
+
+必须写清楚的内容包括：
+
+- 页面顶部有哪些固定元素
+- 中部有哪些独立区块
+- 底部有哪些固定操作
+- 每个区块内部包含哪些字段
+- 字段之间的上下顺序
+- 哪些字段是列表，哪些字段是单值
+- 哪些字段带中文注释，哪些字段只显示英文
+
+禁止只写这类模糊词而不定义字段：
+
+- 摘要
+- 提示
+- 说明
+- 内容
+- 结果
+- 信息块
+
+如果必须使用这些词，后面必须紧跟字段定义，例如：
+
+- `核心表达列表块` = 标题 + 表达列表 + 可选中文注释
+- `完成文案块` = 完成标题 + 完成说明 + 中文说明
+
+### 3.6 页面模板与复用规则
+
+Deep Mode 不是“每一页都重新设计一套骨架”，而是“少数模板 + 明确页面变体”。
+
+可复用的页面模板只有四类：
+
+1. `SingleExercisePage`
+2. `QuickResponsePage`
+3. `DialogueFlowPage`
+4. `SummaryPage`
+
+#### `SingleExercisePage`
+
+- 适用页面：`Notice - Understand`、`Notice - Focus`、`Notice - Build`、`Interpret - Understand`、`Interpret - Focus`、`Interpret - Build`、`Need - Understand`、`Need - Focus`、`Need - Build`、`Handle - Understand`、`Handle - Focus`、`Handle - Build`
+- 结构：顶部区 + 单练习主卡 + 底部操作栏
+- 主卡内部允许切换的是题目内容、词块池、空位区和提示文案，不切换页面骨架
+
+#### `QuickResponsePage`
+
+- 适用页面：`Notice - Quick Response`、`Interpret - Quick Response`
+- 结构：顶部区 + 问题卡 + 回答构建区 + 底部操作栏
+- 题目句、回答区和词块池互相独立，但都挂在同一张页面骨架上
+
+#### `DialogueFlowPage`
+
+- 适用页面：`Dialogue Practice - Need`、`Dialogue Practice - Handle`、`Step In` 的各轮次页面
+- 结构：顶部区 + 对话时间线 + 当前轮次输入区 + 词块池 + 底部操作栏
+- 不同页面只替换当前轮次提示、历史消息、输入来源和对话回放顺序
+
+#### `SummaryPage`
+
+- 适用页面：各模块里程碑页与 `Completion`
+- 结构：顶部完成锚点 + 摘要区 + 回放区 + 底部 CTA 区
+- 不再出现练习题结构，但保留明确的结果回顾和跳转入口
+
+#### 复用规则
+
+- 同一模板下的页面只能替换内容字段和局部顺序，不能擅自发明新骨架。
+- 如果某页需要额外结构，必须先判断它属于哪个模板，再在该页小节里写出“模板内例外”。
+- 组件复用优先于页面复用；页面复用优先于视觉复用。
+- 任何页面如果能落到现有模板，就不要新建第三种页面骨架。
+
 ---
 
 ## 4. 页面总流
@@ -247,6 +317,14 @@ Loading 页只做过渡，不承载课程内容。
 - 当前进行中的步骤在阶段卡内高亮，未进行步骤保持弱色
 - 底部单独放整体进度值，和阶段卡视觉上分离
 
+### 字段来源
+
+- 品牌区文案 `kaisensei` 和 `Deep Mode`：前端固定品牌文案，不来自后端 `lesson`。
+- 阶段卡三条英文文案 `Reading the scene`、`Building your practice`、`Preparing your challenge`：来自当前确认的 Loading 参考图与本 spec 的固定结构，不来自后端 `lesson`。
+- 当前进行中的步骤高亮：来自前端 loading 子状态或 job 生命周期状态，不来自后端课程 JSON。
+- 底部进度值：来自前端 loading 状态机的展示值，不由后端课程 JSON 提供。
+- 两行加载文案：来自 `prototype/src/deep/copy.js` 的 `DEEP_COPY.loading`，对应“正在生成深度课程…”和“正在整理场景里的线索…”，不来自后端课程 JSON。
+
 ---
 
 ### 7.2 Overview
@@ -291,13 +369,22 @@ Overview 是 Deep Mode 的课程入口页，只做一个判断：
 - 关键词区、场景区、引导语区必须是独立语义块
 - 这些语义块后续可以分别换皮，但不能合并成一个模糊文本区
 
+### 字段来源
+
+- 主图 `photoPreviewUrl`：来自 `useDeepModeFlow.photoPreviewUrl`，它由 `initialFile` 生成的 object URL 提供，不来自后端 `lesson`。
+- 关键词行 `overview.keywords`：来自后端 `lesson.overview.keywords`，长度受后端 config `overviewKeywordCount` 约束。
+- 场景描述 `overview.sceneDescriptionChinese`：来自后端 `lesson.overview.sceneDescriptionChinese`。
+- 开始引导语 `overview.startPromptChinese`：来自后端 `lesson.overview.startPromptChinese`，其固定值由 `deepCourseDefaultFixedCopy.startPromptChinese` 和产品设计文档第 4.2 节共同约束。
+- 顶部的 `Overview` 和 `Deep Mode` 文案：来自当前前端布局约定，不来自后端 `lesson`。
+
 ---
 
 ### 7.3 Shared Page Layout
 
-Notice、Interpret、Interact、Step In 共用同一套页面布局基线。
+Notice、Interpret、Interact、Step In 共用的是模板层，不是“所有页面都长得一模一样”。
 这里的“共享布局”只是一种结构说明，不是在页面最外层再包一层可见容器。
 实际页面应直接在同一个页面容器里铺开顶部区、中部区和底部区。
+模板选择规则见 3.6：单练习页用 `SingleExercisePage`，快答页用 `QuickResponsePage`，对话页用 `DialogueFlowPage`，里程碑和完成页用 `SummaryPage`。
 
 ### 顶部区
 
@@ -352,19 +439,37 @@ Notice、Interpret、Interact、Step In 共用同一套页面布局基线。
 
 ### 7.4 Notice / Interpret
 
-Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案语义。
-用户提供的 Interpret 设计稿对应这里的 Understand 和 Quick Response 两个状态；Notice 复用同样的结构。
-这两个页面都直接铺在页面容器上，不再额外包一层独立外框。
+Notice 和 Interpret 共享同一套页面组件族与布局规则，但在 spec 里必须作为两组独立页面逐个列出，不可合并成一个“同一页”。
+用户提供的 Interpret 设计稿对应这里的 Understand / Focus / Build / Quick Response / 里程碑页五个独立页面；Notice 复用同样的页面骨架与组件族。
+这两组页面都直接铺在页面容器上，不再额外包一层独立外框。
+
+### 页面清单
+
+#### Notice 页面
+
+1. Notice - Understand
+2. Notice - Focus
+3. Notice - Build
+4. Notice - Quick Response
+5. Notice Milestone
+
+#### Interpret 页面
+
+1. Interpret - Understand
+2. Interpret - Focus
+3. Interpret - Build
+4. Interpret - Quick Response
+5. Interpret Milestone
 
 ### 共同页面骨架
 
-1. 当前基础例句卡
-2. Understand 区
-3. Focus 区
-4. Build 区
-5. 变式例句切换
-6. Quick Response
-7. 模块里程碑页
+- 当前基础例句卡
+- Understand 区
+- Focus 区
+- Build 区
+- 变式例句切换
+- Quick Response
+- 模块里程碑页
 
 ### 页面布局基线
 
@@ -372,6 +477,21 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 每个状态都保持“上方主卡 + 下方输入区 + 底部操作栏”的纵向节奏
 - 不同状态之间只换卡片内容和输入区，不换整页结构
 - 如果当前状态需要强调步骤感，步骤提示放在主卡顶部，不单独做成页面标题行
+- 上述布局基线只用于 Understand、Focus、Build 和 Quick Response
+- 模块里程碑页不使用题目卡和输入区结构，正文直接从完成卡开始
+
+### 字段来源
+
+- 页面顶部返回按钮：前端通用导航行为，不来自后端课程 JSON。
+- 顶部主进度条四段：由后端模块顺序 `notice -> interpret -> interact -> stepIn` 和前端当前阶段状态共同决定。
+- 顶部缩略图入口：来自 `useDeepModeFlow.photoPreviewUrl`，与 Overview 页复用同一个预览来源。
+- 模块标题 `modules.notice.title` / `modules.interpret.title`：来自后端 `modules.notice.title` 或 `modules.interpret.title`。
+- 模块目标 `modules.notice.goal` / `modules.interpret.goal`：来自后端 `modules.notice.goal` 或 `modules.interpret.goal`。
+- 当前基础例句卡：来自当前 `expressionPacks[i].baseExample`。
+- 变式例句切换：来自当前 `expressionPacks[i].variations`。
+- Quick Response：来自当前 `expressionPacks[i].quickResponses`。
+- 题目顺序：由 `expressionPacks` 数组顺序决定，数组长度由后端 config 中的 `notice.coreExpressionCount` 或 `interpret.coreExpressionCount` 约束。
+- 模块内题号 `4 / 14` 这种显示：由当前模块内的练习索引和该模块所有练习数量计算，不是后端直接提供的单字段。
 
 ### 基础例句卡布局
 
@@ -381,6 +501,14 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 下方放中文辅助说明或第二层提示
 - 卡片外侧再接词块区或空位区，不把所有内容塞进同一块卡
 
+### 基础例句卡字段
+
+- 核心表达提示：来自 `expressionPack.coreExpression` 和 `expressionPack.meaningChinese`。
+- 英文句子：来自 `expressionPack.baseExample.english`。
+- 中文辅助说明：来自 `expressionPack.baseExample.chinese`。
+- 基础例句卡的 `Understand / Focus / Build` 三个训练区：来自 `expressionPack.baseExample.understand`、`expressionPack.baseExample.focus`、`expressionPack.baseExample.build`。
+- 训练区顺序：固定为 `Understand -> Focus -> Build`，由产品设计文档第 6.5 和第 14 节约束。
+
 ### Understand 区
 
 - 英文例句展示
@@ -389,6 +517,14 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 验证按钮
 - 英文句子里当前核心表达需要被视觉强调
 - 中文词块区是一个独立的可重排区域，不应和句子说明混在一起
+
+### Understand 字段
+
+- 英文例句展示：来自 `baseExample.english`。
+- 中文词块排序区：来自 `baseExample.understand.chunks`。
+- 干扰块：来自 `baseExample.understand.distractors`，数量由后端 config `exercise.understandDistractorCount` 约束。
+- 正确答案顺序：来自 `baseExample.understand.answer`。
+- 高亮核心表达：来自 `expressionPack.coreExpression`，高亮规则由产品设计文档第 6.5A 的“当前核心表达使用强调色”要求约束。
 
 ### Understand 布局
 
@@ -405,6 +541,14 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 验证按钮
 - 空位数量与后端 config 对齐，当前默认按 2 个空位实现
 - 候选词块区和答案区需要明确分层
+
+### Focus 字段
+
+- 带空位的句子：来自 `baseExample.focus.sentenceWithBlanks`。
+- 候选词块：来自 `baseExample.focus.choices`。
+- 正确答案：来自 `baseExample.focus.answer`。
+- 干扰词块：来自 `baseExample.focus.distractors`，数量由后端 config `exercise.focusDistractorCount` 约束。
+- 空位数量：由 `baseExample.focus.sentenceWithBlanks` 中的空位数决定，并且必须匹配后端 config `exercise.focusBlankCount`。
 
 ### Focus 布局
 
@@ -424,6 +568,15 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 英文词块池和答案区要分离，方便用户知道哪里还能选、哪里已经选
 - 词块本身允许是胶囊样式，但这只是视觉层，结构上仍属于同一个练习卡
 
+### Build 字段
+
+- 中文提示：来自 `baseExample.build.promptChinese`。
+- 例句中文：来自 `baseExample.chinese`。
+- 用户答案区的候选词块：来自 `baseExample.build.chunks`。
+- 干扰词块：来自 `baseExample.build.distractors`，数量由后端 config `exercise.buildDistractorCount` 约束。
+- 正确答案顺序：来自 `baseExample.build.answer`。
+- 该页本质是“把例句中文翻译成英文”的任务，这一点由产品设计文档第 6.5C 的 `promptChinese` 规则和当前参考图共同约束。
+
 ### Build 布局
 
 - 中文提示放在题目卡上方或卡内顶部，先告诉用户要拼什么
@@ -442,6 +595,14 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 - 问题卡先出题，答案区后放词块池
 - 题目下方应保留清晰的回答构建区，避免和词块池混在一起
 
+### Quick Response 字段
+
+- 问题句：来自 `expressionPack.quickResponses[i].question`。
+- 答案词块池：来自 `expressionPack.quickResponses[i].chunks`。
+- 干扰词块：来自 `expressionPack.quickResponses[i].distractors`，数量由后端 config `exercise.dialogueDistractorCount` 约束。
+- 正确答案顺序：来自 `expressionPack.quickResponses[i].answer`。
+- 问题句顺序：按 `quickResponses` 数组顺序展示，数组长度由后端 config `notice.quickResponsePerExpression` 或 `interpret.quickResponsePerExpression` 约束。
+
 ### Quick Response 布局
 
 - 问题卡放在中部靠上，先给出提问，再给出中文辅助
@@ -452,19 +613,29 @@ Notice 和 Interpret 的页面骨架相同，差别只在课程内容和文案�
 
 ### 里程碑页
 
-- 模块完成提示
-- 本模块核心表达摘要
-- 一句能力总结
+- 完成文案块
+- 核心表达列表块
 - Continue 按钮
 - 可带一个结果徽章或庆祝标识，但不应替代文本总结
 
 ### 里程碑布局
 
-- 里程碑页在中部居中放庆祝卡，先让用户看到完成状态
-- 核心表达摘要放在庆祝卡下方，使用卡片或列表呈现
-- 一句能力总结放在摘要之后，作为收束文案
-- Continue 按钮单独放在底部操作区或大按钮区
+- 里程碑页正文从一张居中的完成卡开始，不再使用题目卡、输入区或词块池结构
+- 完成卡内部按从上到下排列庆祝图标、完成文案块和核心表达列表块
+- `完成文案块` = 完成图标下方的三行文案，依次是英文主标题、英文完成说明、中文完成说明
+- `核心表达列表块` = 一个独立信息卡，标题下方逐条列出本模块学到的表达，每条表达可带中文注释
+- Continue 按钮放在完成卡下方，和完成卡分层
 - 不把里程碑页做成新的练习页
+
+### 里程碑字段
+
+- 完成图标和散点：来自当前 Notice Milestone 参考图的固定视觉元素，不来自后端课程 JSON。
+- 英文主标题 `Great job!`：来自当前 Notice Milestone 参考图的固定文案。
+- 英文完成说明 `You've completed the Notice stage.`：来自当前 Notice Milestone 参考图的固定文案。
+- 中文完成说明 `你已完成 Notice 阶段！`：来自当前 Notice Milestone 参考图的固定文案。
+- 核心表达列表标题 `Core expressions you noticed`：来自当前 Notice Milestone 参考图的固定文案。
+- 核心表达列表项：来自 `modules.notice.expressionPacks[*].coreExpression` 和 `meaningChinese`，按 `expressionPacks` 顺序展示。
+- Continue 按钮文案 `Continue to Interpret`：来自产品设计文档第 6.8 节和当前参考图，作为固定跳转文案。
 
 ---
 
@@ -476,17 +647,36 @@ Interact 同样直接使用页面容器，不额外增加一层可见外框。
 ### 页面状态
 
 1. 任务包引导页
-2. Need 例句训练页
-3. Handle 例句训练页
-4. Dialogue Practice 页
-5. 里程碑页
+2. Need - Understand
+3. Need - Focus
+4. Need - Build
+5. Handle - Understand
+6. Handle - Focus
+7. Handle - Build
+8. Dialogue Practice - Need
+9. Dialogue Practice - Handle
+10. 里程碑页
+
+### 页面状态来源
+
+- 任务包引导页：使用当前 `taskPacks[i]` 的 `taskTitle`、`scenePrompt`、`need.coreExpression`、`need.meaningChinese`、`handle.coreExpression`、`handle.meaningChinese`。
+- Need - Understand：使用当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `english`、`chinese`、`understand.chunks`、`understand.distractors`、`understand.answer`。
+- Need - Focus：使用当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `focus.sentenceWithBlanks`、`focus.choices`、`focus.distractors`、`focus.answer`。
+- Need - Build：使用当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `build.promptChinese`、`build.chunks`、`build.distractors`、`build.answer`。
+- Handle - Understand：使用当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `english`、`chinese`、`understand.chunks`、`understand.distractors`、`understand.answer`。
+- Handle - Focus：使用当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `focus.sentenceWithBlanks`、`focus.choices`、`focus.distractors`、`focus.answer`。
+- Handle - Build：使用当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `build.promptChinese`、`build.chunks`、`build.distractors`、`build.answer`。
+- Dialogue Practice - Need：使用当前 `taskPacks[i].dialogues[j].scene`、`need` 和前端固定开场提示 copy。
+- Dialogue Practice - Handle：使用当前 `taskPacks[i].dialogues[j].scene`、`need.answer` 形成的上一轮用户气泡、`systemReply`、`handle`。
+- 里程碑页完成任务摘要：由当前 `taskPacks[i].taskTitle`、`need.coreExpression`、`handle.coreExpression` 和已完成的对话状态组合出来，不是后端单独返回的 summary 字段。
 
 ### 页面布局基线
 
-- Interact 顶部先放返回按钮、主进度和缩略图入口，中部内容从单卡练习切到任务包和对话流
-- 任务包内的例句训练页使用和 Notice / Interpret 相同的三段式练习布局
-- Dialogue Practice 页使用对话流布局，主视觉是对话气泡，词块输入区保持独立
-- 任务包引导页、例句训练页、Dialogue Practice 页都在同一任务包语义内，不切到别的课程结构
+- Interact 顶部先放返回按钮、主进度和缩略图入口，中部内容从任务包引导页切到具体练习页
+- `Need - Understand`、`Need - Focus`、`Need - Build`、`Handle - Understand`、`Handle - Focus`、`Handle - Build` 六个页面都使用和 Notice / Interpret 相同的单练习纵向布局
+- 这六个页面都只展示当前一条例句或当前一个空位练习，不把 Need / Handle 混成一个总卡
+- `Dialogue Practice - Need` 和 `Dialogue Practice - Handle` 使用同一套对话流布局，主视觉是对话气泡，词块输入区保持独立
+- 任务包引导页、例句训练页、Dialogue Practice 两页都在同一任务包语义内，不切到别的课程结构
 
 ### 任务包引导页区块
 
@@ -504,41 +694,172 @@ Interact 同样直接使用页面容器，不额外增加一层可见外框。
 - Need 和 Handle 预览卡纵向堆叠，不要并排挤在一起
 - Start Practice 按钮放在引导卡底部，作为唯一主操作
 
-### Need / Handle 例句训练布局
+### 任务包引导页字段
 
-- 例句训练页使用和 Notice / Interpret 相同的纵向结构
-- 中部上方先放步骤提示和题目卡
-- 题目卡下方放词块池和答案区
-- 如果是 Need 训练，先让用户完成 Need 表达；如果是 Handle 训练，页面文案和表达对象切到 Handle
-- 步骤点或进度点放在主卡下方，作为训练子步骤提示
-- 底部固定 Reset、Hint、Check
+- 当前任务说明卡标题：来自 `taskPacks[i].taskTitle`。
+- 场景说明：来自 `taskPacks[i].scenePrompt`。
+- Need Expression 预览卡主表达：来自 `taskPacks[i].need.coreExpression`。
+- Need Expression 中文注释：来自 `taskPacks[i].need.meaningChinese`。
+- Handle Expression 预览卡主表达：来自 `taskPacks[i].handle.coreExpression`。
+- Handle Expression 中文注释：来自 `taskPacks[i].handle.meaningChinese`。
+- Start Practice 按钮文案：来自当前参考图和前端固定 copy，不来自后端 `lesson`。
 
-### 交互顺序
+### Need - Understand 页面
 
-1. 先显示任务包引导页
-2. 用户点击 Start Practice 进入 Need 例句训练页
-3. 用户完成 Need 词块重排
-4. 正确后进入 Handle 例句训练页
-5. 用户完成 Handle 词块重排
-6. 进入 Dialogue Practice 页
-7. 在 Dialogue Practice 页内按 Need turn 和 Handle turn 顺序完成对话
-8. 进入下一任务包或里程碑页
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Need 例句的英文句子，再展示中文辅助说明。
+- 主卡下方放中文词块排序区和干扰块。
+- 底部固定 Reset、Hint、Check。
 
-### 非视觉要求
+### Need - Understand 字段
 
-- Need 和 Handle 必须属于同一任务包
-- 例句训练和 Dialogue Practice 是同一任务包内的连续状态，不是独立课程页
-- 对话流必须是线性推进
-- 不允许扩展成多轮聊天界面
+- 当前 Need 例句英文句子：来自当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `english`。
+- 当前 Need 例句中文辅助：来自当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `chinese`。
+- 中文词块排序区：来自当前例句的 `understand.chunks`。
+- 干扰块：来自当前例句的 `understand.distractors`，数量由后端 config `exercise.understandDistractorCount` 约束。
+- 正确答案顺序：来自当前例句的 `understand.answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
 
-### Dialogue Practice 布局
+### Need - Focus 页面
 
-- 对话页中部上方先放场景说明卡，交代这轮任务发生的语境
-- 场景卡下方是连续的对话气泡区，气泡按时间顺序纵向排列
-- 当前轮次的用户回答区放在对话流下方，和历史气泡分开
-- 候选词块池再放在用户回答区下方，避免和气泡混成一块
-- 底部固定 Reset、Hint、Send 或 Check 类按钮
-- Need turn 和 Handle turn 都复用同一对话页面布局，只切换当前轮次提示和待输入表达
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Need 例句的带空位句子。
+- 主卡下方放候选词块区和已填空位区，二者明确分层。
+- 底部固定 Reset、Hint、Check。
+
+### Need - Focus 字段
+
+- 带空位句子：来自当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `focus.sentenceWithBlanks`。
+- 候选词块：来自当前例句的 `focus.choices`。
+- 干扰词块：来自当前例句的 `focus.distractors`，数量由后端 config `exercise.focusDistractorCount` 约束。
+- 正确答案：来自当前例句的 `focus.answer`。
+- 空位数量：由 `focus.sentenceWithBlanks` 中的空位数决定，并且必须匹配后端 config `exercise.focusBlankCount`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Need - Build 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Need 例句的中文提示。
+- 中文提示下方放当前例句的词块池。
+- 词块池下方放用户答案区。
+- 底部固定 Reset、Hint、Check。
+
+### Need - Build 字段
+
+- 中文提示：来自当前 `taskPacks[i].need.baseExample` 或 `taskPacks[i].need.variations[k]` 的 `build.promptChinese`。
+- 词块池：来自当前例句的 `build.chunks`。
+- 干扰词块：来自当前例句的 `build.distractors`，数量由后端 config `exercise.buildDistractorCount` 约束。
+- 用户答案区：来自当前例句的 `build.answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Handle - Understand 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Handle 例句的英文句子，再展示中文辅助说明。
+- 主卡下方放中文词块排序区和干扰块。
+- 底部固定 Reset、Hint、Check。
+
+### Handle - Understand 字段
+
+- 当前 Handle 例句英文句子：来自当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `english`。
+- 当前 Handle 例句中文辅助：来自当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `chinese`。
+- 中文词块排序区：来自当前例句的 `understand.chunks`。
+- 干扰块：来自当前例句的 `understand.distractors`，数量由后端 config `exercise.understandDistractorCount` 约束。
+- 正确答案顺序：来自当前例句的 `understand.answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Handle - Focus 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Handle 例句的带空位句子。
+- 主卡下方放候选词块区和已填空位区，二者明确分层。
+- 底部固定 Reset、Hint、Check。
+
+### Handle - Focus 字段
+
+- 带空位句子：来自当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `focus.sentenceWithBlanks`。
+- 候选词块：来自当前例句的 `focus.choices`。
+- 干扰词块：来自当前例句的 `focus.distractors`，数量由后端 config `exercise.focusDistractorCount` 约束。
+- 正确答案：来自当前例句的 `focus.answer`。
+- 空位数量：由 `focus.sentenceWithBlanks` 中的空位数决定，并且必须匹配后端 config `exercise.focusBlankCount`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Handle - Build 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部主卡先展示当前 Handle 例句的中文提示。
+- 中文提示下方放当前例句的词块池。
+- 词块池下方放用户答案区。
+- 底部固定 Reset、Hint、Check。
+
+### Handle - Build 字段
+
+- 中文提示：来自当前 `taskPacks[i].handle.baseExample` 或 `taskPacks[i].handle.variations[k]` 的 `build.promptChinese`。
+- 词块池：来自当前例句的 `build.chunks`。
+- 干扰词块：来自当前例句的 `build.distractors`，数量由后端 config `exercise.buildDistractorCount` 约束。
+- 用户答案区：来自当前例句的 `build.answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Dialogue Practice - Need 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部先放场景说明卡，交代这轮任务发生的语境。
+- 场景卡下方放一条对方开场气泡或身份提示，再往下放当前 Need 的用户回答提示。
+- 用户回答提示下方放 Need 的答案区和候选词块池。
+- 底部固定 Reset、Hint、Check。
+
+### Dialogue Practice - Need 字段
+
+- 场景说明卡：来自 `taskPacks[i].dialogues[j].scene`。
+- 对方开场气泡或身份提示：来自前端固定开场 copy，不来自后端 `dialogues[j]`。
+- Need 页面当前提示文案：来自前端固定交互 copy，不来自后端 `lesson`。
+- Need turn 用户输入区：来自 `taskPacks[i].dialogues[j].need.chunks`、`distractors`、`answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Dialogue Practice - Handle 页面
+
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部先放同一轮次的场景说明卡。
+- 场景卡下方先回放上一轮 Need 的正确用户气泡，再放系统回复气泡。
+- 系统回复气泡下方放当前 Handle 的用户回答提示。
+- 用户回答提示下方放 Handle 的答案区和候选词块池。
+- 底部固定 Reset、Hint、Check。
+
+### Dialogue Practice - Handle 字段
+
+- 场景说明卡：来自 `taskPacks[i].dialogues[j].scene`。
+- 上一轮 Need 的正确用户气泡：来自 `taskPacks[i].dialogues[j].need.answer`，由当前任务的 Need 完成状态拼成前一条消息气泡。
+- 系统回复气泡：来自 `taskPacks[i].dialogues[j].systemReply`。
+- Handle 页面当前提示文案：来自前端固定交互 copy，不来自后端 `lesson`。
+- Handle turn 用户输入区：来自 `taskPacks[i].dialogues[j].handle.chunks`、`distractors`、`answer`。
+- 底部 Reset / Hint / Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Dialogue Practice 进入规则
+
+1. 先显示任务包引导页。
+2. 用户点击 Start Practice 后，先进入当前 Task Pack 的 Need - Understand 页面。
+3. Need 例句按 `Understand -> Focus -> Build` 三页完成后，切到下一条例句的 Need - Understand 页面。
+4. 当前 Task Pack 的 Need 例句全部完成后，进入当前 Task Pack 的 Handle - Understand 页面。
+5. Handle 例句按 `Understand -> Focus -> Build` 三页完成后，切到下一条例句的 Handle - Understand 页面。
+6. 当前 Task Pack 的 Need 和 Handle 例句全部完成后，进入 Dialogue Practice - Need 页面。
+7. 在 Dialogue Practice - Need 页面完成 Need turn 后，切到 Dialogue Practice - Handle 页面。
+8. 在 Dialogue Practice - Handle 页面完成 Handle turn 后，进入下一任务包或里程碑页。
+
+### 里程碑页布局
+
+- 里程碑页正文从一张居中的完成卡开始，不再使用对话流或词块池结构。
+- 完成卡内部按从上到下排列完成图标、模块名、完成任务说明、Need 表达列表、Handle 表达列表和能力总结。
+- Continue 按钮放在完成卡下方，文案固定为 `Continue to Step In`。
+
+### 里程碑页字段
+
+- 完成图标和庆祝点状装饰：来自当前 Interact 里程碑页的固定视觉元素，不来自后端 `lesson`。
+- 模块名 `Interact`：来自后端 `modules.interact.title`。
+- 完成任务说明：来自当前 `taskPacks[i].taskTitle` 和 `taskPacks[i].scenePrompt`。
+- Need 表达列表：来自 `taskPacks[i].need.coreExpression` 和 `taskPacks[i].need.meaningChinese`。
+- Handle 表达列表：来自 `taskPacks[i].handle.coreExpression` 和 `taskPacks[i].handle.meaningChinese`。
+- 能力总结：来自产品设计文档第 8.6 节的完成提示规则，属于固定完成态 copy，不来自后端 `lesson`。
+- Continue 按钮文案 `Continue to Step In`：来自当前参考图和产品设计文档第 8.6 节。
 
 ---
 
@@ -548,72 +869,181 @@ Step In 是综合挑战，页面形式仍然是对话流，但内容从前面模
 用户提供的 Step In 设计稿对应这里的最终挑战视图。
 Step In 也直接铺在页面容器上，不增加独立外框。
 
-### 页面区块
+### 页面状态
 
-- 场景说明
-- 挑战引导卡
-- 对话轨道
-- 逐步输入区
-- 当前轮次的词块池
-- 下一步提示
-- 完成反馈
-- 对话轨道是主视觉，但逐步输入区必须保持独立
-- Step In 的页面结构要像最终完整对话，而不是新的知识点说明页
+1. 挑战引导卡
+2. Notice 轮次
+3. Interpret 轮次
+4. Interact - Need 轮次
+5. Interact - Handle 轮次
+6. 完成反馈
 
-### 页面布局
+### 页面状态来源
 
-- Step In 顶部先放返回按钮、主进度和缩略图入口，中部更像一条完整对话时间线
-- 顶部先放一张简短的挑战引导卡，交代这是最终场景和最终目标
-- 引导卡下方是对话轨道，历史消息按时间往下堆叠
-- 当前轮次的输入区单独放在对话轨道下方，和历史气泡拉开距离
-- 当前轮次的词块池再放在输入区下方，和对话轨道分层
-- 底部固定 Reset、Hint、Send 或 Check
-- 页面整体应呈现“逐步进入场景”的感觉，而不是新一轮知识讲解
+- 挑战引导卡：来自 `modules.stepIn.title`、`modules.stepIn.goal` 和 `modules.stepIn.dialogue.scene`。
+- Notice 轮次：来自 `modules.stepIn.dialogue.turns` 中 `sourceModule = notice` 的 user turn，配套使用前一条 system turn 的提问。
+- Interpret 轮次：来自 `modules.stepIn.dialogue.turns` 中 `sourceModule = interpret` 的 user turn，配套使用前一条 system turn 的追问。
+- Interact - Need 轮次：来自 `modules.stepIn.dialogue.turns` 中 `sourceModule = interact_need` 的 user turn，配套使用前一条 system turn 的任务提示。
+- Interact - Handle 轮次：来自 `modules.stepIn.dialogue.turns` 中 `sourceModule = interact_handle` 的 user turn，配套使用前一条 system turn 的回复。
+- 完成反馈：来自前端完成态与 `turns` 走完后的状态，不是后端单独字段。
 
-### 交互顺序
+### 挑战引导卡页面
 
-1. 先显示挑战引导卡和场景说明
-2. 用户按对话轨道逐步完成复用表达
-3. 每轮仍通过词块重排后验证
-4. 完成所有轮次后进入课程完成页
+- 页面顶部放返回按钮、主进度和缩略图入口。
+- 中部先放一张简短的挑战引导卡，交代这是最终场景和最终目标。
+- 引导卡下方先不显示词块池，只保留进入下一轮对话的铺垫。
+- 引导卡本身不新增额外开始按钮，后续对话轨道直接从引导卡下方展开。
+
+### 挑战引导卡字段
+
+- 顶部返回按钮：前端通用导航行为，不来自后端课程 JSON。
+- 顶部主进度四段：由 `DEEP_PHASES` 和前端当前阶段状态决定。
+- 顶部缩略图入口：来自 `useDeepModeFlow.photoPreviewUrl`。
+- 挑战引导卡标题：来自 `modules.stepIn.title`。
+- 挑战引导卡目标说明：来自 `modules.stepIn.goal`。
+- 挑战引导卡场景说明：来自 `modules.stepIn.dialogue.scene`。
+
+### Notice 轮次页面
+
+- 页面顶部仍保留返回按钮、主进度和缩略图入口。
+- 中部是完整对话时间线，先放场景说明和之前的消息气泡。
+- 当前 Notice 轮次的用户输入区放在对话轨道下方。
+- 当前轮次的词块池放在用户输入区下方。
+- 底部固定 Reset、Hint、Send 或 Check。
+
+### Notice 轮次字段
+
+- 历史消息列表：来自 `modules.stepIn.dialogue.turns` 中已经完成的前置 turn。
+- 当前轮次系统提问：来自当前 Notice turn 前一条 system turn 的 `text`。
+- 当前轮次用户输入区：来自当前 Notice turn 的 `chunks`、`distractors`、`answer`。
+- 当前轮次的对话来源标记：来自当前 turn 的 `sourceModule = notice`。
+- 底部 Reset / Hint / Send 或 Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Interpret 轮次页面
+
+- 页面顶部仍保留返回按钮、主进度和缩略图入口。
+- 中部延续同一条对话时间线，显示前置 Notice 内容和当前轮次系统追问。
+- 当前 Interpret 轮次的用户输入区放在对话轨道下方。
+- 当前轮次的词块池放在用户输入区下方。
+- 底部固定 Reset、Hint、Send 或 Check。
+
+### Interpret 轮次字段
+
+- 历史消息列表：来自 `modules.stepIn.dialogue.turns` 中已经完成的前置 turn。
+- 当前轮次系统追问：来自当前 Interpret turn 前一条 system turn 的 `text`。
+- 当前轮次用户输入区：来自当前 Interpret turn 的 `chunks`、`distractors`、`answer`。
+- 当前轮次的对话来源标记：来自当前 turn 的 `sourceModule = interpret`。
+- 底部 Reset / Hint / Send 或 Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Interact - Need 轮次页面
+
+- 页面顶部仍保留返回按钮、主进度和缩略图入口。
+- 中部延续同一条对话时间线，显示前置 Notice 和 Interpret 内容，以及当前任务提示。
+- 当前 Interact - Need 轮次的用户输入区放在对话轨道下方。
+- 当前轮次的词块池放在用户输入区下方。
+- 底部固定 Reset、Hint、Send 或 Check。
+
+### Interact - Need 轮次字段
+
+- 历史消息列表：来自 `modules.stepIn.dialogue.turns` 中已经完成的前置 turn。
+- 当前轮次任务提示：来自当前 `interact_need` turn 前一条 system turn 的 `text`。
+- 当前轮次用户输入区：来自当前 `interact_need` turn 的 `chunks`、`distractors`、`answer`。
+- 当前轮次的对话来源标记：来自当前 turn 的 `sourceModule = interact_need`。
+- 底部 Reset / Hint / Send 或 Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### Interact - Handle 轮次页面
+
+- 页面顶部仍保留返回按钮、主进度和缩略图入口。
+- 中部延续同一条对话时间线，显示前置所有消息以及当前系统回复。
+- 当前 Interact - Handle 轮次的用户输入区放在对话轨道下方。
+- 当前轮次的词块池放在用户输入区下方。
+- 底部固定 Reset、Hint、Send 或 Check。
+
+### Interact - Handle 轮次字段
+
+- 历史消息列表：来自 `modules.stepIn.dialogue.turns` 中已经完成的前置 turn。
+- 当前轮次系统回复：来自当前 `interact_handle` turn 前一条 system turn 的 `text`。
+- 当前轮次用户输入区：来自当前 `interact_handle` turn 的 `chunks`、`distractors`、`answer`。
+- 当前轮次的对话来源标记：来自当前 turn 的 `sourceModule = interact_handle`。
+- 底部 Reset / Hint / Send 或 Check：来自前端固定交互 copy，不来自后端 `lesson`。
+
+### 完成反馈页面
+
+- 完成所有轮次后，页面切到完成反馈状态，然后进入 7.7 的 Completion 独立页面。
+- 这个状态只负责短暂收束，不再出现新的输入区。
+- 这一层可以复用 Completion 页的结果数据，但不再单独定义新的页面结构。
+
+### 完成反馈字段
+
+- 完成反馈：来自前端完成态与 `turns` 走完后的状态，不是后端单独字段。
+- 完整回放：来自 `modules.stepIn.dialogue.turns`。
+- 返回拍照页或课程完成页的后续 CTA：来自前端固定完成态 copy，不来自后端 `lesson`。
 
 ### 交互要求
 
-- 只能复用前面学过的表达
-- 每步仍然通过词块重排完成
-- 不允许自由输入
-- 不允许引入新核心表达
-
-### 完成页
-
-- 用户照片
-- 完成提示
-- 四阶段表达摘要
-- 完整对话回放
-- 再次练习按钮
-- 返回拍照页按钮
-- 完成页的 CTA 采用双按钮结构，两个按钮都应保留在首版
-- 四阶段摘要可以是卡片或列表，但必须能看出是课程结果回顾
-
-### 完成页布局
-
-- 完成页上半部放完成状态和主庆祝信息
-- 中部放四阶段表达摘要和完整对话回放
-- 底部放两个并列 CTA，分别负责再次练习和返回拍照页
-- 完成页不再放新的练习区，只保留结果回顾
+- 只能复用前面学过的表达。
+- 每步仍然通过词块重排完成。
+- 不允许自由输入。
+- 不允许引入新核心表达。
 
 ---
 
 ### 7.7 Completion
 
-Completion 与 Step In 的完成页结构一致，但作为独立页面层承接课程结束状态。
+Completion 是课程最终结果页，承接 Step In 完成后的收束状态，结构以产品设计文档第 9.4 节为准。
 
-### 页面布局
+### 页面区块
 
-- 顶部可以保留照片或完成徽章，作为完成状态的视觉锚点
-- 中部按从上到下排列完成提示、阶段摘要、完整对话回放
-- 底部固定两个按钮，保持并列双 CTA 结构
+- 顶部完成视觉锚点
+- 完成提示区
+- 四阶段表达摘要区
+- 完整对话回放区
+- 底部双 CTA 区
 - 这页只负责收束和回放，不再进入新的练习状态
+
+### 顶部完成视觉锚点
+
+- 顶部可以保留用户照片或完成徽章，作为完成状态的视觉锚点。
+- 顶部区域不再出现课程进度条或输入区。
+
+### 完成提示区
+
+- 完成提示区放在顶部视觉锚点下方，作为课程结束说明。
+- 完成提示区可以包含主标题、简短说明和可选的轻量庆祝文案。
+
+### 四阶段表达摘要区
+
+- 四阶段表达摘要区按从上到下排列 Notice、Interpret、Interact、Step In 四个回收块。
+- 每个回收块可以是卡片或列表，但必须能看出是独立的阶段摘要。
+- Notice 和 Interpret 只回收核心表达列表。
+- Interact 回收 Need 和 Handle 的核心表达。
+- Step In 回收完整对话，不再拆成新的表达项。
+
+### 完整对话回放区
+
+- 完整对话回放区放在四阶段摘要区下方。
+- 该区域按时间顺序回放 Step In 的整段对话。
+- 该区域不再提供新的输入控件。
+
+### 底部双 CTA 区
+
+- 底部固定两个并列按钮。
+- 一个按钮负责再次练习。
+- 一个按钮负责返回拍照页。
+- 两个按钮都应在首版保留。
+
+### 页面字段
+
+- 顶部照片或完成徽章：来自 `useDeepModeFlow.photoPreviewUrl` 或前端固定 completion 图标。
+- 完成提示主标题：来自前端固定 copy 和当前完成态，不来自后端 `lesson`。
+- 完成提示说明：来自前端固定 copy 和当前完成态，不来自后端 `lesson`。
+- Notice 阶段摘要块：来自 `modules.notice.expressionPacks[*].coreExpression` 和 `meaningChinese`，按 `expressionPacks` 顺序回收。
+- Interpret 阶段摘要块：来自 `modules.interpret.expressionPacks[*].coreExpression` 和 `meaningChinese`，按 `expressionPacks` 顺序回收。
+- Interact 阶段摘要块：来自 `modules.interact.taskPacks[*].need.coreExpression` / `meaningChinese` 与 `handle.coreExpression` / `meaningChinese`，按 `taskPacks` 顺序回收。
+- Step In 阶段摘要块：来自 `modules.stepIn.dialogue.turns` 的完整回放，不再拆分成新的表达项。
+- 完整对话回放：来自 `modules.stepIn.dialogue.turns`。
+- 再次练习按钮：来自当前参考图和产品设计文档第 9.4 节的完成反馈规则，不来自后端课程 JSON。
+- 返回拍照页按钮：来自当前参考图和产品设计文档第 9.4 节的完成反馈规则，不来自后端课程 JSON。
 
 ---
 
@@ -641,7 +1071,8 @@ Completion 与 Step In 的完成页结构一致，但作为独立页面层承接
   - 只负责纵览页
 
 - `DeepCourseShell`
-  - 只负责共享页面结构
+  - 只负责选择并承载页面模板，不自己发明独立课程壳层
+  - 负责把当前 phase 映射到对应模板，并把顶部区、中部区、底部区传给子页面
 
 - `NoticeModule`
 - `InterpretModule`
@@ -656,6 +1087,15 @@ Completion 与 Step In 的完成页结构一致，但作为独立页面层承接
 
 允许抽成共享基元，但只限无业务语义部分：
 
+- `PageFrame`
+- `TopBar`
+- `MainCard`
+- `ExerciseCard`
+- `Timeline`
+- `SummaryStack`
+- `CTABar`
+- `InputDock`
+- `ChoiceGrid`
 - `Button`
 - `Card`
 - `Modal`
@@ -667,6 +1107,7 @@ Completion 与 Step In 的完成页结构一致，但作为独立页面层承接
 - `PhotoThumb`
 
 这些基元只能决定“怎么显示”，不能决定“显示什么业务含义”。
+页面骨架优先复用 `PageFrame`、`TopBar`、`MainCard`、`Timeline`、`InputDock`、`SummaryStack` 和 `CTABar`，业务差异只落在卡片内容、题目状态和字段映射上。
 
 ---
 
@@ -715,6 +1156,24 @@ type DeepCourseViewModel = {
 };
 ```
 
+### 页面家族映射
+
+- `overview` -> `DeepOverviewScreen`
+- `notice` -> `NoticeModule`
+- `interpret` -> `InterpretModule`
+- `interact` -> `InteractModule`
+- `stepIn` -> `StepInModule`
+- `completion` -> `DeepCompletionScreen`
+
+### 模板映射
+
+- `DeepOverviewScreen` -> 独立入口页
+- `NoticeModule` -> `SingleExercisePage` / `QuickResponsePage`
+- `InterpretModule` -> `SingleExercisePage` / `QuickResponsePage`
+- `InteractModule` -> `SingleExercisePage` / `DialogueFlowPage`
+- `StepInModule` -> `DialogueFlowPage`
+- `DeepCompletionScreen` -> `SummaryPage`
+
 ### 映射原则
 
 - 数据层只关心字段
@@ -761,7 +1220,7 @@ Deep Mode 第一版只用点击或选择，不做拖拽必需交互。
 第一阶段只要满足以下条件，就可以认为 Deep Mode 前端 backbone 可用：
 
 1. 能从相机页进入 Deep Mode
-2. 能经历 loading -> overview -> modules -> completion
+2. 能经历 `loading -> overview -> notice -> interpret -> interact -> stepIn -> completion`
 3. 能正确展示四阶段主进度
 4. 能正确展示模块内题目进度
 5. 能正确承接后端 Deep Course JSON
@@ -799,9 +1258,9 @@ Deep Mode 第一版只用点击或选择，不做拖拽必需交互。
 建议实现顺序如下：
 
 1. 先把 `useDeepModeFlow` 和 `DeepModeApp` 的状态流对齐到本 spec
-2. 再把 `DeepOverviewScreen`、`DeepCourseShell`、四个模块页和 `DeepCompletionScreen` 的职责切稳
-3. 再补 `DeepCourseViewModel` 映射层
-4. 再补共享 UI 基元
+2. 再把 `DeepOverviewScreen`、`DeepCourseShell`、`NoticeModule`、`InterpretModule`、`InteractModule`、`StepInModule` 和 `DeepCompletionScreen` 的职责切稳
+3. 再补 `DeepCourseViewModel`、页面家族映射和模板映射层
+4. 再补共享 UI 基元与页面骨架组件
 5. 最后再做视觉还原
 
 这会让前端先“可用”，再“好看”，而不是反过来。

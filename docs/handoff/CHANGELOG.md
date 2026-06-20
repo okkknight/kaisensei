@@ -4,6 +4,21 @@ Append-only resume log.
 
 ## 2026-06-20
 
+- Added a Deep Mode frontend implementation plan that starts with reusable skeletons, validates a reference slice, then expands by page family
+- Added explicit page-family and template mappings plus an exact Deep Mode phase chain so the backend JSON maps cleanly to screen families
+- Added explicit Deep Mode page templates and reusable layout primitives so Codex can reuse page skeletons instead of redrawing each screen
+- Expanded the Completion page into explicit photo, completion message, four-stage summary, dialogue replay, and dual-CTA regions so the final screen can be built without guessing
+- Expanded Step In in the frontend spec as a single dialogue page with explicit turn states for Notice, Interpret, Interact Need, and Interact Handle
+- Split Interact Dialogue Practice into explicit Need and Handle pages so the reference-image flow can be implemented as two concrete screens
+- Rewrote the Interact section so Need and Handle are listed as six explicit pages (`Understand` / `Focus` / `Build` for each) instead of a compressed sequence rule
+- Clarified that Interact Need and Handle are repeated three-step example sequences, so every base example and variation must complete Understand / Focus / Build before Dialogue Practice begins
+- Separated Notice and Interpret into distinct page lists in the frontend spec so they can share components without collapsing into a single logical page family
+- Added field-level source mappings for the Interact milestone and completion views so the final pages can be reconstructed from task packs and dialogue turns instead of vague summary text
+- Added field-level source mappings for Interact, Step In, and Completion so every visible block can trace back to task packs, dialogue turns, or fixed completion copy
+- Added field-level source mappings for the confirmed Deep Mode pages so Loading, Overview, Notice exercises, Quick Response, and Notice Milestone all trace values back to backend lesson fields or fixed product copy
+- Added a field-level writing rule to the Deep Mode frontend backbone spec so every page must name concrete component fields instead of vague summary language
+- Clarified that the Notice Milestone completion card includes a separate learned-expression list block, not just a generic completion summary
+- Corrected the Notice Milestone layout so it starts directly from the centered completion card instead of inheriting the practice-page layout baseline
 - Added the missing example-sentence row to the Notice Build layout so the page clearly reads as translating a Chinese example sentence into English
 - Added a Deep Mode default config layer under `api/src/deep/config/course.js` so the prompt and normalizer both consume the same course counts without any backend-config UI yet
 - Hardened the Deep Mode prompt to inject the default config, exact course counts, and a concrete Focus example so the model has a clearer generation contract
