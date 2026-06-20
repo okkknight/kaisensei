@@ -7,9 +7,10 @@ Reading order:
 1. `PROJECT_CONTEXT.md`
 2. `docs/kaisensei_deep_mode_product_design.md`
 3. `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
-4. `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md`
-5. `docs/handoff/CHANGELOG.md`
-6. `docs/KAISENSEI_VPS_RUNBOOK.md`
+4. `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-frontend-spec.md`
+5. `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md`
+6. `docs/handoff/CHANGELOG.md`
+7. `docs/KAISENSEI_VPS_RUNBOOK.md`
 
 Notes:
 

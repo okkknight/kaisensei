@@ -1,5 +1,6 @@
 import { LessonValidationError } from "../../shared/ai/errors.js";
 import { deepCourseContract, deepModuleOrder } from "../contracts/course.js";
+import { deepCourseDefaultConfig } from "../config/course.js";
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -68,7 +69,40 @@ function ensureAnswerCoverage(answer, choices, path) {
   }
 }
 
-function normalizeReorderExercise(exercise, path) {
+function ensureExactLength(value, expectedLength, path) {
+  if (!Array.isArray(value)) {
+    fail(`Missing or invalid array at ${path}`, { path });
+  }
+
+  if (value.length !== expectedLength) {
+    fail(`Expected exactly ${expectedLength} items at ${path}`, { path });
+  }
+}
+
+function ensureExactCount(value, expectedCount, path) {
+  if (value !== expectedCount) {
+    fail(`Expected exactly ${expectedCount} at ${path}`, { path });
+  }
+}
+
+function limitArrayLength(values, expectedLength) {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  if (values.length <= expectedLength) {
+    return values;
+  }
+
+  return values.slice(0, expectedLength);
+}
+
+function countBlanks(sentence) {
+  const matches = String(sentence).match(/____/g);
+  return matches ? matches.length : 0;
+}
+
+function normalizeReorderExercise(exercise, path, expectedDistractorCount) {
   if (!isPlainObject(exercise)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -84,12 +118,12 @@ function normalizeReorderExercise(exercise, path) {
   return {
     ...exercise,
     chunks,
-    distractors,
+    distractors: limitArrayLength(distractors, expectedDistractorCount),
     answer,
   };
 }
 
-function normalizeFocusExercise(exercise, path) {
+function normalizeFocusExercise(exercise, path, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(exercise)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -102,33 +136,35 @@ function normalizeFocusExercise(exercise, path) {
   ensureUnique(choices, `${path}.choices`);
   ensureUnique(distractors, `${path}.distractors`);
   ensureAnswerCoverage(answer, choices, `${path}.answer`);
+  ensureExactLength(answer, config.focusBlankCount, `${path}.answer`);
+  ensureExactCount(countBlanks(sentenceWithBlanks), config.focusBlankCount, `${path}.sentenceWithBlanks`);
 
   return {
     ...exercise,
     sentenceWithBlanks,
     choices,
-    distractors,
+    distractors: limitArrayLength(distractors, config.focusDistractorCount),
     answer,
   };
 }
 
-function normalizeMaybeReorderExercise(exercise, path) {
+function normalizeMaybeReorderExercise(exercise, path, config = deepCourseDefaultConfig.exercise, expectedDistractorCount = config.buildDistractorCount) {
   if (!isPlainObject(exercise)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
 
   if ("sentenceWithBlanks" in exercise || "choices" in exercise) {
-    return normalizeFocusExercise(exercise, path);
+    return normalizeFocusExercise(exercise, path, config);
   }
 
   if (!Array.isArray(exercise.chunks) && !Array.isArray(exercise.distractors) && !Array.isArray(exercise.answer)) {
     return { ...exercise };
   }
 
-  return normalizeReorderExercise(exercise, path);
+  return normalizeReorderExercise(exercise, path, expectedDistractorCount);
 }
 
-function normalizeBaseExample(baseExample, path) {
+function normalizeBaseExample(baseExample, path, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(baseExample)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -140,13 +176,13 @@ function normalizeBaseExample(baseExample, path) {
     ...baseExample,
     english,
     chinese,
-    understand: normalizeMaybeReorderExercise(baseExample.understand || {}, `${path}.understand`),
-    focus: normalizeMaybeReorderExercise(baseExample.focus || {}, `${path}.focus`),
-    build: normalizeMaybeReorderExercise(baseExample.build || {}, `${path}.build`),
+    understand: normalizeMaybeReorderExercise(baseExample.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
+    focus: normalizeMaybeReorderExercise(baseExample.focus || {}, `${path}.focus`, config),
+    build: normalizeMaybeReorderExercise(baseExample.build || {}, `${path}.build`, config, config.buildDistractorCount),
   };
 }
 
-function normalizeVariation(variation, path) {
+function normalizeVariation(variation, path, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(variation)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -158,13 +194,13 @@ function normalizeVariation(variation, path) {
     ...variation,
     english,
     chinese,
-    understand: normalizeMaybeReorderExercise(variation.understand || {}, `${path}.understand`),
-    focus: normalizeMaybeReorderExercise(variation.focus || {}, `${path}.focus`),
-    build: normalizeMaybeReorderExercise(variation.build || {}, `${path}.build`),
+    understand: normalizeMaybeReorderExercise(variation.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
+    focus: normalizeMaybeReorderExercise(variation.focus || {}, `${path}.focus`, config),
+    build: normalizeMaybeReorderExercise(variation.build || {}, `${path}.build`, config, config.buildDistractorCount),
   };
 }
 
-function normalizeQuickResponse(quickResponse, path) {
+function normalizeQuickResponse(quickResponse, path, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(quickResponse)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -182,12 +218,12 @@ function normalizeQuickResponse(quickResponse, path) {
     ...quickResponse,
     question,
     chunks,
-    distractors,
+    distractors: limitArrayLength(distractors, config.dialogueDistractorCount),
     answer,
   };
 }
 
-function normalizeExpressionPack(pack, path) {
+function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.notice, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(pack)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -195,13 +231,16 @@ function normalizeExpressionPack(pack, path) {
   const id = ensureString(pack.id, `${path}.id`);
   const coreExpression = ensureString(pack.coreExpression, `${path}.coreExpression`);
   const meaningChinese = ensureString(pack.meaningChinese, `${path}.meaningChinese`);
-  const baseExample = normalizeBaseExample(pack.baseExample || {}, `${path}.baseExample`);
+  const baseExample = normalizeBaseExample(pack.baseExample || {}, `${path}.baseExample`, exerciseConfig);
   const variations = Array.isArray(pack.variations)
-    ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`))
+    ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`, exerciseConfig))
     : [];
   const quickResponses = Array.isArray(pack.quickResponses)
-    ? pack.quickResponses.map((quickResponse, index) => normalizeQuickResponse(quickResponse, `${path}.quickResponses[${index}]`))
+    ? pack.quickResponses.map((quickResponse, index) => normalizeQuickResponse(quickResponse, `${path}.quickResponses[${index}]`, exerciseConfig))
     : [];
+
+  ensureExactLength(variations, config.variationsPerExpression, `${path}.variations`);
+  ensureExactLength(quickResponses, config.quickResponsePerExpression, `${path}.quickResponses`);
 
   return {
     ...pack,
@@ -214,7 +253,7 @@ function normalizeExpressionPack(pack, path) {
   };
 }
 
-function normalizeTaskPack(pack, path) {
+function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(pack)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -225,8 +264,10 @@ function normalizeTaskPack(pack, path) {
   const need = isPlainObject(pack.need) ? pack.need : {};
   const handle = isPlainObject(pack.handle) ? pack.handle : {};
   const dialogues = Array.isArray(pack.dialogues) ? pack.dialogues : [];
+  const needVariations = Array.isArray(need.variations) ? need.variations : [];
+  const handleVariations = Array.isArray(handle.variations) ? handle.variations : [];
 
-  return {
+  const normalized = {
     ...pack,
     id,
     taskTitle,
@@ -235,19 +276,15 @@ function normalizeTaskPack(pack, path) {
       ...need,
       coreExpression: ensureString(need.coreExpression, `${path}.need.coreExpression`),
       meaningChinese: ensureString(need.meaningChinese, `${path}.need.meaningChinese`),
-      baseExample: normalizeMaybeReorderExercise(need.baseExample || {}, `${path}.need.baseExample`),
-      variations: Array.isArray(need.variations)
-        ? need.variations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`))
-        : [],
+      baseExample: normalizeMaybeReorderExercise(need.baseExample || {}, `${path}.need.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
+      variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, exerciseConfig)),
     },
     handle: {
       ...handle,
       coreExpression: ensureString(handle.coreExpression, `${path}.handle.coreExpression`),
       meaningChinese: ensureString(handle.meaningChinese, `${path}.handle.meaningChinese`),
-      baseExample: normalizeMaybeReorderExercise(handle.baseExample || {}, `${path}.handle.baseExample`),
-      variations: Array.isArray(handle.variations)
-        ? handle.variations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`))
-        : [],
+      baseExample: normalizeMaybeReorderExercise(handle.baseExample || {}, `${path}.handle.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
+      variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, exerciseConfig)),
     },
     dialogues: dialogues.map((dialogue, index) => {
       if (!isPlainObject(dialogue)) {
@@ -257,15 +294,21 @@ function normalizeTaskPack(pack, path) {
       return {
         ...dialogue,
         scene: ensureString(dialogue.scene, `${path}.dialogues[${index}].scene`),
-        need: normalizeMaybeReorderExercise(dialogue.need || {}, `${path}.dialogues[${index}].need`),
+        need: normalizeMaybeReorderExercise(dialogue.need || {}, `${path}.dialogues[${index}].need`, exerciseConfig, exerciseConfig.buildDistractorCount),
         systemReply: ensureString(dialogue.systemReply, `${path}.dialogues[${index}].systemReply`),
-        handle: normalizeMaybeReorderExercise(dialogue.handle || {}, `${path}.dialogues[${index}].handle`),
+        handle: normalizeMaybeReorderExercise(dialogue.handle || {}, `${path}.dialogues[${index}].handle`, exerciseConfig, exerciseConfig.buildDistractorCount),
       };
     }),
   };
+
+  ensureExactLength(needVariations, config.variationsPerNeedExpression, `${path}.need.variations`);
+  ensureExactLength(handleVariations, config.variationsPerHandleExpression, `${path}.handle.variations`);
+  ensureExactLength(dialogues, config.dialoguesPerTaskPack, `${path}.dialogues`);
+
+  return normalized;
 }
 
-function normalizeStepInDialogue(dialogue) {
+function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.stepIn, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(dialogue)) {
     fail("Missing or invalid object at modules.stepIn.dialogue", {
       path: "modules.stepIn.dialogue",
@@ -278,6 +321,9 @@ function normalizeStepInDialogue(dialogue) {
 
   const scene = ensureString(dialogue.scene, "modules.stepIn.dialogue.scene");
   const turns = Array.isArray(dialogue.turns) ? dialogue.turns : [];
+  const expectedTurns = (config.noticeExpressionCount + config.interpretExpressionCount + config.needExpressionCount + config.handleExpressionCount) * 2;
+
+  ensureExactLength(turns, expectedTurns, "modules.stepIn.dialogue.turns");
 
   return {
     ...dialogue,
@@ -291,6 +337,34 @@ function normalizeStepInDialogue(dialogue) {
 
       const speaker = ensureString(turn.speaker, `modules.stepIn.dialogue.turns[${index}].speaker`);
       const text = ensureString(turn.text, `modules.stepIn.dialogue.turns[${index}].text`);
+      if (index % 2 === 0 && speaker !== "system") {
+        fail(`Expected system speaker at modules.stepIn.dialogue.turns[${index}]`, {
+          path: `modules.stepIn.dialogue.turns[${index}].speaker`,
+        });
+      }
+      if (index % 2 === 1 && speaker !== "user") {
+        fail(`Expected user speaker at modules.stepIn.dialogue.turns[${index}]`, {
+          path: `modules.stepIn.dialogue.turns[${index}].speaker`,
+        });
+      }
+      if (speaker === "user") {
+        const sourceModule = ensureString(turn.sourceModule, `modules.stepIn.dialogue.turns[${index}].sourceModule`);
+        const chunks = ensureStringArray(turn.chunks, `modules.stepIn.dialogue.turns[${index}].chunks`);
+        const distractors = ensureOptionalStringArray(turn.distractors, `modules.stepIn.dialogue.turns[${index}].distractors`);
+        const answer = ensureStringArray(turn.answer, `modules.stepIn.dialogue.turns[${index}].answer`);
+        ensureUnique(chunks, `modules.stepIn.dialogue.turns[${index}].chunks`);
+        ensureUnique(distractors, `modules.stepIn.dialogue.turns[${index}].distractors`);
+        ensureAnswerCoverage(answer, chunks, `modules.stepIn.dialogue.turns[${index}].answer`);
+        return {
+          ...turn,
+          speaker,
+          text,
+          sourceModule,
+          chunks,
+          distractors: limitArrayLength(distractors, exerciseConfig.dialogueDistractorCount),
+          answer,
+        };
+      }
       return {
         ...turn,
         speaker,
@@ -300,12 +374,13 @@ function normalizeStepInDialogue(dialogue) {
   };
 }
 
-function normalizeOverview(overview) {
+function normalizeOverview(overview, config = deepCourseDefaultConfig) {
   if (!isPlainObject(overview)) {
     fail("Missing or invalid object at overview", { path: "overview" });
   }
 
   const keywords = ensureStringArray(overview.keywords, "overview.keywords");
+  ensureExactLength(keywords, config.overviewKeywordCount, "overview.keywords");
 
   return {
     ...overview,
@@ -324,7 +399,7 @@ function normalizeLevel(level) {
   return normalized;
 }
 
-function normalizeModuleSet(modules) {
+function normalizeModuleSet(modules, config = deepCourseDefaultConfig) {
   if (!isPlainObject(modules)) {
     fail("Missing or invalid object at modules", { path: "modules" });
   }
@@ -351,9 +426,9 @@ function normalizeModuleSet(modules) {
     });
   }
 
-  const noticeExpressionPacks = modules.notice.expressionPacks.map((pack, index) => normalizeExpressionPack(pack, `modules.notice.expressionPacks[${index}]`));
-  const interpretExpressionPacks = modules.interpret.expressionPacks.map((pack, index) => normalizeExpressionPack(pack, `modules.interpret.expressionPacks[${index}]`));
-  const interactTaskPacks = modules.interact.taskPacks.map((pack, index) => normalizeTaskPack(pack, `modules.interact.taskPacks[${index}]`));
+  const noticeExpressionPacks = modules.notice.expressionPacks.map((pack, index) => normalizeExpressionPack(pack, `modules.notice.expressionPacks[${index}]`, config.notice, config.exercise));
+  const interpretExpressionPacks = modules.interpret.expressionPacks.map((pack, index) => normalizeExpressionPack(pack, `modules.interpret.expressionPacks[${index}]`, config.interpret, config.exercise));
+  const interactTaskPacks = modules.interact.taskPacks.map((pack, index) => normalizeTaskPack(pack, `modules.interact.taskPacks[${index}]`, config.interact, config.exercise));
 
   const noticeIds = noticeExpressionPacks.map((pack) => pack.id);
   const interpretIds = interpretExpressionPacks.map((pack) => pack.id);
@@ -362,6 +437,9 @@ function normalizeModuleSet(modules) {
   ensureUnique(noticeIds, "modules.notice.expressionPacks.id");
   ensureUnique(interpretIds, "modules.interpret.expressionPacks.id");
   ensureUnique(interactIds, "modules.interact.taskPacks.id");
+  ensureExactLength(noticeExpressionPacks, config.notice.coreExpressionCount, "modules.notice.expressionPacks");
+  ensureExactLength(interpretExpressionPacks, config.interpret.coreExpressionCount, "modules.interpret.expressionPacks");
+  ensureExactLength(interactTaskPacks, config.interact.taskPackCount, "modules.interact.taskPacks");
 
   return {
     notice: {
@@ -386,12 +464,12 @@ function normalizeModuleSet(modules) {
       ...modules.stepIn,
       title: ensureString(modules.stepIn.title, "modules.stepIn.title"),
       goal: ensureString(modules.stepIn.goal, "modules.stepIn.goal"),
-      dialogue: normalizeStepInDialogue(modules.stepIn.dialogue || {}),
+      dialogue: normalizeStepInDialogue(modules.stepIn.dialogue || {}, config.stepIn, config.exercise),
     },
   };
 }
 
-export function normalizeDeepCoursePayload(payload) {
+export function normalizeDeepCoursePayload(payload, config = deepCourseDefaultConfig) {
   if (!isPlainObject(payload)) {
     fail("Lesson payload must be a JSON object", { path: "root" });
   }
@@ -404,8 +482,8 @@ export function normalizeDeepCoursePayload(payload) {
     ...deepCourseContract,
     mode: "deep",
     level: normalizeLevel(payload.level),
-    overview: normalizeOverview(payload.overview),
-    modules: normalizeModuleSet(payload.modules),
+    overview: normalizeOverview(payload.overview, config),
+    modules: normalizeModuleSet(payload.modules, config),
   };
 
   return normalized;

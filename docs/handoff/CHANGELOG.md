@@ -2,7 +2,30 @@
 
 Append-only resume log.
 
+## 2026-06-20
+
+- Added the missing example-sentence row to the Notice Build layout so the page clearly reads as translating a Chinese example sentence into English
+- Added a Deep Mode default config layer under `api/src/deep/config/course.js` so the prompt and normalizer both consume the same course counts without any backend-config UI yet
+- Hardened the Deep Mode prompt to inject the default config, exact course counts, and a concrete Focus example so the model has a clearer generation contract
+- Relaxed the Deep Mode normalizer on distractor counts by trimming extras instead of hard-failing, while keeping the core course structure and blank counts intact
+- Added JSON fragment extraction in the Deep Mode providers so wrapped JSON output can still be parsed before normalization
+- Verified the real Deep Mode job end-to-end against `docs/deepmodeimage.png` on the live API, with job `job_fa8f56b498ac476a8bb49d02674099e7` completing successfully
+
+- Removed the remaining page-layout references to the shared course shell concept so each page now describes its own direct elements and fixed regions
+- Clarified that the shared Deep Mode page layout is only a structural explanation and must not become an extra visible outer shell in the real UI
+- Aligned the Deep Mode frontend backbone spec to the Interpret / Interact / Step In reference images by splitting Interact into task-pack intro, Need practice, Handle practice, and milestone states
+- Removed the last ambiguous title-like wording from the Deep Mode frontend backbone spec, keeping the shared course shell and Step In pages focused on real structure only
+- Removed the reference-image caption labels from the Deep Mode frontend backbone spec so only the real page containers and content zones remain in the structure
+- Clarified that the numbered labels in the Deep Mode reference images are documentation captions only and must not be treated as real page structure
+- Aligned the Deep Mode frontend backbone spec to the loading-through-Notice milestone UI references, including page titles, top header rows, stage cards, and per-step shell structure
+- Confirmed the Deep Mode frontend backbone decisions for the first implementation pass: no image modal in the first version, keep both completion CTAs, include the TTS button structure, and follow the product design doc for loading copy
+- Updated the Deep Mode frontend backbone spec so the remaining implementation work can proceed without ambiguity on these interaction boundaries
+
 ## 2026-06-19
+
+- Added `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-frontend-spec.md` to lock the Deep Mode frontend backbone before visual styling
+- Defined the non-visual Deep Mode page flow, component responsibilities, and backend view-model boundary so Codex can build a usable structure first and fill visuals later
+- Kept the spec aligned to `docs/kaisensei_deep_mode_product_design.md` as the authoritative frontend product source
 
 - Tightened the Deep Mode backend contract so the prompt now emits the design-aligned inner shapes for Notice / Interpret / Interact / Step In, including focus-style exercises and Step In text turns
 - Added a Deep-only retry bump in the job runner so the real provider has an extra recovery chance without changing Quick Mode behavior
