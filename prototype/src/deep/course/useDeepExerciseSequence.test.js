@@ -23,6 +23,12 @@ function makeExample(label) {
       distractors: [`${label} build x`],
       answer: [`${label} build`],
     },
+    quickResponse: {
+      question: `${label} question`,
+      chunks: [`${label} quick`],
+      distractors: [`${label} quick x`],
+      answer: [`${label} quick`],
+    },
   };
 }
 
@@ -32,37 +38,31 @@ function makePack(id, coreExpression) {
     coreExpression,
     baseExample: makeExample(`${coreExpression} base`),
     variations: [makeExample(`${coreExpression} variation`)],
-    quickResponses: [
-      {
-        question: `${coreExpression} question`,
-        chunks: [`${coreExpression} quick`],
-        distractors: [`${coreExpression} quick x`],
-        answer: [`${coreExpression} quick`],
-      },
-    ],
   };
 }
 
-test("buildExercisePages groups Notice and Interpret exercises by step type first", () => {
+test("buildExercisePages keeps each example's Quick Response attached to that example", () => {
   const pages = buildExercisePages([makePack("p1", "core one"), makePack("p2", "core two")], "notice");
 
   assert.deepEqual(
     pages.map((page) => page.id),
     [
       "p1-core one base english-understand",
-      "p2-core two base english-understand",
-      "p1-core one variation english-understand",
-      "p2-core two variation english-understand",
       "p1-core one base english-focus",
-      "p2-core two base english-focus",
-      "p1-core one variation english-focus",
-      "p2-core two variation english-focus",
       "p1-core one base english-build",
-      "p2-core two base english-build",
+      "p1-core one base english-quick-response",
+      "p1-core one variation english-understand",
+      "p1-core one variation english-focus",
       "p1-core one variation english-build",
+      "p1-core one variation english-quick-response",
+      "p2-core two base english-understand",
+      "p2-core two base english-focus",
+      "p2-core two base english-build",
+      "p2-core two base english-quick-response",
+      "p2-core two variation english-understand",
+      "p2-core two variation english-focus",
       "p2-core two variation english-build",
-      "p1-quick-response-0",
-      "p2-quick-response-0",
+      "p2-core two variation english-quick-response",
     ]
   );
 });

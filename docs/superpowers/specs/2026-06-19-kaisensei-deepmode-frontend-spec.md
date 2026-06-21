@@ -467,7 +467,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 用户重排英文词块
 - 可撤回已选词块
-- Check 通过后进入当前表达的 Quick Response 页
+- Check 通过后进入当前 example 的 Quick Response 页
 
 #### Notice - Quick Response 页面
 
@@ -500,13 +500,13 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 ##### 组件说明与来源
 
 - 页内进度：由当前 quick response 在该表达的题目序列里动态计算
-- 问题句：来自 `expressionPack.quickResponses[i].question`
+- 问题句：来自当前 example 的 `quickResponse.question`
 - Notice 辅助问题：固定为 `这个句子表达的主要原因是什么？`
 - Interpret 辅助问题：固定为 `目前可能正在发生什么？`
 - 用户答案区占位：固定为 `Build your answer / 在此形成句组`
-- 答案词块池：来自 `expressionPack.quickResponses[i].chunks`
-- 干扰词块：来自 `expressionPack.quickResponses[i].distractors`
-- 正确答案：来自 `expressionPack.quickResponses[i].answer`
+- 答案词块池：来自当前 example 的 `quickResponse.chunks`
+- 干扰词块：来自当前 example 的 `quickResponse.distractors`
+- 正确答案：来自当前 example 的 `quickResponse.answer`
 - 底部按钮：固定为 `Reset / Hint / Check`
 
 ##### 交互流程与状态流转
@@ -689,7 +689,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 交互流程与状态流转
 
-- 通过后进入 Interpret 的 Quick Response 页
+- 通过后进入当前 example 的 Quick Response 页
 
 #### Interpret - Quick Response 页面
 
@@ -722,13 +722,13 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 ##### 组件说明与来源
 
 - 页内进度：由当前 quick response 在该表达的题目序列里动态计算
-- 问题句：来自 `expressionPack.quickResponses[i].question`
+- 问题句：来自当前 example 的 `quickResponse.question`
 - Notice 辅助问题：固定为 `这个句子表达的主要原因是什么？`
 - Interpret 辅助问题：固定为 `目前可能正在发生什么？`
 - 用户答案区占位：固定为 `Build your answer / 在此形成句组`
-- 答案词块池：来自 `expressionPack.quickResponses[i].chunks`
-- 干扰词块：来自 `expressionPack.quickResponses[i].distractors`
-- 正确答案：来自 `expressionPack.quickResponses[i].answer`
+- 答案词块池：来自当前 example 的 `quickResponse.chunks`
+- 干扰词块：来自当前 example 的 `quickResponse.distractors`
+- 正确答案：来自当前 example 的 `quickResponse.answer`
 - 底部按钮：固定为 `Reset / Hint / Check`
 
 ##### 交互流程与状态流转

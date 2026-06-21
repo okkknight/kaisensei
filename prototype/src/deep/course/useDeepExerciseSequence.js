@@ -80,9 +80,11 @@ function buildExercisePages(packs, moduleKey) {
     };
   }
 
-  function makeQuickResponsePage(pack, response, responseIndex) {
+  function makeQuickResponsePage(pack, example) {
+    const response = example?.quickResponse ?? {};
+
     return {
-      id: `${pack.id}-quick-response-${responseIndex}`,
+      id: `${pack.id}-${example.english}-quick-response`,
       kind: "quickResponse",
       label: pack.coreExpression,
       stepLabel: "",
@@ -96,33 +98,18 @@ function buildExercisePages(packs, moduleKey) {
   }
 
   if (moduleKey === "notice" || moduleKey === "interpret") {
-    const understandPages = [];
-    const focusPages = [];
-    const buildPages = [];
-    const quickResponsePages = [];
-    const maxExampleCount = Math.max(...packedExamples.map(({ examples }) => examples.length), 0);
+    const pages = [];
 
-    for (let exampleIndex = 0; exampleIndex < maxExampleCount; exampleIndex += 1) {
-      packedExamples.forEach(({ pack, examples }) => {
-        const example = examples[exampleIndex];
-
-        if (!example) {
-          return;
-        }
-
-        understandPages.push(makeUnderstandPage(pack, example));
-        focusPages.push(makeFocusPage(pack, example));
-        buildPages.push(makeBuildPage(pack, example));
-      });
-    }
-
-    packedExamples.forEach(({ pack }) => {
-      (pack?.quickResponses ?? []).forEach((response, responseIndex) => {
-        quickResponsePages.push(makeQuickResponsePage(pack, response, responseIndex));
+    packedExamples.forEach(({ pack, examples }) => {
+      examples.forEach((example) => {
+        pages.push(makeUnderstandPage(pack, example));
+        pages.push(makeFocusPage(pack, example));
+        pages.push(makeBuildPage(pack, example));
+        pages.push(makeQuickResponsePage(pack, example));
       });
     });
 
-    return [...understandPages, ...focusPages, ...buildPages, ...quickResponsePages];
+    return pages;
   }
 
   const pages = [];
@@ -134,9 +121,7 @@ function buildExercisePages(packs, moduleKey) {
       pages.push(makeBuildPage(pack, example));
     });
 
-    (pack?.quickResponses ?? []).forEach((response, responseIndex) => {
-      pages.push(makeQuickResponsePage(pack, response, responseIndex));
-    });
+    // Interact / Step In do not use the example-level quick response flow.
   });
 
   return pages;

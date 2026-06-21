@@ -4,13 +4,68 @@ import { createDeepCodexCliProvider } from "../src/deep/services/deep-codex-cli-
 import { createProviderRegistry } from "../src/services/provider-registry.js";
 import { buildValidDeepCoursePayload } from "./deep-course-fixture.js";
 
+function makeExample(label) {
+  return {
+    english: `${label} english`,
+    chinese: `${label} 中文`,
+    understand: {
+      chunks: [`${label} understand A`, `${label} understand B`],
+      distractors: [`${label} understand x`],
+      answer: [`${label} understand A`, `${label} understand B`],
+    },
+    focus: {
+      sentenceWithBlanks: `${label} ____ ____ the desk.`,
+      choices: [`${label} focus A`, `${label} focus B`, `${label} focus x`],
+      distractors: [`${label} focus x`],
+      answer: [`${label} focus A`, `${label} focus B`],
+    },
+    build: {
+      promptChinese: `${label} build`,
+      chunks: [`${label} build A`, `${label} build B`],
+      distractors: [`${label} build x`],
+      answer: [`${label} build A`, `${label} build B`],
+    },
+    quickResponse: {
+      question: `${label} question`,
+      chunks: [`${label} quick`],
+      distractors: [`${label} quick x`],
+      answer: [`${label} quick`],
+    },
+  };
+}
+
+function makeExpressionPack(id, coreExpression) {
+  return {
+    id,
+    coreExpression,
+    meaningChinese: `${coreExpression} 的中文意思`,
+    baseExample: makeExample(`${coreExpression} base`),
+    variations: [makeExample(`${coreExpression} variation`)],
+  };
+}
+
+function buildExampleLevelQuickResponsePayload() {
+  const payload = buildValidDeepCoursePayload();
+
+  payload.modules.notice.expressionPacks = [
+    makeExpressionPack("notice-1", "a coffee mug"),
+    makeExpressionPack("notice-2", "a laptop"),
+  ];
+  payload.modules.interpret.expressionPacks = [
+    makeExpressionPack("interpret-1", "a quiet work setup"),
+    makeExpressionPack("interpret-2", "ready for work"),
+  ];
+
+  return payload;
+}
+
 test("deep codex provider builds the deep prompt and normalizes the result", async () => {
   const prompts = [];
   const provider = createDeepCodexCliProvider({
     model: "test-model",
     runCliPrompt: async ({ prompt }) => {
       prompts.push(prompt);
-      return JSON.stringify(buildValidDeepCoursePayload());
+      return JSON.stringify(buildExampleLevelQuickResponsePayload());
     },
   });
 
@@ -31,9 +86,12 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /systemReply inside each dialogue must be a bridge sentence/);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /REQUIRED INNER SHAPES:/);
-  assert.match(prompts[0], /"quickResponses": \[/);
+  assert.match(prompts[0], /Quick Response attached to each baseExample and variation/);
+  assert.match(prompts[0], /"quickResponse": \{/);
   assert.equal(course.mode, "deep");
   assert.equal(course.level, "normal");
+  assert.equal(course.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
+  assert.equal(course.modules.interpret.expressionPacks[1].variations[0].quickResponse.question, "ready for work variation question");
   assert.equal(course.modules.stepIn.dialogue.turns.length, 8);
 });
 

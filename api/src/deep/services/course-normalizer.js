@@ -195,6 +195,7 @@ function normalizeBaseExample(baseExample, path, config = deepCourseDefaultConfi
     understand: normalizeMaybeReorderExercise(baseExample.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
     focus: normalizeMaybeReorderExercise(baseExample.focus || {}, `${path}.focus`, config),
     build: normalizeMaybeReorderExercise(baseExample.build || {}, `${path}.build`, config, config.buildDistractorCount),
+    quickResponse: normalizeQuickResponse(baseExample.quickResponse || {}, `${path}.quickResponse`, config),
   };
 }
 
@@ -223,6 +224,7 @@ function normalizeVariation(variation, path, coreExpression, config = deepCourse
     understand: normalizeMaybeReorderExercise(variation.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
     focus: normalizeMaybeReorderExercise(variation.focus || {}, `${path}.focus`, config),
     build: normalizeMaybeReorderExercise(variation.build || {}, `${path}.build`, config, config.buildDistractorCount),
+    quickResponse: normalizeQuickResponse(variation.quickResponse || {}, `${path}.quickResponse`, config),
   };
 }
 
@@ -261,12 +263,8 @@ function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.no
   const variations = Array.isArray(pack.variations)
     ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`, coreExpression, exerciseConfig))
     : [];
-  const quickResponses = Array.isArray(pack.quickResponses)
-    ? pack.quickResponses.map((quickResponse, index) => normalizeQuickResponse(quickResponse, `${path}.quickResponses[${index}]`, exerciseConfig))
-    : [];
 
   ensureExactLength(variations, config.variationsPerExpression, `${path}.variations`);
-  ensureExactLength(quickResponses, config.quickResponsePerExpression, `${path}.quickResponses`);
 
   return {
     ...pack,
@@ -275,7 +273,6 @@ function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.no
     meaningChinese,
     baseExample,
     variations,
-    quickResponses,
   };
 }
 

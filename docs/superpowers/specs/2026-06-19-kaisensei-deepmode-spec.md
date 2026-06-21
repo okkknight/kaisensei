@@ -528,27 +528,31 @@ Notice · 4 / 14
 Notice 由以下部分组成：
 
 ```text
-基础例句训练
+每个例句依次完成：
+Understand
 ↓
-变式例句训练
+Focus
+↓
+Build
 ↓
 Quick Response
 ↓
-Notice 里程碑
+下一个例句
 ```
 
 每个核心表达对应：
 
 - 1 条基础例句
 - 若干条变式例句
-- 每条例句都经过同一组三步练习
+- 每条例句都经过同一组四步练习
+- Quick Response 不再集中在整个核心表达末尾，而是跟随每个例句单独出现
 
 默认：
 
 - 2 个核心表达
 - 每个核心表达 1 条基础例句
 - 每个核心表达 1 条变式例句
-- 2 道 Quick Response
+- 每个例句 1 道 Quick Response
 
 数量必须可配置。
 
@@ -615,7 +619,7 @@ Understand → Focus → Build
 
 ### 7.4 变式例句
 
-基础例句完成后，进入同一核心表达的变式例句。
+基础例句完成后，进入同一核心表达下的下一个例句，并继续同样的四步练习。
 
 变式例句要求：
 
@@ -627,7 +631,7 @@ Understand → Focus → Build
 
 ### 7.5 Quick Response
 
-所有基础例句和变式例句完成后，进入 Quick Response。
+Quick Response 跟随每个例句结束后立即出现。
 
 Quick Response 不是对话流，而是单轮问答。
 
@@ -646,7 +650,7 @@ Quick Response 不是对话流，而是单轮问答。
 - 答案必须复用对应核心表达
 - 不要求用户自由输入
 - 每题单独验证
-- 完成后自动进入下一题
+- 完成后自动进入下一个例句或里程碑页
 
 ### 7.6 Notice 里程碑页
 
@@ -680,12 +684,12 @@ Continue to Interpret
 Interpret 与 Notice 完全复用同一套页面和练习交互：
 
 ```text
-基础例句
-→ Understand
+每个例句：
+Understand
 → Focus
 → Build
-→ 变式例句
 → Quick Response
+→ 下一个例句
 → 里程碑
 ```
 
@@ -712,6 +716,8 @@ Quick Response 问题可包括：
 - What might be happening here?
 - How does this place feel?
 - Why might someone choose this seat?
+
+每个基础例句和变式例句都必须各自带有一个 Quick Response，不能把整个表达 pack 的 Quick Response 集中到最后统一播放。
 
 ### 8.4 里程碑页
 

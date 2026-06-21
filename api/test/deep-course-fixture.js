@@ -40,6 +40,7 @@ function makeBaseExample(label) {
     understand: makeUnderstandExercise(`${label} understand`),
     focus: makeFocusExercise(`${label} focus`),
     build: makeBuildExercise(`${label} build`),
+    quickResponse: makeQuickResponse(`${label} quick response`),
   };
 }
 
@@ -50,7 +51,6 @@ function makeExpressionPack(id, coreExpression) {
     meaningChinese: `${coreExpression} 的中文意思`,
     baseExample: makeBaseExample(coreExpression),
     variations: [makeBaseExample(`${coreExpression} variation`)],
-    quickResponses: [makeQuickResponse(coreExpression)],
   };
 }
 

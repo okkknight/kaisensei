@@ -231,27 +231,31 @@ Notice · 4 / 14
 Notice 由以下部分组成：
 
 ```text
-基础例句训练
+每个例句依次完成：
+Understand
 ↓
-变式例句训练
+Focus
+↓
+Build
 ↓
 Quick Response
 ↓
-Notice 里程碑
+下一个例句
 ```
 
 每个核心表达对应：
 
 - 1 条基础例句
 - 若干条变式例句
-- 每条例句都经过同一组三步练习
+- 每条例句都经过同一组四步练习
+- Quick Response 跟随每个例句单独出现，不在整个 Expression Pack 末尾统一汇总
 
 默认：
 
 - 2 个核心表达
 - 每个核心表达 1 条基础例句
 - 每个核心表达 1 条变式例句
-- 2 道 Quick Response
+- 每个例句 1 道 Quick Response
 
 数量必须可配置。
 
@@ -426,7 +430,7 @@ The notebook is next to a small plate.
 
 ## 6.7 Quick Response
 
-所有基础例句和变式例句完成后，进入 Quick Response。
+Quick Response 跟随每个例句结束后立即出现。
 
 Quick Response 不是对话流，而是单轮问答。
 
@@ -877,12 +881,12 @@ Notice | Interpret | Interact | Step In
     "notice": {
       "coreExpressionCount": 2,
       "variationsPerExpression": 1,
-      "quickResponsePerExpression": 1
+      "quickResponsePerExample": 1
     },
     "interpret": {
       "coreExpressionCount": 2,
       "variationsPerExpression": 1,
-      "quickResponsePerExpression": 1
+      "quickResponsePerExample": 1
     },
     "interact": {
       "taskPackCount": 2,
@@ -1019,15 +1023,8 @@ Advanced 不能变成考试英语、长难句或语法讲解课。
       "chinese": "笔记本在一个小盘子旁边。",
       "understand": {},
       "focus": {},
-      "build": {}
-    }
-  ],
-  "quickResponses": [
-    {
-      "question": "Where is the laptop?",
-      "chunks": ["It is", "next to", "the coffee"],
-      "distractors": ["looks like"],
-      "answer": ["It is", "next to", "the coffee"]
+      "build": {},
+      "quickResponse": {}
     }
   ]
 }
@@ -1175,7 +1172,7 @@ AI 必须遵守：
 - 必须包含四个模块
 - 模块顺序固定为 Notice、Interpret、Interact、Step In
 - Notice 和 Interpret 必须包含 Expression Pack
-- 每个 Expression Pack 必须包含核心表达、基础例句、变式和 Quick Response
+- 每个 Expression Pack 必须包含核心表达、基础例句、变式，且每个基础例句和变式都必须各自包含 Quick Response
 - 每条基础例句和变式必须包含 Understand、Focus、Build
 - Interact 必须包含 Task Pack
 - 每个 Task Pack 必须同时包含 Need 和 Handle
@@ -1185,6 +1182,7 @@ AI 必须遵守：
 - 所有 answer 必须能由 chunks 组成
 - distractors 不能出现在正确答案中
 - 中文词块顺序必须能组成自然中文
+- Notice / Interpret 的 Quick Response 必须跟随每个例句单独出现，而不是 pack 末尾统一汇总
 - 英文词块顺序必须能组成自然英文
 - 核心表达必须真实出现在对应例句中
 
@@ -1314,7 +1312,7 @@ Do not include motives, emotions, relationships, or hidden events.
 For each Expression Pack:
 - generate one base example,
 - generate exactly {{notice.variationsPerExpression}} variations,
-- generate exactly {{notice.quickResponsePerExpression}} Quick Responses.
+- attach one Quick Response to the base example and one to each variation.
 
 The base example and variations must describe different visible aspects where possible.
 Do not make all examples describe the same object or repeat the same sentence structure.
@@ -1344,7 +1342,7 @@ Do not present inferences as confirmed facts.
 For each Expression Pack:
 - generate one base example,
 - generate exactly {{interpret.variationsPerExpression}} variations,
-- generate exactly {{interpret.quickResponsePerExpression}} Quick Responses.
+- attach one Quick Response to the base example and one to each variation.
 
 INTERACT:
 
@@ -1549,7 +1547,7 @@ GROUNDING
 CORE EXPRESSIONS
 - every core expression appears verbatim in its base example,
 - every variation preserves the same core expression,
-- Quick Responses reuse the assigned core expression,
+- every example-level Quick Response reuses the assigned core expression,
 - Step In only reuses previously learned expressions.
 
 EXERCISES
@@ -1708,21 +1706,23 @@ MVP 不采用一次生成一个模块。
 基础例句 Understand
 基础例句 Focus
 基础例句 Build
+基础例句 Quick Response
 变式 1 Understand
 变式 1 Focus
 变式 1 Build
+变式 1 Quick Response
 ……
 核心表达 2：
 基础例句 Understand
 基础例句 Focus
 基础例句 Build
+基础例句 Quick Response
 变式……
 ……
-全部 Quick Response
 模块里程碑
 ```
 
-Quick Response 在所有表达和变式练完后统一出现，不穿插在单个 Expression Pack 中间。
+Quick Response 跟随每个 example 单独出现，不再在整个 Expression Pack 结尾统一汇总。
 
 ## 20.2 Interact 播放顺序
 

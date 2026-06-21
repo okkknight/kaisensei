@@ -7,12 +7,12 @@ export const deepCourseDefaultConfig = {
   notice: {
     coreExpressionCount: 2,
     variationsPerExpression: 1,
-    quickResponsePerExpression: 1,
+    quickResponsePerExample: 1,
   },
   interpret: {
     coreExpressionCount: 2,
     variationsPerExpression: 1,
-    quickResponsePerExpression: 1,
+    quickResponsePerExample: 1,
   },
   interact: {
     taskPackCount: 2,

@@ -21,12 +21,14 @@ function createVariation({ english, chinese, understand, focus, build }) {
   };
 }
 
-function createQuickResponse({ question, chunks, answer, distractors = [] }) {
+function createExpressionExample({ english, chinese, understand, focus, build, quickResponse }) {
   return {
-    question,
-    chunks,
-    distractors,
-    answer,
+    english,
+    chinese,
+    understand,
+    focus,
+    build,
+    quickResponse,
   };
 }
 
@@ -36,7 +38,6 @@ function createExpressionPack({
   meaningChinese,
   baseExample,
   variations,
-  quickResponses,
 }) {
   return {
     id,
@@ -44,7 +45,6 @@ function createExpressionPack({
     meaningChinese,
     baseExample,
     variations,
-    quickResponses,
   };
 }
 
@@ -107,17 +107,23 @@ export function createDeepCourseLesson(level = "Normal") {
                 distractors: ["on the shelf"],
                 answer: ["A coffee mug", "is next to", "the laptop"],
               },
+              quickResponse: {
+                question: "What is next to the laptop?",
+                chunks: ["A coffee mug"],
+                distractors: ["A notebook"],
+                answer: ["A coffee mug"],
+              },
             },
             variations: [
-              createVariation({
-              english: "A coffee mug sits beside the laptop.",
-              chinese: "杯子放在笔记本电脑旁边。",
-              understand: createReorderExercise({
-                chunks: ["这个杯子", "放在", "笔记本电脑旁边"],
-                distractors: ["在桌上"],
-                highlight: "a coffee mug",
-                answer: ["这个杯子", "放在", "笔记本电脑旁边"],
-              }),
+              createExpressionExample({
+                english: "A coffee mug sits beside the laptop.",
+                chinese: "杯子放在笔记本电脑旁边。",
+                understand: createReorderExercise({
+                  chunks: ["这个杯子", "放在", "笔记本电脑旁边"],
+                  distractors: ["在桌上"],
+                  highlight: "a coffee mug",
+                  answer: ["这个杯子", "放在", "笔记本电脑旁边"],
+                }),
                 focus: {
                   sentenceWithBlanks: "____ sits beside the laptop.",
                   choices: ["a coffee mug"],
@@ -130,14 +136,12 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["on the shelf"],
                   answer: ["A coffee mug", "sits beside", "the laptop"],
                 },
-              }),
-            ],
-            quickResponses: [
-              createQuickResponse({
-                question: "What is next to the laptop?",
-                chunks: ["A coffee mug"],
-                distractors: ["A notebook"],
-                answer: ["A coffee mug"],
+                quickResponse: {
+                  question: "What sits beside the laptop?",
+                  chunks: ["A coffee mug"],
+                  distractors: ["A notebook"],
+                  answer: ["A coffee mug"],
+                },
               }),
             ],
           }),
@@ -166,17 +170,23 @@ export function createDeepCourseLesson(level = "Normal") {
                 distractors: ["by the window"],
                 answer: ["A laptop", "is open", "on the desk"],
               },
+              quickResponse: {
+                question: "What is open on the desk?",
+                chunks: ["A laptop"],
+                distractors: ["A plant"],
+                answer: ["A laptop"],
+              },
             },
             variations: [
-              createVariation({
-              english: "The laptop is ready for work.",
-              chinese: "这台笔记本电脑准备好工作了。",
-              understand: createReorderExercise({
+              createExpressionExample({
+                english: "The laptop is ready for work.",
+                chinese: "这台笔记本电脑准备好工作了。",
+                understand: createReorderExercise({
                   chunks: ["这台笔记本电脑", "看起来", "已经准备好工作了"],
                   distractors: ["准备去午休"],
                   highlight: "laptop",
                   answer: ["这台笔记本电脑", "看起来", "已经准备好工作了"],
-              }),
+                }),
                 focus: {
                   sentenceWithBlanks: "____ is ready for work.",
                   choices: ["a laptop"],
@@ -189,14 +199,12 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["by the window"],
                   answer: ["The laptop", "is ready for work"],
                 },
-              }),
-            ],
-            quickResponses: [
-              createQuickResponse({
-                question: "What is open on the desk?",
-                chunks: ["A laptop"],
-                distractors: ["A plant"],
-                answer: ["A laptop"],
+                quickResponse: {
+                  question: "What is ready for work?",
+                  chunks: ["A laptop"],
+                  distractors: ["A plant"],
+                  answer: ["A laptop"],
+                },
               }),
             ],
           }),
@@ -231,17 +239,23 @@ export function createDeepCourseLesson(level = "Normal") {
                 distractors: ["a busy party"],
                 answer: ["It looks like", "a quiet work setup"],
               },
+              quickResponse: {
+                question: "How does the space feel?",
+                chunks: ["It feels calm and focused."],
+                distractors: ["It feels loud and crowded."],
+                answer: ["It feels calm and focused."],
+              },
             },
             variations: [
-              createVariation({
-              english: "The desk feels like a quiet work setup.",
-              chinese: "这张桌子感觉像一个安静的工作环境。",
-              understand: createReorderExercise({
+              createExpressionExample({
+                english: "The desk feels like a quiet work setup.",
+                chinese: "这张桌子感觉像一个安静的工作环境。",
+                understand: createReorderExercise({
                   chunks: ["这张桌子", "感觉像", "一个安静的工作环境"],
                   distractors: ["一趟短途散步"],
                   highlight: "a quiet work setup",
                   answer: ["这张桌子", "感觉像", "一个安静的工作环境"],
-              }),
+                }),
                 focus: {
                   sentenceWithBlanks: "The desk feels like a ____ work ____.",
                   choices: ["quiet", "setup", "sleep"],
@@ -254,14 +268,12 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["a short walk"],
                   answer: ["The desk", "feels like", "a quiet work setup"],
                 },
-              }),
-            ],
-            quickResponses: [
-              createQuickResponse({
-                question: "How does the space feel?",
-                chunks: ["It feels calm and focused."],
-                distractors: ["It feels loud and crowded."],
-                answer: ["It feels calm and focused."],
+                quickResponse: {
+                  question: "How does the desk feel?",
+                  chunks: ["It feels calm and focused."],
+                  distractors: ["It feels loud and crowded."],
+                  answer: ["It feels calm and focused."],
+                },
               }),
             ],
           }),
@@ -290,17 +302,23 @@ export function createDeepCourseLesson(level = "Normal") {
                 distractors: ["needs a nap"],
                 answer: ["The laptop", "seems ready for work"],
               },
+              quickResponse: {
+                question: "What seems ready for work?",
+                chunks: ["The laptop"],
+                distractors: ["The plant"],
+                answer: ["The laptop"],
+              },
             },
             variations: [
-              createVariation({
-              english: "Someone seems ready for work here.",
-              chinese: "这里看起来有人已经准备好工作了。",
-              understand: createReorderExercise({
+              createExpressionExample({
+                english: "Someone seems ready for work here.",
+                chinese: "这里看起来有人已经准备好工作了。",
+                understand: createReorderExercise({
                   chunks: ["这里看起来有人", "已经准备好工作了"],
                   distractors: ["出去吃午饭"],
                   highlight: "ready for work",
                   answer: ["这里看起来有人", "已经准备好工作了"],
-              }),
+                }),
                 focus: {
                   sentenceWithBlanks: "Someone seems ready for ____ here.",
                   choices: ["work", "sleep", "fun"],
@@ -313,14 +331,12 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["going out for lunch"],
                   answer: ["Someone seems", "ready for work", "here"],
                 },
-              }),
-            ],
-            quickResponses: [
-              createQuickResponse({
-                question: "What might someone be doing here?",
-                chunks: ["Getting ready to work."],
-                distractors: ["Starting a party."],
-                answer: ["Getting ready to work."],
+                quickResponse: {
+                  question: "Who seems ready for work here?",
+                  chunks: ["Someone"],
+                  distractors: ["Nobody"],
+                  answer: ["Someone"],
+                },
               }),
             ],
           }),
