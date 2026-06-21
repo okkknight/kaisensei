@@ -668,7 +668,7 @@ Ask the person next to you if you can use the outlet.
 
 - 正确句子作为用户消息气泡加入对话流
 - 候选区收起
-- 系统在同一页面生成对方回复气泡
+- 系统在同一页面生成一个不暴露 Handle 目标表达的桥接回复气泡
 
 ### 第二步：Handle
 
@@ -686,7 +686,7 @@ Ask the person next to you if you can use the outlet.
 要求：
 
 - Need 和 Handle 必须属于同一个 Task Pack
-- 对方回复必须与 Need 自然对应
+- 对方回复必须与 Need 自然对应，但不能直接说出当前练习的 Handle 目标表达
 - 对话保持短小，不追加额外轮次
 - 一轮 Dialogue Practice 固定为：用户 Need → 系统回复 → 用户 Handle
 
@@ -1072,11 +1072,11 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
         "distractors": ["It looks like"],
         "answer": ["Could I", "use", "this outlet"]
       },
-      "systemReply": "Of course. Go ahead.",
+      "systemReply": "No problem, take your time.",
       "handle": {
-        "chunks": ["Sure", "thank you"],
+        "chunks": ["Sure", "go ahead"],
         "distractors": ["next to"],
-        "answer": ["Sure", "thank you"]
+        "answer": ["Sure", "go ahead"]
       }
     }
   ]

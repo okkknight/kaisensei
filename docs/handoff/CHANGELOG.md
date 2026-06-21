@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-21
 
+- Refined Deep Mode Interact so the dialogue `systemReply` is a bridge sentence and the learned Handle expression stays reserved for the user's reply
+- Added normalizer and prompt guards so bridge replies that expose the learned Handle are rejected before reaching the UI
+- Updated the Deep Mode mock Interact dialogue examples to use bridge replies instead of exposing the target Handle line early
 - Aligned Deep Mode pack content so baseExample and variations keep the same core expression across Notice, Interpret, and Interact instead of drifting into separate pack meanings
 - Updated the Deep Mode mock data, page sequencing helpers, and exercise page rendering so the frontend prototype follows the same pack-level core expression rule
 - Hardened the Deep Mode prompt and normalizer so variation payloads are validated against the pack core expression before they reach the UI

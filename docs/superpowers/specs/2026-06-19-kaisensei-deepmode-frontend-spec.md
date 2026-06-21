@@ -1149,7 +1149,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-完成对话场景里 Handle 轮次的用户回答，接住系统回复并继续对话。
+完成对话场景里 Handle 轮次的用户回答，接住系统给出的桥接回复并继续对话。
 
 ##### 复用关系
 
@@ -1182,7 +1182,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 - 场景说明：来自 `taskPacks[i].dialogues[j].scene`
 - 场景中文辅助说明：来自后端返回的场景中文描述文本
 - 上一轮 Need 气泡：来自 `dialogues[j].need.answer`
-- 系统回复气泡：来自 `dialogues[j].systemReply`
+- 系统回复气泡：来自 `dialogues[j].systemReply`，它必须是一个不暴露 Handle 目标表达的桥接句
 - 用户提示：固定为 `Your turn: Build your Handle`
 - Handle 用户输入区：来自 `dialogues[j].handle.chunks / distractors / answer`
 - 底部按钮：固定为 `Reset / Hint / Send`

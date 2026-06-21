@@ -69,6 +69,22 @@ function ensureAnswerCoverage(answer, choices, path) {
   }
 }
 
+function normalizeDeepText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function joinChunks(chunks) {
+  if (!Array.isArray(chunks)) {
+    return "";
+  }
+
+  return chunks.join(" ").replace(/\s+([,.!?;:])/g, "$1").replace(/\s+/g, " ").trim();
+}
+
 function ensureExactLength(value, expectedLength, path) {
   if (!Array.isArray(value)) {
     fail(`Missing or invalid array at ${path}`, { path });
@@ -276,6 +292,9 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
   const dialogues = Array.isArray(pack.dialogues) ? pack.dialogues : [];
   const needVariations = Array.isArray(need.variations) ? need.variations : [];
   const handleVariations = Array.isArray(handle.variations) ? handle.variations : [];
+  const needCoreExpression = ensureString(need.coreExpression, `${path}.need.coreExpression`);
+  const handleCoreExpression = ensureString(handle.coreExpression, `${path}.handle.coreExpression`);
+  const normalizedHandleCoreExpression = normalizeDeepText(handleCoreExpression);
 
   const normalized = {
     ...pack,
@@ -284,29 +303,45 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
     scenePrompt,
     need: {
       ...need,
-      coreExpression: ensureString(need.coreExpression, `${path}.need.coreExpression`),
+      coreExpression: needCoreExpression,
       meaningChinese: ensureString(need.meaningChinese, `${path}.need.meaningChinese`),
       baseExample: normalizeMaybeReorderExercise(need.baseExample || {}, `${path}.need.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
-      variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, need.coreExpression, exerciseConfig)),
+      variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, needCoreExpression, exerciseConfig)),
     },
     handle: {
       ...handle,
-      coreExpression: ensureString(handle.coreExpression, `${path}.handle.coreExpression`),
+      coreExpression: handleCoreExpression,
       meaningChinese: ensureString(handle.meaningChinese, `${path}.handle.meaningChinese`),
       baseExample: normalizeMaybeReorderExercise(handle.baseExample || {}, `${path}.handle.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
-      variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, handle.coreExpression, exerciseConfig)),
+      variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, handleCoreExpression, exerciseConfig)),
     },
     dialogues: dialogues.map((dialogue, index) => {
       if (!isPlainObject(dialogue)) {
         fail(`Missing or invalid object at ${path}.dialogues[${index}]`, { path: `${path}.dialogues[${index}]` });
       }
 
+      const dialogueNeed = normalizeMaybeReorderExercise(dialogue.need || {}, `${path}.dialogues[${index}].need`, exerciseConfig, exerciseConfig.buildDistractorCount);
+      const dialogueHandle = normalizeMaybeReorderExercise(dialogue.handle || {}, `${path}.dialogues[${index}].handle`, exerciseConfig, exerciseConfig.buildDistractorCount);
+      const systemReply = ensureString(dialogue.systemReply, `${path}.dialogues[${index}].systemReply`);
+      const normalizedSystemReply = normalizeDeepText(systemReply);
+      const dialogueHandleAnswer = joinChunks(dialogueHandle.answer);
+      const normalizedDialogueHandleAnswer = normalizeDeepText(dialogueHandleAnswer);
+
+      if (
+        normalizedSystemReply.includes(normalizedHandleCoreExpression) ||
+        (normalizedDialogueHandleAnswer && normalizedSystemReply.includes(normalizedDialogueHandleAnswer))
+      ) {
+        fail(`Dialogue systemReply must be a bridge sentence, not the learned handle expression`, {
+          path: `${path}.dialogues[${index}].systemReply`,
+        });
+      }
+
       return {
         ...dialogue,
         scene: ensureString(dialogue.scene, `${path}.dialogues[${index}].scene`),
-        need: normalizeMaybeReorderExercise(dialogue.need || {}, `${path}.dialogues[${index}].need`, exerciseConfig, exerciseConfig.buildDistractorCount),
-        systemReply: ensureString(dialogue.systemReply, `${path}.dialogues[${index}].systemReply`),
-        handle: normalizeMaybeReorderExercise(dialogue.handle || {}, `${path}.dialogues[${index}].handle`, exerciseConfig, exerciseConfig.buildDistractorCount),
+        need: dialogueNeed,
+        systemReply,
+        handle: dialogueHandle,
       };
     }),
   };

@@ -31,6 +31,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Quick Mode has already been further split into a lesson container plus quick-owned step, feedback, loading, error, and empty-state files
 - Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
 - Deep Mode packs now keep one core expression across baseExample and variations, and the mock / backend alignment work has been applied across Notice, Interpret, and Interact
+- Interact dialogue practice now treats `systemReply` as a bridge sentence and keeps the learned Handle expression for the user's reply, instead of exposing the answer early
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
 - The Deep Mode architecture baseline is being refined before feature work lands, so `deep/` should stay isolated from `quick/`
@@ -47,7 +48,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: align Deep Mode pack-level core expression rules so baseExample and variations stay on the same core expression across Notice, Interpret, and Interact
+- Task: align Deep Mode Interact dialogue flow so `systemReply` becomes a bridge sentence and the learned Handle expression stays reserved for the user's reply
 - Status: 已执行待验收
 
 ## Architecture or state flow
@@ -92,6 +93,7 @@ Deep Mode planned states:
 - `prototype/src/deep/course/useDeepExerciseSequence.js` - Notice / Interpret page sequencing
 - `prototype/src/deep/course/useDeepInteractFlow.js` - Interact / Step In page sequencing
 - `prototype/src/deep/course/deep-flow-utils.js` - Deep Mode flow helpers
+- `prototype/src/deep/course/DeepDialogueFlowPage.jsx` - Interact dialogue timeline and answer layout
 - `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
 - `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt and rules
 - `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
@@ -123,6 +125,7 @@ Deep Mode planned states:
 - Preserve the current Quick Mode flow while Deep Mode is being added
 - Do not let Deep Mode changes alter existing Quick Mode behavior
 - Keep Deep Mode pack content on one core expression per pack, with baseExample and variations sharing that same value
+- Treat Interact `systemReply` as a bridge sentence, not as the learned Handle target
 - Use the Deep Mode spec as the source of truth for the new mode
 - Prefer isolated feature boundaries so Deep Mode can become a standalone project later
 - Keep docs compact and source-of-truth oriented

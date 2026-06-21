@@ -18,6 +18,7 @@ Notes:
 - Keep the project context authoritative and the changelog append-only
 - The current focus is Deep Mode implementation with Quick Mode left unchanged
 - The current alignment task is keeping each Deep Mode pack on one core expression across baseExample and variations
+- The latest Interact rule is that `systemReply` should be a bridge sentence while the learned Handle expression stays for the user reply
 - Treat the Deep Mode design doc as the authoritative product fact source and the Deep Mode spec as the implementation boundary source
 - Treat the structure isolation plan as the next execution step
 - Do not duplicate the same state in multiple docs

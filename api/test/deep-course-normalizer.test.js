@@ -35,3 +35,11 @@ test("normalizeDeepCoursePayload accepts focus-style exercises", () => {
   assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.focus.sentenceWithBlanks, "A laptop is ____ ____ the mug.");
   assert.deepEqual(normalized.modules.notice.expressionPacks[0].baseExample.focus.answer, ["next", "to"]);
 });
+
+test("normalizeDeepCoursePayload rejects dialogue system replies that expose the learned handle", () => {
+  const payload = buildValidDeepCoursePayload();
+  const handleCoreExpression = payload.modules.interact.taskPacks[0].handle.coreExpression;
+  payload.modules.interact.taskPacks[0].dialogues[0].systemReply = `Please ${handleCoreExpression}.`;
+
+  assert.throws(() => normalizeDeepCoursePayload(payload), /bridge sentence/i);
+});

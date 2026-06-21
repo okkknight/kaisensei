@@ -103,6 +103,8 @@ export function buildDeepCoursePrompt({
     "- The Handle expression must naturally respond to the system reply.",
     "- Need and Handle variations must keep the same coreExpression as their pack.",
     "- Do not introduce a new coreExpression inside a Need or Handle variation.",
+    "- The systemReply inside each dialogue must be a bridge sentence, not the learned Handle expression.",
+    "- The systemReply must not repeat, expose, or answer with the Handle coreExpression.",
     `- Generate exactly ${promptConfig.interact.taskPackCount} Task Packs.`,
     `- Generate exactly ${promptConfig.interact.variationsPerNeedExpression} Need variations per Task Pack.`,
     `- Generate exactly ${promptConfig.interact.variationsPerHandleExpression} Handle variations per Task Pack.`,

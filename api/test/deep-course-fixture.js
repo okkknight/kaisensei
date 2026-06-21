@@ -93,7 +93,7 @@ function makeTaskPack(id, label) {
       {
         scene: `${label} dialogue scene`,
         need: makeBuildExercise(`${label} dialogue need`),
-        systemReply: `${label} system reply`,
+        systemReply: `${label} bridge reply`,
         handle: makeBuildExercise(`${label} dialogue handle`),
       },
     ],
