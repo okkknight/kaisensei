@@ -99,15 +99,38 @@ function buildExercisePages(packs, moduleKey) {
 
   if (moduleKey === "notice" || moduleKey === "interpret") {
     const pages = [];
+    const maxExampleCount = Math.max(...packedExamples.map(({ examples }) => examples.length), 0);
 
-    packedExamples.forEach(({ pack, examples }) => {
-      examples.forEach((example) => {
-        pages.push(makeUnderstandPage(pack, example));
-        pages.push(makeFocusPage(pack, example));
-        pages.push(makeBuildPage(pack, example));
-        pages.push(makeQuickResponsePage(pack, example));
+    for (let exampleIndex = 0; exampleIndex < maxExampleCount; exampleIndex += 1) {
+      packedExamples.forEach(({ pack, examples }) => {
+        const example = examples[exampleIndex];
+        if (example) {
+          pages.push(makeUnderstandPage(pack, example));
+        }
       });
-    });
+      packedExamples.forEach(({ pack, examples }) => {
+        const example = examples[exampleIndex];
+        if (example) {
+          pages.push(makeFocusPage(pack, example));
+        }
+      });
+    }
+
+    for (let exampleIndex = 0; exampleIndex < maxExampleCount; exampleIndex += 1) {
+      packedExamples.forEach(({ pack, examples }) => {
+        const example = examples[exampleIndex];
+        if (example) {
+          pages.push(makeBuildPage(pack, example));
+        }
+      });
+
+      packedExamples.forEach(({ pack, examples }) => {
+        const example = examples[exampleIndex];
+        if (example) {
+          pages.push(makeQuickResponsePage(pack, example));
+        }
+      });
+    }
 
     return pages;
   }

@@ -1702,27 +1702,58 @@ MVP 不采用一次生成一个模块。
 每个 Expression Pack 按以下顺序播放：
 
 ```text
-核心表达 1：
-基础例句 Understand
-基础例句 Focus
-基础例句 Build
-基础例句 Quick Response
-变式 1 Understand
-变式 1 Focus
-变式 1 Build
-变式 1 Quick Response
+例句 1：
+核心表达 1 Understand
+核心表达 2 Understand
 ……
-核心表达 2：
-基础例句 Understand
-基础例句 Focus
-基础例句 Build
-基础例句 Quick Response
-变式……
+核心表达 n Understand
+核心表达 1 Focus
+核心表达 2 Focus
 ……
-模块里程碑
+核心表达 n Focus
+
+例句 2：
+核心表达 1 Understand
+核心表达 2 Understand
+……
+核心表达 n Understand
+核心表达 1 Focus
+核心表达 2 Focus
+……
+核心表达 n Focus
+
+……
+
+例句 n：
+核心表达 1 Understand
+核心表达 2 Understand
+……
+核心表达 n Understand
+核心表达 1 Focus
+核心表达 2 Focus
+……
+核心表达 n Focus
+
+核心表达 1 Build
+核心表达 2 Build
+……
+核心表达 n Build
+
+核心表达 1 Quick Response
+核心表达 2 Quick Response
+……
+核心表达 n Quick Response
+
+下一例句或模块里程碑
 ```
 
-Quick Response 跟随每个 example 单独出现，不再在整个 Expression Pack 结尾统一汇总。
+其中：
+
+- 先按例句序号横向对齐不同核心表达
+- 每个例句先走 Understand，再走 Focus
+- 所有例句的 Build 统一在后面一轮完成
+- 每个例句的 Quick Response 紧跟 Build 之后完成
+- 不再按单个核心表达把完整练习串到底
 
 ## 20.2 Interact 播放顺序
 
@@ -1730,11 +1761,25 @@ Quick Response 跟随每个 example 单独出现，不再在整个 Expression Pa
 
 ```text
 Task Pack 1：
-Need 基础例句三步
-Need 所有变式三步
-Handle 基础例句三步
-Handle 所有变式三步
-该任务所有 Dialogue Practice
+Need 例句 1 Understand
+Handle 例句 1 Understand
+Need 例句 2 Understand
+Handle 例句 2 Understand
+……
+
+Need 例句 1 Focus
+Handle 例句 1 Focus
+Need 例句 2 Focus
+Handle 例句 2 Focus
+……
+
+Need 例句 1 Build
+Handle 例句 1 Build
+Need 例句 2 Build
+Handle 例句 2 Build
+……
+
+该 Task Pack 的 Dialogue Practice
 
 Task Pack 2：
 重复同一结构

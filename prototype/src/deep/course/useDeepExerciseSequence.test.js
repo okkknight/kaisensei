@@ -41,27 +41,27 @@ function makePack(id, coreExpression) {
   };
 }
 
-test("buildExercisePages keeps each example's Quick Response attached to that example", () => {
+test("buildExercisePages orders Notice and Interpret by example index first, then exercise type", () => {
   const pages = buildExercisePages([makePack("p1", "core one"), makePack("p2", "core two")], "notice");
 
   assert.deepEqual(
     pages.map((page) => page.id),
     [
       "p1-core one base english-understand",
-      "p1-core one base english-focus",
-      "p1-core one base english-build",
-      "p1-core one base english-quick-response",
-      "p1-core one variation english-understand",
-      "p1-core one variation english-focus",
-      "p1-core one variation english-build",
-      "p1-core one variation english-quick-response",
       "p2-core two base english-understand",
+      "p1-core one base english-focus",
       "p2-core two base english-focus",
-      "p2-core two base english-build",
-      "p2-core two base english-quick-response",
+      "p1-core one variation english-understand",
       "p2-core two variation english-understand",
+      "p1-core one variation english-focus",
       "p2-core two variation english-focus",
+      "p1-core one base english-build",
+      "p2-core two base english-build",
+      "p1-core one base english-quick-response",
+      "p2-core two base english-quick-response",
+      "p1-core one variation english-build",
       "p2-core two variation english-build",
+      "p1-core one variation english-quick-response",
       "p2-core two variation english-quick-response",
     ]
   );
