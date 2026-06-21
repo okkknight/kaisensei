@@ -2141,17 +2141,21 @@ img {
 }
 
 .deep-overview-media {
-  min-height: 248px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
 }
 
 .deep-overview-photo {
   width: 100%;
   height: 100%;
-  min-height: 248px;
+  display: block;
   object-fit: cover;
 }
 
 .deep-overview-photo-placeholder {
+  width: 100%;
+  height: 100%;
   background:
     radial-gradient(circle at 30% 20%, rgba(255, 211, 77, 0.4), transparent 30%),
     radial-gradient(circle at 70% 65%, rgba(108, 78, 246, 0.28), transparent 32%),
