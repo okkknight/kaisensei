@@ -7,7 +7,6 @@ function SummarySection({ title, items }) {
     <section className="deep-summary-group">
       <div className="deep-summary-group-head">
         <span>{title}</span>
-        <strong>{items.length}</strong>
       </div>
       <div className="deep-summary-items">
         {items.map((item) => (
@@ -45,17 +44,29 @@ export function DeepInteractMilestonePage({ taskPacks = [] }) {
         </div>
 
         <div className="deep-completion-copy">
-          <h2>Interact</h2>
-          <p>{DEEP_COPY.interactSummary}</p>
+          <h2>Excellent!</h2>
+          <p>You completed the Interact stage.</p>
+          <span>你已完成 Interact 阶段！</span>
         </div>
 
-        <SummarySection title="Task Packs" items={taskItems} />
-        <SummarySection title="Need" items={needItems} />
-        <SummarySection title="Handle" items={handleItems} />
+        <SummarySection title="Completed task packs" items={taskItems} />
+        <SummarySection title="Need expressions" items={needItems} />
+        <SummarySection title="Handle expressions" items={handleItems} />
+
+        <section className="deep-summary-group">
+          <div className="deep-summary-group-head">
+            <span>Capability summary</span>
+          </div>
+          <div className="deep-summary-items">
+            <div className="deep-summary-item">
+              <strong>Speak and respond naturally.</strong>
+              <p>{DEEP_COPY.interactSummary}</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
 export default DeepInteractMilestonePage;
-

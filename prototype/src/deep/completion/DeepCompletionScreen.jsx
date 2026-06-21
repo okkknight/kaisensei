@@ -1,5 +1,5 @@
 import React from "react";
-import { IconArrowLeft, IconRotateClockwise, IconSparkles, IconStars } from "@tabler/icons-react";
+import { IconRotateClockwise, IconSparkles, IconStars } from "@tabler/icons-react";
 import { DEEP_COPY } from "../copy.js";
 
 function SummaryGroup({ title, items }) {
@@ -7,7 +7,6 @@ function SummaryGroup({ title, items }) {
     <section className="deep-summary-group">
       <div className="deep-summary-group-head">
         <span>{title}</span>
-        <strong>{items.length}</strong>
       </div>
       <div className="deep-summary-items">
         {items.map((item) => (
@@ -39,18 +38,6 @@ export function DeepCompletionScreen({ lesson, photoPreviewUrl, onBack, onExitTo
   return (
     <div className="screen lesson-screen deep-completion-screen">
       <div className="lesson-content deep-completion-content">
-        <div className="screen-header deep-completion-header">
-          <button className="back-button" type="button" aria-label="Back" onClick={onBack}>
-            <IconArrowLeft size={18} />
-          </button>
-          <div className="screen-header-copy">
-            <div className="screen-progress-copy">
-              <span className="screen-progress-count">Completion</span>
-              <span className="screen-progress-label">Deep Mode</span>
-            </div>
-          </div>
-        </div>
-
         <div className="deep-completion-card">
           <div className="deep-completion-hero">
             {photoPreviewUrl ? <img src={photoPreviewUrl} alt="Completed scene" className="deep-completion-photo" /> : <div className="deep-completion-photo deep-completion-photo-placeholder" />}
@@ -60,8 +47,9 @@ export function DeepCompletionScreen({ lesson, photoPreviewUrl, onBack, onExitTo
           </div>
 
           <div className="deep-completion-copy">
-            <h2>{DEEP_COPY.finish}</h2>
-            <p>Notice, Interpret, Interact, and Step In now fit one scene.</p>
+            <h2>{DEEP_COPY.completionTitle}</h2>
+            <p>{DEEP_COPY.completionDescription}</p>
+            <span>{DEEP_COPY.completionChinese}</span>
           </div>
 
           <SummaryGroup title="Notice" items={noticeItems} />
@@ -71,7 +59,6 @@ export function DeepCompletionScreen({ lesson, photoPreviewUrl, onBack, onExitTo
           <section className="deep-summary-group">
             <div className="deep-summary-group-head">
               <span>Step In</span>
-              <strong>{stepInTurns.length}</strong>
             </div>
             <div className="deep-dialogue-replay">
               {stepInTurns.map((turn, index) => (

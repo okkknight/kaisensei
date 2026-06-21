@@ -3,6 +3,7 @@ import { IconSparkles } from "@tabler/icons-react";
 import { DEEP_COPY } from "../copy.js";
 
 export function DeepLoadingScreen({ message = DEEP_COPY.loading[0], progress = 42 }) {
+  const loadingState = DEEP_COPY.loading[Math.min(DEEP_COPY.loading.length - 1, progress >= 80 ? 2 : progress >= 50 ? 1 : 0)];
   return (
     <div className="screen loading-screen deep-loading-screen">
       <div className="deep-loading-stage">
@@ -34,7 +35,8 @@ export function DeepLoadingScreen({ message = DEEP_COPY.loading[0], progress = 4
         </div>
 
         <div className="deep-loading-copy">
-          <p>{message}</p>
+          <p>{loadingState.primary}</p>
+          <span>{loadingState.secondary}</span>
           <div className="loading-dots" aria-hidden="true">
             <span />
             <span />

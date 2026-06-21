@@ -2,7 +2,6 @@ import React from "react";
 import { IconCheck, IconRefresh } from "@tabler/icons-react";
 import { DEEP_COPY } from "../copy.js";
 import { DeepChunkChip } from "./DeepChunkChip.jsx";
-import { DeepFeedbackCard } from "./DeepFeedbackCard.jsx";
 
 function DialogueTurn({ turn }) {
   return (
@@ -17,6 +16,7 @@ export function DeepDialogueFlowPage({
   stageLabel = "Dialogue",
   title,
   subtitle,
+  showHeader = true,
   scene,
   introCards = [],
   history = [],
@@ -30,23 +30,30 @@ export function DeepDialogueFlowPage({
   onCheck,
   onContinue,
   continueLabel = DEEP_COPY.continue,
-  historyEmpty = "Build the answer to move the dialogue forward.",
+  historyEmpty = "",
   showActions = false,
+  emptyMessage = DEEP_COPY.tapChunksToBuild,
 }) {
   const canContinue = feedback.tone === "success";
+  const selectedChunkSet = new Set(selectedChunks);
+  const availableBank = bank.filter((chunk) => !selectedChunkSet.has(chunk));
 
   return (
     <div className="deep-dialogue-flow-page">
-      <div className="deep-exercise-head">
-        <span className="deep-exercise-stage">{stageLabel}</span>
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </div>
+      {showHeader ? (
+        <div className="deep-exercise-head">
+          <span className="deep-exercise-stage">{stageLabel}</span>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+      ) : null}
 
-      <div className="deep-dialogue-scene-card">
-        <span>Scene</span>
-        <strong>{scene}</strong>
-      </div>
+      {scene ? (
+        <div className="deep-dialogue-scene-card">
+          <span>Scene</span>
+          <strong>{scene}</strong>
+        </div>
+      ) : null}
 
       {introCards.length > 0 ? (
         <div className="deep-stage-stack">
@@ -61,13 +68,15 @@ export function DeepDialogueFlowPage({
         </div>
       ) : null}
 
-      <div className="deep-dialogue-history">
-        {history.length > 0 ? (
-          history.map((turn, index) => <DialogueTurn key={`${turn.speaker}-${index}-${turn.text}`} turn={turn} />)
-        ) : (
-          <div className="deep-dialogue-history-empty">{historyEmpty}</div>
-        )}
-      </div>
+      {history.length > 0 || historyEmpty ? (
+        <div className="deep-dialogue-history">
+          {history.length > 0 ? (
+            history.map((turn, index) => <DialogueTurn key={`${turn.speaker}-${index}-${turn.text}`} turn={turn} />)
+          ) : (
+            <div className="deep-dialogue-history-empty">{historyEmpty}</div>
+          )}
+        </div>
+      ) : null}
 
       <div className="deep-exercise-prompt deep-dialogue-prompt">
         <strong>{prompt}</strong>
@@ -80,18 +89,15 @@ export function DeepDialogueFlowPage({
             <DeepChunkChip key={chunk} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
           ))
         ) : (
-          <div className="deep-answer-empty">Tap chunks to build your answer.</div>
+          <div className="deep-answer-empty">{emptyMessage}</div>
         )}
       </div>
 
       <div className="deep-bank-row">
-        {bank.map((chunk) => {
-          const isSelected = selectedChunks.includes(chunk);
-          return <DeepChunkChip key={chunk} chunk={chunk} selected={isSelected} onClick={() => onToggleChunk(chunk)} />;
+        {availableBank.map((chunk) => {
+          return <DeepChunkChip key={chunk} chunk={chunk} onClick={() => onToggleChunk(chunk)} />;
         })}
       </div>
-
-      <DeepFeedbackCard tone={feedback.tone} title={feedback.title} body={feedback.body} />
 
       {showActions ? (
         <div className="deep-exercise-actions">

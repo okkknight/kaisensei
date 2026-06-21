@@ -17,10 +17,10 @@ export function DeepOverviewScreen({ lesson, photoPreviewUrl, onStart, onBack })
             ←
           </button>
           <div className="screen-header-copy">
-            <div className="screen-progress-copy">
-              <span className="screen-progress-count">Overview</span>
-              <span className="screen-progress-label">Deep Mode</span>
-            </div>
+          <div className="screen-progress-copy">
+            <span className="screen-progress-count">Overview</span>
+            <span className="screen-progress-label">Deep Mode</span>
+          </div>
           </div>
           <button className="camera-settings-button deep-overview-settings" type="button" aria-label="Settings">
             <IconSettings size={16} />
@@ -39,15 +39,9 @@ export function DeepOverviewScreen({ lesson, photoPreviewUrl, onStart, onBack })
           <div className="deep-overview-copy">
             <div className="deep-overview-keywords">{overview.keywords.join(" · ")}</div>
             <div className="deep-overview-scene">{overview.sceneDescriptionChinese}</div>
-            <div className="deep-overview-prompt">{overview.startPromptChinese}</div>
+            <div className="deep-overview-prompt">{DEEP_COPY.overviewPrompt}</div>
+            <div className="deep-overview-cta">{DEEP_COPY.startDeepMode}</div>
           </div>
-        </button>
-      </div>
-
-      <div className="lesson-footer">
-        <button className="primary-button" type="button" onClick={onStart}>
-          Start
-          <IconArrowRight size={18} />
         </button>
       </div>
     </div>

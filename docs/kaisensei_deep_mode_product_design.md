@@ -123,7 +123,7 @@ coffee · table · laptop
 - 使用高频、具体、可见的名词
 - 不要加入推测内容
 
-第二行：场景描述，中文显示。
+第二行：场景描述，中文显示，来自后端返回值。
 
 ```text
 咖啡厅里悠闲的下午茶时间
@@ -131,7 +131,8 @@ coffee · table · laptop
 
 要求：
 
-- AI 根据照片做合理、保守的情境推测
+- 由后端返回场景描述文本，前端直接渲染
+- 如果生成侧需要补充这行文案，应遵循合理、保守的情境推测
 - 可以包含地点、活动或氛围
 - 不要编造具体人物关系或无法判断的事实
 - 只输出一句简短描述
@@ -980,6 +981,14 @@ Advanced 不能变成考试英语、长难句或语法讲解课。
 
 # 14. Notice / Interpret 的 Expression Pack
 
+说明：
+
+- `meaningChinese` 表示表达释义，不是页面任务说明
+- `baseExample.chinese` 表示目标句中文
+- `build.promptChinese` 表示固定任务说明文案
+- `variations[*].chinese` 同样表示目标句中文
+- 页面实现时不要把这几类中文字段混用
+
 ```json
 {
   "id": "notice_expression_1",
@@ -1029,6 +1038,14 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
 ---
 
 # 15. Interact 的 Task Pack
+
+说明：
+
+- `need.meaningChinese` 和 `handle.meaningChinese` 都表示表达释义
+- `scenePrompt` 表示当前任务场景说明，不是目标句中文
+- `dialogues[*].scene` 表示对话场景说明
+- `dialogues[*].need.chunks` / `handle.chunks` 承载的是练习用词块，不是页面任务说明
+- 页面里如果出现中文提示文案，应按固定任务说明理解，不要和字段释义混淆
 
 ```json
 {

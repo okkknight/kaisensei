@@ -53,6 +53,11 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
   }
 
   function goBack() {
+    if (phase === "completion") {
+      setPhase("overview");
+      return;
+    }
+
     if (phase === "overview" || phase === "loading") {
       onExitToCamera?.();
       return;

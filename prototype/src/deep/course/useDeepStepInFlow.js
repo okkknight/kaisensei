@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
 import { joinDeepChunks } from "./deep-flow-utils.js";
@@ -9,6 +9,7 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [isComplete, setIsComplete] = useState(false);
+  const autoAdvanceTimerRef = useRef(null);
 
   const currentSystemTurn = safeTurns[turnIndex - 1] ?? null;
   const currentUserTurn = safeTurns[turnIndex] ?? null;
@@ -39,6 +40,10 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
           : "Step In";
 
   function clearSelection() {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
   }
@@ -54,7 +59,24 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
     clearSelection();
   }
 
+  function hint() {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    const firstChunk = Array.isArray(currentAnswer) ? currentAnswer[0] : "";
+    setFeedback({
+      tone: "hinted",
+      title: DEEP_COPY.hint,
+      body: firstChunk ? `Try "${firstChunk}" first.` : "Try a smaller chunk first.",
+    });
+  }
+
   function toggleChunk(chunk) {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
     setSelectedChunks((current) => {
       const exists = current.some((item) => item === chunk);
       return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
@@ -73,6 +95,9 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
         title: DEEP_COPY.correct,
         body: "You kept the conversation moving.",
       });
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        advance();
+      }, 650);
       return;
     }
 
@@ -82,6 +107,15 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
       body: "Try the same idea with a more natural chunk order.",
     });
   }
+
+  useEffect(
+    () => () => {
+      if (autoAdvanceTimerRef.current) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+      }
+    },
+    []
+  );
 
   function advance() {
     clearSelection();
@@ -112,6 +146,7 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
     feedback,
     toggleChunk,
     reset,
+    hint,
     check,
     advance,
     currentUserTurn,

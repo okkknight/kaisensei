@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
 import { getExampleVariants, joinDeepChunks } from "./deep-flow-utils.js";
@@ -88,6 +88,32 @@ function getExerciseData(example, stage, title, subtitle) {
   };
 }
 
+function getHintMessage(stage, answer) {
+  const firstChunk = Array.isArray(answer) ? answer[0] : "";
+
+  if (!firstChunk) {
+    return "Try a smaller chunk first.";
+  }
+
+  if (stage === "needUnderstand" || stage === "handleUnderstand") {
+    return `Start with "${firstChunk}".`;
+  }
+
+  if (stage === "needFocus" || stage === "handleFocus") {
+    return `Look for the blank that matches "${firstChunk}".`;
+  }
+
+  if (stage === "needBuild" || stage === "handleBuild") {
+    return `Begin with "${firstChunk}".`;
+  }
+
+  if (stage === "dialogueNeed" || stage === "dialogueHandle") {
+    return `Try "${firstChunk}" first.`;
+  }
+
+  return `Start with "${firstChunk}".`;
+}
+
 export function useDeepInteractFlow(taskPacks = []) {
   const safeTaskPacks = Array.isArray(taskPacks) ? taskPacks : [];
   const [taskIndex, setTaskIndex] = useState(0);
@@ -97,6 +123,7 @@ export function useDeepInteractFlow(taskPacks = []) {
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [dialogueHistory, setDialogueHistory] = useState([]);
+  const autoAdvanceTimerRef = useRef(null);
 
   const taskPack = safeTaskPacks[taskIndex] ?? null;
   const needExamples = useMemo(() => getExampleVariants(taskPack?.need), [taskPack]);
@@ -108,6 +135,19 @@ export function useDeepInteractFlow(taskPacks = []) {
   const isHandleStage = stage.startsWith("handle");
   const isExerciseStage = isNeedStage || isHandleStage;
   const stageLabel = getStageLabel(stage);
+  const stepLabel = stage === "needUnderstand"
+    ? "Step 1 of 3"
+    : stage === "needFocus"
+      ? "Step 2 of 3"
+      : stage === "needBuild"
+        ? "Step 3 of 3"
+        : stage === "handleUnderstand"
+          ? "Step 1 of 3"
+          : stage === "handleFocus"
+            ? "Step 2 of 3"
+            : stage === "handleBuild"
+              ? "Step 3 of 3"
+              : "";
 
   const exerciseData = useMemo(() => {
     if (!isExerciseStage) {
@@ -186,6 +226,10 @@ export function useDeepInteractFlow(taskPacks = []) {
   }, [stage, taskPack]);
 
   function clearSelection() {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
   }
@@ -197,7 +241,23 @@ export function useDeepInteractFlow(taskPacks = []) {
     }
   }
 
+  function revealHint() {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    setFeedback({
+      tone: "hinted",
+      title: DEEP_COPY.hint,
+      body: getHintMessage(stage, answer),
+    });
+  }
+
   function toggleChunk(chunk) {
+    if (autoAdvanceTimerRef.current) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
     setSelectedChunks((current) => {
       const exists = current.some((item) => item === chunk);
       return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
@@ -226,6 +286,9 @@ export function useDeepInteractFlow(taskPacks = []) {
               ? "You replied naturally."
               : "You built the target expression.",
       });
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        advance();
+      }, 650);
       return;
     }
 
@@ -235,6 +298,15 @@ export function useDeepInteractFlow(taskPacks = []) {
       body: "Try arranging the chunks in a more natural order.",
     });
   }
+
+  useEffect(
+    () => () => {
+      if (autoAdvanceTimerRef.current) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+      }
+    },
+    []
+  );
 
   function advance() {
     clearSelection();
@@ -327,6 +399,7 @@ export function useDeepInteractFlow(taskPacks = []) {
   return {
     stage,
     stageLabel,
+    stepLabel,
     taskIndex,
     taskPack,
     taskTotal: safeTaskPacks.length,
@@ -347,6 +420,7 @@ export function useDeepInteractFlow(taskPacks = []) {
     startPractice,
     toggleChunk,
     reset,
+    hint: revealHint,
     check,
     advance,
     setStage,
@@ -355,4 +429,3 @@ export function useDeepInteractFlow(taskPacks = []) {
 }
 
 export default useDeepInteractFlow;
-

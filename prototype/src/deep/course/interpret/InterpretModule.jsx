@@ -23,17 +23,18 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
         onAdvance={onAdvance}
         footerActions={
           <button className="primary-button" type="button" onClick={onAdvance}>
-            {DEEP_COPY.continueToStepIn}
+            {DEEP_COPY.continueToInteract}
           </button>
         }
       >
         <div className="deep-summary-landing">
           <div className="deep-summary-landing-copy">
             <strong>Great job!</strong>
-            <p>You completed the Interpret stage.</p>
+            <p>You've completed the Interpret stage.</p>
             <span>你已完成 Interpret 阶段！</span>
           </div>
           <div className="deep-summary-landing-list">
+            <div className="deep-summary-section-title">Core expressions you interpreted</div>
             {summaryItems.map((item) => (
               <div key={item.title} className="deep-summary-row">
                 <strong>{item.title}</strong>
@@ -60,8 +61,11 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
           <button className="secondary-button" type="button" onClick={sequence.reset}>
             {DEEP_COPY.reset}
           </button>
+          <button className="secondary-button" type="button" onClick={sequence.hint}>
+            {DEEP_COPY.hint}
+          </button>
           <button className="primary-button" type="button" onClick={sequence.feedback.tone === "success" ? sequence.advance : sequence.check}>
-            {sequence.feedback.tone === "success" ? DEEP_COPY.continueToStepIn : DEEP_COPY.check}
+            {DEEP_COPY.check}
           </button>
         </div>
       }
@@ -74,12 +78,12 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
         bank={sequence.bank}
         selectedChunks={sequence.selectedChunks}
         feedback={sequence.feedback}
+        bankFirst={sequence.stage === "build"}
         onToggleChunk={sequence.toggleChunk}
         onReset={sequence.reset}
         onCheck={sequence.check}
-        onContinue={sequence.advance}
-        continueLabel={DEEP_COPY.continueToStepIn}
         stageLabel={sequence.currentStageLabel}
+        stepLabel={sequence.stepLabel}
         showActions={false}
       />
     </DeepCourseShell>

@@ -11,27 +11,21 @@ function PreviewCard({ label, title, body, tone = "default" }) {
 }
 
 export function DeepTaskPackGuidePage({
-  taskIndex,
-  taskTotal,
   taskTitle,
   scenePrompt,
   needExpression,
   needMeaning,
   handleExpression,
   handleMeaning,
-  lead,
 }) {
   return (
     <div className="deep-guide-page">
       <div className="deep-exercise-head">
         <span className="deep-exercise-stage">Interact</span>
-        <h2>{taskTitle}</h2>
-        <p>{lead}</p>
       </div>
 
       <div className="deep-stage-card deep-guide-task-card">
-        <span>Task Pack</span>
-        <strong>{taskTotal > 1 ? `Task ${taskIndex + 1} / ${taskTotal}` : "Task Pack"}</strong>
+        <strong>{taskTitle}</strong>
         <p>{scenePrompt}</p>
       </div>
 
@@ -44,4 +38,3 @@ export function DeepTaskPackGuidePage({
 }
 
 export default DeepTaskPackGuidePage;
-

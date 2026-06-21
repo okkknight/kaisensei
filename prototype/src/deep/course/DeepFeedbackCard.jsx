@@ -1,8 +1,8 @@
 import React from "react";
 
-export function DeepFeedbackCard({ tone = "idle", title = "", body = "" }) {
+export function DeepFeedbackCard({ tone = "idle", title = "", body = "", idleBody = "" }) {
   if (tone === "idle") {
-    return <div className="deep-feedback-card muted">Tap chunks, then check your answer.</div>;
+    return null;
   }
 
   return (
