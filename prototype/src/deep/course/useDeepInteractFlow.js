@@ -11,6 +11,16 @@ function buildInteractPages(taskPacks) {
   const pages = [];
 
   taskPacks.forEach((taskPack) => {
+    const sections = {
+      need: taskPack.need,
+      handle: taskPack.handle,
+    };
+    const exampleLists = {
+      need: [taskPack.need?.baseExample, ...(taskPack.need?.variations ?? [])].filter(Boolean),
+      handle: [taskPack.handle?.baseExample, ...(taskPack.handle?.variations ?? [])].filter(Boolean),
+    };
+    const maxExampleCount = Math.max(exampleLists.need.length, exampleLists.handle.length);
+
     pages.push({
       id: `${taskPack.id}-guide`,
       kind: "guide",
@@ -23,55 +33,68 @@ function buildInteractPages(taskPacks) {
       handleMeaning: taskPack.handle.meaningChinese,
     });
 
-    ["need", "handle"].forEach((sectionKey) => {
-      const section = taskPack[sectionKey];
-      const examples = [section?.baseExample, ...(section?.variations ?? [])].filter(Boolean);
-      const stepPrefix = sectionKey === "need" ? "Need" : "Handle";
+    ["understand", "focus", "build"].forEach((pageType, phaseIndex) => {
+      for (let exampleIndex = 0; exampleIndex < maxExampleCount; exampleIndex += 1) {
+        ["need", "handle"].forEach((sectionKey) => {
+          const section = sections[sectionKey];
+          const example = exampleLists[sectionKey][exampleIndex];
 
-      examples.forEach((example) => {
-        pages.push({
-          id: `${taskPack.id}-${sectionKey}-${example.english}-understand`,
-          kind: "exercise",
-          pageType: "understand",
-          title: section.coreExpression,
-          stepLabel: "Step 1 of 3",
-          instruction: DEEP_COPY.interactReorderInstruction,
-          englishSentence: example.english,
-          englishHighlight: example.understand?.highlight ?? section.coreExpression,
-          chineseReference: example.chinese,
-          bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
-          answer: example.understand?.answer ?? [],
-          moduleLabel: `${stepPrefix} · Understand`,
-        });
+          if (!section || !example) {
+            return;
+          }
 
-        pages.push({
-          id: `${taskPack.id}-${sectionKey}-${example.english}-focus`,
-          kind: "exercise",
-          pageType: "focus",
-          title: section.coreExpression,
-          stepLabel: "Step 2 of 3",
-          instruction: DEEP_COPY.focusInstruction,
-          sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
-          chineseReference: example.chinese,
-          bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
-          answer: example.focus?.answer ?? [],
-          moduleLabel: `${stepPrefix} · Focus`,
-        });
+          const stepPrefix = sectionKey === "need" ? "Need" : "Handle";
 
-        pages.push({
-          id: `${taskPack.id}-${sectionKey}-${example.english}-build`,
-          kind: "exercise",
-          pageType: "build",
-          title: section.coreExpression,
-          stepLabel: "Step 3 of 3",
-          instruction: DEEP_COPY.buildInstruction,
-          promptChinese: example.build?.promptChinese ?? "",
-          chineseReference: example.chinese ?? "",
-          bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
-          answer: example.build?.answer ?? [],
-          moduleLabel: `${stepPrefix} · Build`,
+          if (pageType === "understand") {
+            pages.push({
+              id: `${taskPack.id}-${sectionKey}-${example.english}-understand`,
+              kind: "exercise",
+              pageType,
+              title: section.coreExpression,
+              stepLabel: `Step ${phaseIndex + 1} of 3`,
+              instruction: DEEP_COPY.interactReorderInstruction,
+              englishSentence: example.english,
+              englishHighlight: example.understand?.highlight ?? section.coreExpression,
+              chineseReference: example.chinese,
+              bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+              answer: example.understand?.answer ?? [],
+              moduleLabel: `${stepPrefix} · Understand`,
+            });
+          }
+
+          if (pageType === "focus") {
+            pages.push({
+              id: `${taskPack.id}-${sectionKey}-${example.english}-focus`,
+              kind: "exercise",
+              pageType,
+              title: section.coreExpression,
+              stepLabel: `Step ${phaseIndex + 1} of 3`,
+              instruction: DEEP_COPY.focusInstruction,
+              sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
+              chineseReference: example.chinese,
+              bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+              answer: example.focus?.answer ?? [],
+              moduleLabel: `${stepPrefix} · Focus`,
+            });
+          }
+
+          if (pageType === "build") {
+            pages.push({
+              id: `${taskPack.id}-${sectionKey}-${example.english}-build`,
+              kind: "exercise",
+              pageType,
+              title: section.coreExpression,
+              stepLabel: `Step ${phaseIndex + 1} of 3`,
+              instruction: DEEP_COPY.buildInstruction,
+              promptChinese: example.build?.promptChinese ?? "",
+              chineseReference: example.chinese ?? "",
+              bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+              answer: example.build?.answer ?? [],
+              moduleLabel: `${stepPrefix} · Build`,
+            });
+          }
         });
-      });
+      }
     });
 
     const dialogue = taskPack?.dialogues?.[0];
@@ -258,5 +281,7 @@ export function useDeepInteractFlow(taskPacks = []) {
     })),
   };
 }
+
+export { buildInteractPages };
 
 export default useDeepInteractFlow;
