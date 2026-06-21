@@ -1,12 +1,34 @@
-# Kaisensei Deep Mode Foundation Split Plan
+# Kaisensei Deep Mode Frontend Backbone Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** implement this plan in order. Use the Deep Mode frontend spec as the source of truth. Treat the current prototype code as implementation facts only, not as design authority.
 
-**Goal:** Split the prototype into a thin app shell, a shared camera entry, a Quick Mode course domain, and a Deep Mode course domain scaffold that matches the real Deep Mode design. The split must preserve Quick Mode behavior while making Deep Mode easy to grow into a standalone project later.
+**Goal:** Bring the prototype frontend into alignment with [`2026-06-19-kaisensei-deepmode-frontend-spec.md`](../specs/2026-06-19-kaisensei-deepmode-frontend-spec.md) while preserving Quick Mode behavior. The result should be a Deep Mode backbone that can run end-to-end, page family by page family, before visual polish.
 
-**Architecture:** The shell owns mode routing and the first photo-input surface only. The shared camera entry handles capture/upload, mode selection, and handoff. Quick Mode keeps its existing See / Learn / Build / Use behavior inside a quick-owned domain. Deep Mode gets its own domain tree that mirrors the product design: overview, Notice, Interpret, Interact, Step In, and completion. Shared code is limited to mode-agnostic UI, media, and low-level helpers.
+**Source hierarchy:**
 
-**Tech Stack:** React, Vite, plain JavaScript, existing browser APIs, `node:test` for helper smoke tests where useful.
+1. `docs/kaisensei_deep_mode_product_design.md`
+2. `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-frontend-spec.md`
+3. backend lesson contract / `mode=deep` payload shape
+4. current `prototype/src/*` implementation state
+5. inference
+
+If the current code conflicts with the spec, change the code. Do not promote current implementation details into design truth.
+
+**Current baseline facts, not design truth:**
+
+- `prototype/src/App.jsx` already delegates to `AppShell`.
+- `prototype/src/app/AppShell.jsx` already routes between camera, Quick Mode, and Deep Mode.
+- `prototype/src/app/CameraEntry.jsx` already owns capture, upload, mode choice, and level choice.
+- `prototype/src/deep/*` already contains a partial Deep Mode scaffold.
+- These surfaces are useful starting points, but any mismatch with the new spec must be corrected.
+
+**Execution strategy:**
+
+- freeze the shell and data contract first
+- validate one end-to-end reference slice before broad rollout
+- implement by page family, not by isolated file
+- wire global interactions only after the page families are stable
+- verify every phase against the spec and fix drift as soon as it appears
 
 ---
 
@@ -14,390 +36,294 @@
 
 ### In scope
 
-- Make `prototype/src/App.jsx` a thin wrapper
-- Introduce a shared camera entry that can route to Quick Mode or Deep Mode
-- Split Quick Mode into a quick-owned feature domain without changing behavior
-- Scaffold Deep Mode using the real product phases from `docs/kaisensei_deep_mode_product_design.md`
-- Move only mode-agnostic helpers and primitives into `prototype/src/shared/`
-- Keep Quick Mode and Deep Mode storage keys, copy, and state namespaced separately
+- Align the shell, camera entry, and Deep Mode entry with the new spec
+- Normalize the Deep Mode state and data view-model layer
+- Implement Deep Mode pages in the spec order: Loading, Overview, Notice / Interpret, Interact, Step In, Completion
+- Keep the visible Deep Mode page structure self-contained
+- Preserve Quick Mode behavior while Deep Mode is refactored
+- Keep shared code limited to mode-agnostic primitives, media, and low-level helpers
 
 ### Out of scope
 
-- No Deep Mode course content generation yet
-- No backend schema changes in this plan
-- No redesign of Quick Mode lesson behavior
-- No cross-mode shared lesson components
-- No speech input
+- Quick Mode redesign
+- Deep Mode backend redesign unless a field mismatch must be clarified
+- Visual polish before structure and interaction are correct
+- New feature ideas outside the spec
+- Any assumption that current code is the source of truth
 
 ---
 
-## Target File Structure
+## Phase 0: Gap audit and baseline freeze
 
-```text
-prototype/src/
-  App.jsx
-  app/
-    AppShell.jsx
-    CameraEntry.jsx
-    modeRegistry.js
-  shared/
-    ui/
-      Button.jsx
-      Card.jsx
-      Modal.jsx
-      ProgressBar.jsx
-      IconButton.jsx
-    media/
-      image.js
-    utils/
-      text.js
-      time.js
-  quick/
-    QuickModeApp.jsx
-    storage.js
-    copy.js
-    camera/
-      camera-session.js
-      camera-controls.jsx
-    lesson/
-      QuickLessonScreen.jsx
-      StepProgress.jsx
-      SeeStep.jsx
-      LearnStep.jsx
-      BuildStep.jsx
-      UseStep.jsx
-      VoiceButton.jsx
-      lesson-state.js
-      lesson-helpers.js
-  deep/
-    DeepModeApp.jsx
-    storage.js
-    copy.js
-    schema/
-      deep-course-schema.js
-    overview/
-      DeepOverviewScreen.jsx
-    completion/
-      DeepCompletionScreen.jsx
-    course/
-      DeepCourseShell.jsx
-      ModuleProgress.jsx
-      module-registry.js
-      notice/
-        NoticeModule.jsx
-      interpret/
-        InterpretModule.jsx
-      interact/
-        InteractModule.jsx
-      step-in/
-        StepInModule.jsx
-    state/
-      deep-course-state.js
-      useDeepModeFlow.js
-```
+**Objective:** Compare the current code surface against the new spec and record the mismatches before changing behavior.
 
-## Current Baseline Mapping
+**Target surfaces:**
 
-The split should start from the current working code, not from a blank theoretical layout.
+- `prototype/src/App.jsx`
+- `prototype/src/app/AppShell.jsx`
+- `prototype/src/app/CameraEntry.jsx`
+- `prototype/src/deep/DeepModeApp.jsx`
+- `prototype/src/deep/state/useDeepModeFlow.js`
+- `prototype/src/deep/course/*`
+- `prototype/src/deep/loading/DeepLoadingScreen.jsx`
+- `prototype/src/deep/overview/DeepOverviewScreen.jsx`
+- `prototype/src/deep/completion/DeepCompletionScreen.jsx`
 
-- `prototype/src/App.jsx` is currently the app entry and should become the thin shell.
-- `prototype/src/app/AppShell.jsx` should own the route between camera entry, Quick Mode, and Deep Mode.
-- `prototype/src/quick/QuickModeApp.jsx` is the current Quick Mode baseline and should be carved into smaller Quick-owned files without changing behavior.
-- `prototype/src/shared/media/image.js` can stay shared because it is mode-agnostic.
-- `prototype/src/quick/lesson/lesson-helpers.js` should own the current Quick lesson sentence/chunk helpers; anything truly mode-agnostic can be lifted into `shared/` later if needed.
-- `prototype/src/deep/DeepModeApp.jsx` should become the Deep entry point shaped by the real Deep Mode product design.
-- `prototype/src/deep/state/useDeepModeFlow.js` should own the phase flow, preview URL lifecycle, and navigation shell state.
-- `prototype/src/deep/completion/DeepCompletionScreen.jsx` should keep the completion screen isolated from the course shell.
+**Checklist:**
+
+- [ ] Map the current Deep Mode code surfaces to the new spec page inventory
+- [ ] Mark where the current code is only an implementation fact and not a spec match
+- [ ] Identify any current wrappers or abstractions that hide page structure too aggressively
+- [ ] Identify any current fields or copy values that are not anchored by the spec or backend contract
+- [ ] Record the minimum set of files that can be reused versus the files that should be reshaped
+
+**Exit criteria:**
+
+- A clear gap list exists between the current code and the new spec
+- No current implementation detail is being treated as design authority
+- The implementation order is locked before the first refactor begins
 
 ---
 
-## Task 1: Make the shell and camera entry the only shared mode boundary
+## Phase 1: Freeze the shell contract and data handoff
 
-**Files:**
-- Modify: `prototype/src/App.jsx`
-- Modify: `prototype/src/app/AppShell.jsx`
-- Create: `prototype/src/app/CameraEntry.jsx`
-- Create: `prototype/src/app/modeRegistry.js`
+**Objective:** Make the app shell, camera entry, and Deep Mode handoff match the spec before changing page bodies.
 
-- [ ] **Step 1: Define the shell contract**
+**Target surfaces:**
 
-`App.jsx` should do only this:
+- `prototype/src/App.jsx`
+- `prototype/src/app/AppShell.jsx`
+- `prototype/src/app/CameraEntry.jsx`
+- `prototype/src/app/modeRegistry.js`
+- `prototype/src/deep/storage.js`
+- `prototype/src/deep/schema/deep-course-schema.js`
+- `prototype/src/deep/state/deep-course-state.js`
+- `prototype/src/deep/state/useDeepModeFlow.js`
 
-```jsx
-import { AppShell } from "./app/AppShell.jsx";
+**Checklist:**
 
-export default function App() {
-  return <AppShell />;
-}
-```
+- [ ] Keep `App.jsx` as a thin shell
+- [ ] Keep `AppShell` routing-only and do not let it absorb Deep Mode page logic
+- [ ] Ensure `CameraEntry` owns only capture, upload, mode selection, and level selection
+- [ ] Keep Deep Mode entry state separate from Quick Mode state
+- [ ] Align the Deep Mode schema and state shape with the new spec, not with current ad hoc fields
+- [ ] Confirm that the Deep Mode photo preview lifecycle is browser-local and not coupled to Quick Mode
 
-`modeRegistry.js` should hold the shared mode names:
+**Exit criteria:**
 
-```js
-export const MODE_QUICK = "quick";
-export const MODE_DEEP = "deep";
-export const MODE_CAMERA = "camera";
-```
-
-- [ ] **Step 2: Move the first-screen camera responsibilities into `CameraEntry`**
-
-`CameraEntry` owns:
-
-- quick/deep mode selection
-- Normal / Advanced level selection
-- upload / capture intent
-- handing photo input and mode choice back to the shell
-
-The shell should decide which domain entry receives the photo:
-
-```jsx
-<CameraEntry
-  mode={mode}
-  level={level}
-  onModeChange={setMode}
-  onLevelChange={setLevel}
-  onCapture={handleCapture}
-  onUpload={handleUpload}
-/>
-```
-
-- [ ] **Step 3: Keep the shell thin and routing-only**
-
-`AppShell` should own the minimal cross-mode state needed to route from the camera entry into the selected mode entry. It should not contain Quick lesson logic, Deep course logic, or mode-specific copy.
-
-- [ ] **Step 4: Verify the shell still starts the app correctly**
-
-Run:
-
-```bash
-cd prototype && npm run build
-```
-
-Expected:
-
-- build succeeds
-- the app still opens to the camera entry
-- the mode switch is still available before photo capture
+- A photo captured from the camera entry can enter Deep Mode with the selected level intact
+- Quick Mode and Deep Mode remain isolated at the shell boundary
+- The Deep Mode state shape is explicit enough to support the spec page family rollout
 
 ---
 
-## Task 2: Carve the current Quick Mode behavior into its own owned domain
+## Reference Slice
 
-**Files:**
-- Modify: `prototype/src/quick/QuickModeApp.jsx`
-- Create: `prototype/src/quick/storage.js`
-- Create: `prototype/src/quick/copy.js`
-- Create: `prototype/src/quick/camera/camera-session.js`
-- Create: `prototype/src/quick/camera/camera-controls.jsx`
-- Create: `prototype/src/quick/lesson/QuickLessonScreen.jsx`
-- Create: `prototype/src/quick/lesson/StepProgress.jsx`
-- Create: `prototype/src/quick/lesson/SeeStep.jsx`
-- Create: `prototype/src/quick/lesson/LearnStep.jsx`
-- Create: `prototype/src/quick/lesson/BuildStep.jsx`
-- Create: `prototype/src/quick/lesson/UseStep.jsx`
-- Create: `prototype/src/quick/lesson/VoiceButton.jsx`
-- Create: `prototype/src/quick/lesson/lesson-state.js`
-- Create: `prototype/src/quick/lesson/lesson-helpers.js`
+**Slice:** `Loading -> Overview -> Notice - Understand -> Notice - Focus`
 
-- [ ] **Step 1: Move the Quick lesson UI out of the monolith**
+**Why this slice:**
 
-`QuickModeApp.jsx` should become a quick-owned container that delegates to small files for the current camera flow, lesson screen, and each step.
+- It proves the shell, photo handoff, loading state, overview state, and a reusable exercise page pattern in one narrow path.
+- It exercises both a top-level Deep Mode page and the first reusable exercise family.
+- It is the smallest slice that can reveal whether the implementation is following the spec or just replaying current code assumptions.
 
-The current 4-step flow must remain unchanged:
+**What it proves:**
 
-```text
-See -> Learn -> Build -> Use
-```
+- loading progress and loading copy
+- overview layout and photo preview
+- page-by-page field provenance
+- one exercise page with reorder / fill behavior
+- return / advance behavior across page boundaries
 
-- [ ] **Step 2: Pull the camera/session side effects into quick-owned helpers**
+**What it does not prove:**
 
-Anything that is still specific to the current Quick Mode camera-to-lesson flow should live under `quick/`, not in `shared/`.
-
-Examples:
-
-- lesson polling state
-- browser TTS triggering
-- build/use selection state
-- retry and retake handling
-- current Quick Mode lesson copy
-- current Quick Mode lesson validation
-
-- [ ] **Step 3: Namescope Quick Mode copy and persistence**
-
-`quick/copy.js` should hold Quick-only UI strings.
-
-`quick/storage.js` should own Quick-only local storage keys so future Deep Mode persistence cannot accidentally collide with Quick Mode.
-
-Example key shape:
-
-```js
-export const QUICK_STORAGE_PREFIX = "quick:";
-```
-
-- [ ] **Step 4: Verify Quick Mode behavior is unchanged**
-
-Run:
-
-```bash
-cd prototype && npm run build
-```
-
-Then smoke test the running app and confirm:
-
-- camera capture still works
-- image upload still works
-- lesson generation still works
-- See / Learn / Build / Use still behave the same
+- Interact pages
+- Step In dialogue flow
+- completion and recovery
+- global wiring across all page families
 
 ---
 
-## Task 3: Scaffold Deep Mode using the actual product phases
+## Phase 2: Build the reference slice end-to-end
 
-**Files:**
-- Modify: `prototype/src/deep/DeepModeApp.jsx`
-- Create: `prototype/src/deep/storage.js`
-- Create: `prototype/src/deep/copy.js`
-- Create: `prototype/src/deep/schema/deep-course-schema.js`
-- Create: `prototype/src/deep/overview/DeepOverviewScreen.jsx`
-- Create: `prototype/src/deep/completion/DeepCompletionScreen.jsx`
-- Create: `prototype/src/deep/course/DeepCourseShell.jsx`
-- Create: `prototype/src/deep/course/ModuleProgress.jsx`
-- Create: `prototype/src/deep/course/module-registry.js`
-- Create: `prototype/src/deep/course/notice/NoticeModule.jsx`
-- Create: `prototype/src/deep/course/interpret/InterpretModule.jsx`
-- Create: `prototype/src/deep/course/interact/InteractModule.jsx`
-- Create: `prototype/src/deep/course/step-in/StepInModule.jsx`
-- Create: `prototype/src/deep/state/deep-course-state.js`
-- Create: `prototype/src/deep/state/useDeepModeFlow.js`
+**Objective:** Implement the reference slice exactly as the spec describes it, using the current code only where it matches the spec.
 
-- [ ] **Step 1: Encode the Deep Mode phase order from the design**
+**Target surfaces:**
 
-The Deep Mode scaffold must reflect the product design, not a recycled Quick lesson shape:
+- `prototype/src/deep/loading/DeepLoadingScreen.jsx`
+- `prototype/src/deep/overview/DeepOverviewScreen.jsx`
+- `prototype/src/deep/course/DeepCourseShell.jsx`
+- `prototype/src/deep/course/ModuleProgress.jsx`
+- `prototype/src/deep/course/DeepExercisePage.jsx`
+- `prototype/src/deep/course/DeepChunkChip.jsx`
+- `prototype/src/deep/course/DeepFeedbackCard.jsx`
+- `prototype/src/deep/course/notice/NoticeModule.jsx`
+- `prototype/src/deep/course/interpret/InterpretModule.jsx`
+- any helper files that currently hide page layout too aggressively
 
-```text
-Overview -> Notice -> Interpret -> Interact -> Step In -> Completion
-```
+**Checklist:**
 
-`module-registry.js` should define those phases and their ordering.
+- [ ] Make Loading match the spec layout and fixed copy
+- [ ] Make Overview match the spec layout, copy, and photo-preview provenance
+- [ ] Build one Notice exercise flow so the page structure can be verified against the spec
+- [ ] Reshape `DeepCourseShell` so it does not become a visible course wrapper that hides page structure
+- [ ] Keep reusable primitives small enough that they do not replace page-level descriptions
+- [ ] Remove or flatten any current abstraction that forces a generic template over a page-specific layout
 
-- [ ] **Step 2: Give Deep Mode its own entry and course shell**
+**Exit criteria:**
 
-`DeepModeApp.jsx` should mount a Deep-specific flow, starting from an overview page rather than jumping straight into the first exercise.
-
-The Deep entry should not import Quick lesson components.
-The phase flow, preview URL lifecycle, and next/back navigation should live in `deep/state/useDeepModeFlow.js`, not in the entry component itself.
-
-- [ ] **Step 3: Give Deep Mode its own schema and copy namespace**
-
-`deep-course-schema.js` should model the Deep Mode course shape from the spec:
-
-- overview keywords and scene description
-- four major modules
-- module-specific expression packs / task packs
-- module progress and completion data
-
-`deep/copy.js` should hold Deep-only loading, back, error, continue, and completion text.
-
-`deep/storage.js` should use a `deep:` prefix and never reuse Quick keys.
-
-- [ ] **Step 4: Scaffold module-specific screens without borrowing Quick lesson structure**
-
-Each Deep module should be a distinct file even if the first version is just a scaffold:
-
-- `NoticeModule.jsx`
-- `InterpretModule.jsx`
-- `InteractModule.jsx`
-- `StepInModule.jsx`
-
-This keeps the future implementation aligned with the real Deep curriculum instead of a single generic lesson screen.
-
-- [ ] **Step 5: Verify the Deep scaffold is isolated**
-
-Confirm by inspection that:
-
-- Deep files do not import Quick lesson screens
-- Deep copy does not come from Quick copy
-- Deep storage uses its own namespace
-- Deep module names match the design doc
+- The reference slice runs end-to-end
+- The visible structure matches the spec page-by-page
+- The code can show the page family without depending on a hidden generic course shell
 
 ---
 
-## Task 4: Move only mode-agnostic helpers into shared
+## Phase 3: Roll out the Notice / Interpret page family
 
-**Files:**
-- Create or modify only truly mode-agnostic helpers under `prototype/src/shared/`
+**Objective:** Complete the Notice and Interpret families as two separate page families that can share reusable primitives but keep their own page descriptions, data sources, and milestones.
 
-- [ ] **Step 1: Keep shared code boring**
+**Target surfaces:**
 
-Only move helpers that do not care whether the user is in Quick Mode or Deep Mode:
+- `prototype/src/deep/course/notice/NoticeModule.jsx`
+- `prototype/src/deep/course/interpret/InterpretModule.jsx`
+- `prototype/src/deep/course/module-registry.js`
+- `prototype/src/deep/course/useDeepExerciseSequence.js`
+- `prototype/src/deep/course/deep-flow-utils.js`
+- `prototype/src/deep/course/deep-text.js`
+- milestone / summary pages for Notice and Interpret
 
-- image compression
-- generic text normalization
-- generic time formatting
-- pure button/card/modal/progress primitives
+**Checklist:**
 
-- [ ] **Step 2: Do not put course meaning in shared**
+- [ ] Implement all Notice pages in the spec order
+- [ ] Implement all Interpret pages in the spec order
+- [ ] Keep the page-level copy and field provenance separate for each page
+- [ ] Keep the page structure self-contained even when the layouts are similar
+- [ ] Ensure the milestone pages summarize the correct expressions and stage-specific recovery data
+- [ ] Keep `Notice` and `Interpret` aligned in structure but not merged into a single abstract page
 
-Do not move these into `shared/`:
+**Exit criteria:**
 
-- lesson flow logic
-- mode copy
-- Deep course schema
-- Quick lesson state
-- build/check validation
-
-- [ ] **Step 3: Verify imports stay one-way**
-
-`shared` may be imported by `quick` and `deep`.
-
-`quick` must not import from `deep`.
-
-`deep` must not import from `quick`.
-
-- [ ] **Step 4: Make the import graph easy to audit**
-
-Use `rg` to confirm the intended dependency direction after the split:
-
-```bash
-rg -n "from \"../deep|from '../deep|from \"../quick|from '../quick" prototype/src
-```
-
-Expected:
-
-- no Quick/Deep cross-imports
+- Notice and Interpret can each run through their full page family
+- Milestone pages show stage-specific summaries that match the spec
+- No page in this family depends on an invisible shared template map
 
 ---
 
-## Task 5: Final verification
+## Phase 4: Roll out the Interact page family
 
-**Files:**
-- Validate the updated prototype structure and behavior
+**Objective:** Build the full Interact family, including the task-pack guide, Need / Handle exercise pages, dialogue practice, and the Interact milestone.
 
-- [ ] **Step 1: Build the app**
+**Target surfaces:**
 
-Run:
+- `prototype/src/deep/course/interact/InteractModule.jsx`
+- `prototype/src/deep/course/DeepTaskPackGuidePage.jsx`
+- `prototype/src/deep/course/DeepDialogueFlowPage.jsx`
+- `prototype/src/deep/course/DeepInteractMilestonePage.jsx`
+- `prototype/src/deep/course/useDeepInteractFlow.js`
+- `prototype/src/deep/course/DeepExercisePage.jsx`
+- any task-pack or dialogue helpers under `prototype/src/deep/course/`
 
-```bash
-cd prototype && npm run build
-```
+**Checklist:**
 
-- [ ] **Step 2: Smoke test the app in the browser**
+- [ ] Implement the task-pack guide page as its own page, not as a hidden intro panel
+- [ ] Implement Need and Handle exercises as separate pages in the spec order
+- [ ] Keep the dialogue practice pages distinct from the earlier exercise pages
+- [ ] Keep task-pack data, dialogue data, and stage summary data separated by source
+- [ ] Make sure the Interact milestone reflects the completed need/handle expressions and capability summary required by the spec
+- [ ] Remove any code path that assumes Interact is only a generic copy of Notice / Interpret
 
-Verify that the camera entry still opens and that Quick Mode still reaches the lesson flow after photo capture.
+**Exit criteria:**
 
-- [ ] **Step 3: Check the structure against the Deep Mode design**
-
-Confirm the file boundaries now line up with the real Deep Mode phases from `docs/kaisensei_deep_mode_product_design.md`.
+- The full Interact family runs in order
+- Need / Handle pages and dialogue pages are distinguishable in code and in the UI
+- The milestone summary matches the spec and does not depend on guessed fields
 
 ---
 
-## Acceptance Criteria
+## Phase 5: Roll out Step In and completion
 
-1. `App.jsx` is a thin shell only.
-2. The shared camera entry owns the first-screen mode choice and photo input.
-3. Quick Mode is split into smaller quick-owned files without changing behavior.
-4. Deep Mode has a scaffold that matches the actual design phases: Overview, Notice, Interpret, Interact, Step In, Completion.
-5. Shared code contains only mode-agnostic helpers and primitives.
-6. Quick and Deep storage keys, copy, and state are namespaced separately.
-7. No Quick/Deep cross-imports remain.
-8. `cd prototype && npm run build` passes.
+**Objective:** Implement the final challenge flow, Step In completion feedback, and the final Completion page as distinct pieces.
+
+**Target surfaces:**
+
+- `prototype/src/deep/course/step-in/StepInModule.jsx`
+- `prototype/src/deep/course/DeepStepInCompletePage.jsx`
+- `prototype/src/deep/completion/DeepCompletionScreen.jsx`
+- `prototype/src/deep/course/useDeepStepInFlow.js`
+- any shared dialogue helpers used only by Step In
+
+**Checklist:**
+
+- [ ] Implement the Step In challenge guide page
+- [ ] Implement the Step In round pages in the spec order
+- [ ] Keep the Step In completion feedback distinct from the final Completion page
+- [ ] Keep the final Completion page as the course-level result page with the spec’s summaries and replay content
+- [ ] Ensure return and replay actions follow the spec instead of current code convenience
+
+**Exit criteria:**
+
+- Step In can run from the guide page through the completion feedback
+- The final Completion page can be reached and exited as the spec requires
+- Step In completion and course completion are not collapsed into one screen
+
+---
+
+## Phase 6: Wire global interactions and shared behavior
+
+**Objective:** Normalize behaviors that apply across the Deep Mode backbone after the page families are in place.
+
+**Target surfaces:**
+
+- `prototype/src/deep/state/useDeepModeFlow.js`
+- `prototype/src/deep/course/module-registry.js`
+- `prototype/src/deep/course/ModuleProgress.jsx`
+- `prototype/src/deep/course/DeepCourseShell.jsx`
+- shared primitives under `prototype/src/shared/` if they genuinely help implementation
+
+**Checklist:**
+
+- [ ] Standardize progress behavior across page families
+- [ ] Standardize hint, reset, verify, and advance behaviors
+- [ ] Standardize back behavior and exit-to-camera behavior
+- [ ] Standardize loading, error, and completion handling
+- [ ] Keep shared primitives thin and reusable without reintroducing a hidden page template
+- [ ] Remove any global rule that asks page code to infer structure from a family-level abstraction
+
+**Exit criteria:**
+
+- Navigation and interaction behavior feel consistent across all page families
+- Shared primitives help implementation without replacing page-specific structure
+- Error states are visible and recoverable
+
+---
+
+## Phase 7: Verification, drift cleanup, and spec sync
+
+**Objective:** Check the implementation against the spec page by page and correct any drift.
+
+**Checklist:**
+
+- [ ] Run a build and smoke test the Deep Mode flow end to end
+- [ ] Compare each page family against the spec’s layout, component list, field provenance, and interaction flow
+- [ ] Fix any page where the current code still reflects an older assumption
+- [ ] Remove any leftover wrapper, helper, or copy path that duplicates functionality without helping structure
+- [ ] Update the spec only if implementation exposes a real gap in the written contract
+
+**Exit criteria:**
+
+- The build succeeds
+- The Deep Mode backbone follows the new spec in structure and behavior
+- Any mismatch between spec and implementation is either corrected in code or explicitly surfaced as an open question
+
+---
+
+## Definition of Done
+
+The plan is complete when:
+
+1. The shell and camera handoff obey the new spec.
+2. The reference slice runs end-to-end.
+3. Notice / Interpret, Interact, Step In, and Completion each exist as spec-aligned page families.
+4. Global interaction behavior is consistent and not inferred from a hidden template.
+5. Current prototype code remains only a baseline fact, not a source of design truth.
+
