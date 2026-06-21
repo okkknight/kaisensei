@@ -83,6 +83,9 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /Generate exactly 2 Notice Expression Packs\./);
   assert.match(prompts[0], /Generate exactly 2 Task Packs\./);
   assert.match(prompts[0], /Use the fixed Chinese start prompt: 点击开始这次学习之旅\./);
+  assert.match(prompts[0], /scenePromptChinese/);
+  assert.match(prompts[0], /interact_need/);
+  assert.match(prompts[0], /interact_handle/);
   assert.match(prompts[0], /systemReply inside each dialogue must be a bridge sentence/);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /REQUIRED INNER SHAPES:/);

@@ -16,12 +16,16 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
     onExitToCamera,
   });
 
-  if (flow.errorState || !flow.viewModel) {
+  if (flow.errorState) {
     return <DeepErrorScreen onRetry={flow.retryFromError} onBackToCamera={flow.exitToCamera} />;
   }
 
   if (flow.phase === "loading") {
     return <DeepLoadingScreen message={flow.loadingMessage} progress={flow.state.loadingMessageIndex === 0 ? 30 : flow.state.loadingMessageIndex === 1 ? 60 : 90} />;
+  }
+
+  if (!flow.viewModel) {
+    return <DeepErrorScreen onRetry={flow.retryFromError} onBackToCamera={flow.exitToCamera} />;
   }
 
   if (flow.phase === "overview") {

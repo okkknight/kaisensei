@@ -65,6 +65,7 @@ test("normalizeDeepCoursePayload accepts the canonical deep course shape", () =>
   assert.equal(normalized.level, "normal");
   assert.equal(normalized.overview.startPromptChinese, "点击开始这次学习之旅");
   assert.equal(normalized.overview.keywords.length, 3);
+  assert.equal(normalized.modules.interact.taskPacks[0].scenePromptChinese, "task one 场景中文");
   assert.equal(normalized.modules.notice.expressionPacks.length, 2);
   assert.equal(normalized.modules.interpret.expressionPacks.length, 2);
   assert.equal(normalized.modules.interact.taskPacks.length, 2);
@@ -98,6 +99,17 @@ test("normalizeDeepCoursePayload accepts quick responses on each example", () =>
   assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
   assert.equal(normalized.modules.notice.expressionPacks[0].variations[0].quickResponse.question, "a coffee mug variation question");
   assert.equal(normalized.modules.notice.expressionPacks[1].baseExample.quickResponse.question, "a laptop base question");
+});
+
+test("normalizeDeepCoursePayload canonicalizes stepIn sourceModule aliases", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.stepIn.dialogue.turns[5].sourceModule = "need";
+  payload.modules.stepIn.dialogue.turns[7].sourceModule = "handle";
+
+  const normalized = normalizeDeepCoursePayload(payload);
+
+  assert.equal(normalized.modules.stepIn.dialogue.turns[5].sourceModule, "interact_need");
+  assert.equal(normalized.modules.stepIn.dialogue.turns[7].sourceModule, "interact_handle");
 });
 
 test("normalizeDeepCoursePayload rejects dialogue system replies that expose the learned handle", () => {

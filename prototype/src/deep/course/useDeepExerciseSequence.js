@@ -44,7 +44,7 @@ function buildExercisePages(packs, moduleKey) {
       instruction: moduleKey === "interact" ? DEEP_COPY.interactReorderInstruction : DEEP_COPY.reorderInstruction,
       englishSentence: example.english,
       speakText: example.english,
-      englishHighlight: example.understand?.highlight ?? pack.coreExpression,
+      englishHighlight: pack.coreExpression,
       chineseReference: example.chinese,
       bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
       answer: example.understand?.answer ?? [],

@@ -1,5 +1,73 @@
 export const deepModuleOrder = ["notice", "interpret", "interact", "stepIn"];
 
+const deepExerciseContract = {
+  chunks: [],
+  distractors: [],
+  answer: [],
+};
+
+const deepFocusContract = {
+  sentenceWithBlanks: "",
+  choices: [],
+  distractors: [],
+  answer: [],
+};
+
+const deepExampleContract = {
+  english: "",
+  chinese: "",
+  understand: deepExerciseContract,
+  focus: deepFocusContract,
+  build: {
+    promptChinese: "",
+    chunks: [],
+    distractors: [],
+    answer: [],
+  },
+  quickResponse: {
+    question: "",
+    chunks: [],
+    distractors: [],
+    answer: [],
+  },
+};
+
+const deepTaskDialogueContract = {
+  scene: "",
+  need: deepExerciseContract,
+  systemReply: "",
+  handle: deepExerciseContract,
+};
+
+const deepTaskPackContract = {
+  id: "",
+  taskTitle: "",
+  scenePrompt: "",
+  scenePromptChinese: "",
+  need: {
+    coreExpression: "",
+    meaningChinese: "",
+    baseExample: deepExampleContract,
+    variations: [],
+  },
+  handle: {
+    coreExpression: "",
+    meaningChinese: "",
+    baseExample: deepExampleContract,
+    variations: [],
+  },
+  dialogues: [deepTaskDialogueContract],
+};
+
+const deepStepInTurnContract = {
+  speaker: "",
+  text: "",
+  sourceModule: "",
+  chunks: [],
+  distractors: [],
+  answer: [],
+};
+
 export const deepCourseContract = {
   mode: "deep",
   level: "normal",
@@ -27,7 +95,28 @@ export const deepCourseContract = {
     stepIn: {
       title: "Step In",
       goal: "Complete one full scene conversation.",
-      dialogue: {},
+      dialogue: {
+        scene: "",
+        turns: [],
+      },
+    },
+  },
+};
+
+export const deepCourseContractShape = {
+  ...deepCourseContract,
+  modules: {
+    ...deepCourseContract.modules,
+    interact: {
+      ...deepCourseContract.modules.interact,
+      taskPacks: [deepTaskPackContract],
+    },
+    stepIn: {
+      ...deepCourseContract.modules.stepIn,
+      dialogue: {
+        scene: "",
+        turns: [deepStepInTurnContract],
+      },
     },
   },
 };

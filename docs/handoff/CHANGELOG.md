@@ -2,6 +2,14 @@
 
 Append-only resume log.
 
+## 2026-06-22
+
+- Added a Deep Mode integration spec and execution plan that lock the confirmed联调 decisions: backend-only `overview.startPromptChinese`, required `scenePromptChinese` on Interact guide data, canonical Step In `sourceModule` mapping, `pack.coreExpression` as the only highlight source, a nested Deep contract shape, and frontend job polling
+- Hardened the Deep Mode backend contract, prompt, and normalizer so `scenePromptChinese` is required on task packs and Step In source-module aliases normalize to `notice`, `interpret`, `interact_need`, and `interact_handle`
+- Switched the Deep Mode frontend flow from local mock lesson generation to a job-polling lifecycle, and updated the Interact flow to read `scenePromptChinese` while keeping understand highlighting anchored to `coreExpression`
+- Added a Playwright smoke test and prototype Playwright config for Deep Mode job polling, plus a convenience `prototype` script to run the new smoke test
+- Verified the integration loop with `cd api && npm test`, `cd prototype && npm run build`, and `cd prototype && npm run test:deepmode`
+
 ## 2026-06-21
 
 - Fixed the Deep Mode playback order in the design docs so Notice / Interpret run example-index-first and Interact runs task-pack-first with Need / Handle interleaving by example

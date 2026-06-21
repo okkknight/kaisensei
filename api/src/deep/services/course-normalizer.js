@@ -2,6 +2,15 @@ import { LessonValidationError } from "../../shared/ai/errors.js";
 import { deepCourseContract, deepModuleOrder } from "../contracts/course.js";
 import { deepCourseDefaultConfig } from "../config/course.js";
 
+const sourceModuleMap = {
+  notice: "notice",
+  interpret: "interpret",
+  need: "interact_need",
+  interact_need: "interact_need",
+  handle: "interact_handle",
+  interact_handle: "interact_handle",
+};
+
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -251,6 +260,17 @@ function normalizeQuickResponse(quickResponse, path, config = deepCourseDefaultC
   };
 }
 
+function normalizeSourceModule(sourceModule, path) {
+  const normalizedSourceModule = ensureString(sourceModule, path);
+  const mappedSourceModule = sourceModuleMap[normalizedSourceModule];
+
+  if (!mappedSourceModule) {
+    fail(`Invalid sourceModule at ${path}`, { path });
+  }
+
+  return mappedSourceModule;
+}
+
 function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.notice, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(pack)) {
     fail(`Missing or invalid object at ${path}`, { path });
@@ -284,6 +304,7 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
   const id = ensureString(pack.id, `${path}.id`);
   const taskTitle = ensureString(pack.taskTitle, `${path}.taskTitle`);
   const scenePrompt = ensureString(pack.scenePrompt, `${path}.scenePrompt`);
+  const scenePromptChinese = ensureString(pack.scenePromptChinese, `${path}.scenePromptChinese`);
   const need = isPlainObject(pack.need) ? pack.need : {};
   const handle = isPlainObject(pack.handle) ? pack.handle : {};
   const dialogues = Array.isArray(pack.dialogues) ? pack.dialogues : [];
@@ -298,6 +319,7 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
     id,
     taskTitle,
     scenePrompt,
+    scenePromptChinese,
     need: {
       ...need,
       coreExpression: needCoreExpression,
@@ -390,7 +412,7 @@ function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.step
         });
       }
       if (speaker === "user") {
-        const sourceModule = ensureString(turn.sourceModule, `modules.stepIn.dialogue.turns[${index}].sourceModule`);
+        const sourceModule = normalizeSourceModule(turn.sourceModule, `modules.stepIn.dialogue.turns[${index}].sourceModule`);
         const chunks = ensureStringArray(turn.chunks, `modules.stepIn.dialogue.turns[${index}].chunks`);
         const distractors = ensureOptionalStringArray(turn.distractors, `modules.stepIn.dialogue.turns[${index}].distractors`);
         const answer = ensureStringArray(turn.answer, `modules.stepIn.dialogue.turns[${index}].answer`);

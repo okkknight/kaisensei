@@ -1,59 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
-import { DEEP_PHASE_ORDER } from "../course/module-registry.js";
 import { createDeepCourseState, getNextDeepPhase, getPreviousDeepPhase } from "./deep-course-state.js";
-import { createDeepCourseLesson, createDeepCourseViewModel } from "../schema/deep-course-schema.js";
+import { createDeepCourseViewModel } from "../schema/deep-course-schema.js";
+import { useDeepModeJobLifecycle } from "./useDeepModeJobLifecycle.js";
 
 export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", onExitToCamera } = {}) {
+  const job = useDeepModeJobLifecycle({
+    initialFile,
+    initialLevel,
+    onExitToCamera,
+  });
   const [phase, setPhase] = useState(initialFile ? "loading" : "overview");
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
-  const [errorState, setErrorState] = useState(null);
-
-  const lesson = useMemo(() => createDeepCourseLesson(initialLevel), [initialLevel]);
-  const viewModel = useMemo(
-    () => createDeepCourseViewModel({ lesson, photoPreviewUrl }),
-    [lesson, photoPreviewUrl]
-  );
 
   useEffect(() => {
-    if (!initialFile) {
-      setPhotoPreviewUrl("");
-      setPhase("overview");
-      setErrorState(null);
-      return undefined;
+    if (job.screen === "loading") {
+      setPhase("loading");
+      return;
     }
 
-    const nextUrl = URL.createObjectURL(initialFile);
-    setPhotoPreviewUrl(nextUrl);
-    setPhase("loading");
-    setLoadingMessageIndex(0);
-    setErrorState(null);
-
-    const messageTimer = window.setInterval(() => {
-      setLoadingMessageIndex((current) => (current + 1) % DEEP_COPY.loading.length);
-    }, 700);
-
-    const enterOverviewTimer = window.setTimeout(() => {
+    if (job.lesson && phase === "loading") {
       setPhase("overview");
-      window.clearInterval(messageTimer);
-    }, 1500);
+    }
+  }, [job.lesson, job.screen, phase]);
 
-    return () => {
-      URL.revokeObjectURL(nextUrl);
-      window.clearInterval(messageTimer);
-      window.clearTimeout(enterOverviewTimer);
-    };
-  }, [initialFile]);
+  const viewModel = useMemo(
+    () => (job.lesson ? createDeepCourseViewModel({ lesson: job.lesson, photoPreviewUrl: job.photoPreviewUrl }) : null),
+    [job.lesson, job.photoPreviewUrl]
+  );
 
   const state = useMemo(() => {
     return createDeepCourseState({
-      level: initialLevel,
-      photoPreviewUrl,
+      level: job.level,
+      photoPreviewUrl: job.photoPreviewUrl,
       phase,
-      loadingMessageIndex,
+      loadingMessageIndex: job.loadingMessageIndex,
     });
-  }, [initialLevel, loadingMessageIndex, photoPreviewUrl, phase]);
+  }, [job.level, job.loadingMessageIndex, job.photoPreviewUrl, phase]);
 
   function goNext() {
     setPhase((current) => getNextDeepPhase(current));
@@ -72,7 +54,7 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
         return;
       }
 
-      onExitToCamera?.();
+      job.handleRetakePhoto();
       return;
     }
 
@@ -86,27 +68,26 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
   }
 
   function restartCourse() {
-    setErrorState(null);
     setPhase("overview");
   }
 
   function exitToCamera() {
-    onExitToCamera?.();
+    job.handleRetakePhoto();
   }
 
   function retryFromError() {
-    setErrorState(null);
-    setPhase(initialFile ? "loading" : "overview");
+    setPhase("loading");
+    job.handleRetry();
   }
 
   return {
     phase,
-    lesson,
+    lesson: job.lesson,
     viewModel,
     state,
-    photoPreviewUrl,
-    loadingMessage: DEEP_COPY.loading[loadingMessageIndex],
-    errorState,
+    photoPreviewUrl: job.photoPreviewUrl,
+    loadingMessage: job.loadingMessage,
+    errorState: job.errorState,
     goNext,
     goBack,
     restartCourse,

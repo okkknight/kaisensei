@@ -26,7 +26,7 @@ function buildInteractPages(taskPacks) {
       kind: "guide",
       title: taskPack.taskTitle,
       scene: taskPack.scenePrompt,
-      sceneChinese: taskPack.sceneDescriptionChinese ?? "",
+      sceneChinese: taskPack.scenePromptChinese ?? "",
       needExpression: taskPack.need.coreExpression,
       needMeaning: taskPack.need.meaningChinese,
       handleExpression: taskPack.handle.coreExpression,
@@ -54,7 +54,7 @@ function buildInteractPages(taskPacks) {
               stepLabel: `Step ${phaseIndex + 1} of 3`,
               instruction: DEEP_COPY.interactReorderInstruction,
               englishSentence: example.english,
-              englishHighlight: example.understand?.highlight ?? section.coreExpression,
+              englishHighlight: section.coreExpression,
               chineseReference: example.chinese,
               bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
               answer: example.understand?.answer ?? [],
@@ -104,7 +104,7 @@ function buildInteractPages(taskPacks) {
       kind: "dialogue",
       userPrompt: DEEP_COPY.dialogueNeedPrompt,
       scene: dialogue?.scene ?? taskPack.scenePrompt,
-      sceneChinese: dialogue?.sceneDescriptionChinese ?? taskPack.sceneDescriptionChinese ?? "",
+      sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
       history: [
         {
           speaker: "system",
@@ -121,7 +121,7 @@ function buildInteractPages(taskPacks) {
       kind: "dialogue",
       userPrompt: DEEP_COPY.dialogueHandlePrompt,
       scene: dialogue?.scene ?? taskPack.scenePrompt,
-      sceneChinese: dialogue?.sceneDescriptionChinese ?? taskPack.sceneDescriptionChinese ?? "",
+      sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
       history: [
         {
           speaker: "user",

@@ -52,6 +52,7 @@ function createTaskPack({
   id,
   taskTitle,
   scenePrompt,
+  scenePromptChinese,
   need,
   handle,
   dialogues,
@@ -60,6 +61,7 @@ function createTaskPack({
     id,
     taskTitle,
     scenePrompt,
+    scenePromptChinese,
     need,
     handle,
     dialogues,
@@ -350,6 +352,7 @@ export function createDeepCourseLesson(level = "Normal") {
             id: "interact-1",
             taskTitle: "Need a quick break",
             scenePrompt: "You are talking about a short break at your desk.",
+            scenePromptChinese: "你正在桌边想休息一下。",
             need: {
               coreExpression: "a short break",
               meaningChinese: "我可以休息一下吗？",
@@ -471,6 +474,7 @@ export function createDeepCourseLesson(level = "Normal") {
             id: "interact-2",
             taskTitle: "Ask about coffee",
             scenePrompt: "You are talking with someone near the desk.",
+            scenePromptChinese: "你正在桌边和别人聊咖啡。",
             need: {
               coreExpression: "some coffee",
               meaningChinese: "你想喝点咖啡吗？",
