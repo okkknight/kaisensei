@@ -30,65 +30,112 @@ function getHintMessage(kind, answer) {
 }
 
 function buildExercisePages(packs, moduleKey) {
-  const pages = [];
+  const packedExamples = (Array.isArray(packs) ? packs : []).map((pack) => ({
+    pack,
+    examples: [pack?.baseExample, ...(pack?.variations ?? [])].filter(Boolean),
+  }));
 
-  packs.forEach((pack) => {
-    const examples = [pack?.baseExample, ...(pack?.variations ?? [])].filter(Boolean);
+  function makeUnderstandPage(pack, example) {
+    return {
+      id: `${pack.id}-${example.english}-understand`,
+      kind: "understand",
+      label: pack.coreExpression,
+      stepLabel: "Step 1 of 3",
+      instruction: moduleKey === "interact" ? DEEP_COPY.interactReorderInstruction : DEEP_COPY.reorderInstruction,
+      englishSentence: example.english,
+      speakText: example.english,
+      englishHighlight: example.understand?.highlight ?? pack.coreExpression,
+      chineseReference: example.chinese,
+      bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+      answer: example.understand?.answer ?? [],
+    };
+  }
 
-    examples.forEach((example) => {
-      pages.push({
-        id: `${pack.id}-${example.english}-understand`,
-        kind: "understand",
-        label: pack.coreExpression,
-        stepLabel: "Step 1 of 3",
-        instruction: moduleKey === "interact" ? DEEP_COPY.interactReorderInstruction : DEEP_COPY.reorderInstruction,
-        englishSentence: example.english,
-        speakText: example.english,
-        englishHighlight: example.understand?.highlight ?? pack.coreExpression,
-        chineseReference: example.chinese,
-        bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
-        answer: example.understand?.answer ?? [],
+  function makeFocusPage(pack, example) {
+    return {
+      id: `${pack.id}-${example.english}-focus`,
+      kind: "focus",
+      label: pack.coreExpression,
+      stepLabel: "Step 2 of 3",
+      instruction: DEEP_COPY.focusInstruction,
+      sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
+      speakText: example.english,
+      chineseReference: example.chinese,
+      bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+      answer: example.focus?.answer ?? [],
+    };
+  }
+
+  function makeBuildPage(pack, example) {
+    return {
+      id: `${pack.id}-${example.english}-build`,
+      kind: "build",
+      label: pack.coreExpression,
+      stepLabel: "Step 3 of 3",
+      instruction: DEEP_COPY.buildInstruction,
+      promptChinese: example.build?.promptChinese ?? "",
+      chineseReference: example.chinese ?? "",
+      bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+      answer: example.build?.answer ?? [],
+    };
+  }
+
+  function makeQuickResponsePage(pack, response, responseIndex) {
+    return {
+      id: `${pack.id}-quick-response-${responseIndex}`,
+      kind: "quickResponse",
+      label: pack.coreExpression,
+      stepLabel: "",
+      question: response.question,
+      speakText: response.question,
+      questionChinese:
+        moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese,
+      bank: uniqueChunks([...(response.chunks ?? []), ...(response.distractors ?? [])]),
+      answer: response.answer ?? [],
+    };
+  }
+
+  if (moduleKey === "notice" || moduleKey === "interpret") {
+    const understandPages = [];
+    const focusPages = [];
+    const buildPages = [];
+    const quickResponsePages = [];
+    const maxExampleCount = Math.max(...packedExamples.map(({ examples }) => examples.length), 0);
+
+    for (let exampleIndex = 0; exampleIndex < maxExampleCount; exampleIndex += 1) {
+      packedExamples.forEach(({ pack, examples }) => {
+        const example = examples[exampleIndex];
+
+        if (!example) {
+          return;
+        }
+
+        understandPages.push(makeUnderstandPage(pack, example));
+        focusPages.push(makeFocusPage(pack, example));
+        buildPages.push(makeBuildPage(pack, example));
       });
+    }
 
-      pages.push({
-        id: `${pack.id}-${example.english}-focus`,
-        kind: "focus",
-        label: pack.coreExpression,
-        stepLabel: "Step 2 of 3",
-        instruction: DEEP_COPY.focusInstruction,
-        sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
-        speakText: example.english,
-        chineseReference: example.chinese,
-        bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
-        answer: example.focus?.answer ?? [],
-      });
-
-      pages.push({
-        id: `${pack.id}-${example.english}-build`,
-        kind: "build",
-        label: pack.coreExpression,
-        stepLabel: "Step 3 of 3",
-        instruction: DEEP_COPY.buildInstruction,
-        promptChinese: example.build?.promptChinese ?? "",
-        chineseReference: example.chinese ?? "",
-        bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
-        answer: example.build?.answer ?? [],
+    packedExamples.forEach(({ pack }) => {
+      (pack?.quickResponses ?? []).forEach((response, responseIndex) => {
+        quickResponsePages.push(makeQuickResponsePage(pack, response, responseIndex));
       });
     });
 
+    return [...understandPages, ...focusPages, ...buildPages, ...quickResponsePages];
+  }
+
+  const pages = [];
+
+  packedExamples.forEach(({ pack, examples }) => {
+    examples.forEach((example) => {
+      pages.push(makeUnderstandPage(pack, example));
+      pages.push(makeFocusPage(pack, example));
+      pages.push(makeBuildPage(pack, example));
+    });
+
     (pack?.quickResponses ?? []).forEach((response, responseIndex) => {
-      pages.push({
-        id: `${pack.id}-quick-response-${responseIndex}`,
-        kind: "quickResponse",
-        label: pack.coreExpression,
-        stepLabel: "",
-        question: response.question,
-        speakText: response.question,
-        questionChinese:
-          moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese,
-        bank: uniqueChunks([...(response.chunks ?? []), ...(response.distractors ?? [])]),
-        answer: response.answer ?? [],
-      });
+      pages.push(makeQuickResponsePage(pack, response, responseIndex));
     });
   });
 
@@ -205,5 +252,7 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
     back: goPreviousPage,
   };
 }
+
+export { buildExercisePages };
 
 export default useDeepExerciseSequence;
