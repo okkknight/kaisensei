@@ -38,6 +38,17 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
   }
 
   const currentPage = flow.currentPage;
+  const primaryActionLabel =
+    currentPage.kind === "dialogue"
+      ? flow.feedback.tone === "success"
+        ? "Continue"
+        : DEEP_COPY.send
+      : flow.feedback.tone === "success"
+        ? "Continue"
+        : DEEP_COPY.check;
+  const handlePrimaryAction = flow.feedback.tone === "success" ? flow.next : flow.check;
+  const primaryActionDisabled =
+    currentPage.kind === "guide" ? false : flow.feedback.tone === "success" ? false : !flow.canAttempt;
 
   const body = (() => {
     if (currentPage.kind === "guide") {
@@ -83,6 +94,7 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
         speakText={currentPage.speakText}
         bank={currentPage.bank}
         selectedChunks={flow.selectedChunks}
+        selectionLimit={flow.selectionLimit}
         feedback={flow.feedback}
         onToggleChunk={flow.toggleChunk}
       />
@@ -111,8 +123,8 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
             <button className="secondary-button" type="button" onClick={flow.hint}>
               {DEEP_COPY.hint}
             </button>
-            <button className="primary-button" type="button" onClick={flow.check} disabled={!flow.isReadyToCheck}>
-              {currentPage.kind === "dialogue" ? DEEP_COPY.send : DEEP_COPY.check}
+            <button className="primary-button" type="button" onClick={handlePrimaryAction} disabled={primaryActionDisabled}>
+              {primaryActionLabel}
             </button>
           </div>
         )

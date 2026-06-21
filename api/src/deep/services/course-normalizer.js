@@ -182,16 +182,26 @@ function normalizeBaseExample(baseExample, path, config = deepCourseDefaultConfi
   };
 }
 
-function normalizeVariation(variation, path, config = deepCourseDefaultConfig.exercise) {
+function normalizeVariation(variation, path, coreExpression, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(variation)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
 
   const english = ensureString(variation.english, `${path}.english`);
   const chinese = ensureString(variation.chinese, `${path}.chinese`);
+  const variationCoreExpression = variation.coreExpression === undefined
+    ? coreExpression
+    : ensureString(variation.coreExpression, `${path}.coreExpression`);
+
+  if (variationCoreExpression !== coreExpression) {
+    fail(`Variation coreExpression must match ${path.replace(/\.variations\[\d+\]$/, "")} coreExpression`, {
+      path: `${path}.coreExpression`,
+    });
+  }
 
   return {
     ...variation,
+    coreExpression,
     english,
     chinese,
     understand: normalizeMaybeReorderExercise(variation.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
@@ -233,7 +243,7 @@ function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.no
   const meaningChinese = ensureString(pack.meaningChinese, `${path}.meaningChinese`);
   const baseExample = normalizeBaseExample(pack.baseExample || {}, `${path}.baseExample`, exerciseConfig);
   const variations = Array.isArray(pack.variations)
-    ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`, exerciseConfig))
+    ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`, coreExpression, exerciseConfig))
     : [];
   const quickResponses = Array.isArray(pack.quickResponses)
     ? pack.quickResponses.map((quickResponse, index) => normalizeQuickResponse(quickResponse, `${path}.quickResponses[${index}]`, exerciseConfig))
@@ -277,14 +287,14 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
       coreExpression: ensureString(need.coreExpression, `${path}.need.coreExpression`),
       meaningChinese: ensureString(need.meaningChinese, `${path}.need.meaningChinese`),
       baseExample: normalizeMaybeReorderExercise(need.baseExample || {}, `${path}.need.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
-      variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, exerciseConfig)),
+      variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, need.coreExpression, exerciseConfig)),
     },
     handle: {
       ...handle,
       coreExpression: ensureString(handle.coreExpression, `${path}.handle.coreExpression`),
       meaningChinese: ensureString(handle.meaningChinese, `${path}.handle.meaningChinese`),
       baseExample: normalizeMaybeReorderExercise(handle.baseExample || {}, `${path}.handle.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
-      variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, exerciseConfig)),
+      variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, handle.coreExpression, exerciseConfig)),
     },
     dialogues: dialogues.map((dialogue, index) => {
       if (!isPlainObject(dialogue)) {

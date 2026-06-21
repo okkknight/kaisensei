@@ -16,12 +16,6 @@ export function DeepOverviewScreen({ overviewVM, onStart, onBack }) {
           <button className="back-button" type="button" aria-label="Back" onClick={onBack}>
             ←
           </button>
-          <div className="screen-header-copy">
-            <div className="screen-progress-copy">
-              <span className="screen-progress-count">{DEEP_COPY.overviewTitle}</span>
-              <span className="screen-progress-label">{DEEP_COPY.overviewModeLabel}</span>
-            </div>
-          </div>
           <button className="camera-settings-button deep-overview-settings" type="button" aria-label="Settings">
             <IconSettings size={16} />
           </button>

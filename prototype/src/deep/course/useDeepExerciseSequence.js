@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
+import { toggleDeepChunkSelection } from "./deep-flow-utils.js";
 
 function uniqueChunks(items = []) {
   return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
@@ -43,7 +44,7 @@ function buildExercisePages(packs, moduleKey) {
         instruction: moduleKey === "interact" ? DEEP_COPY.interactReorderInstruction : DEEP_COPY.reorderInstruction,
         englishSentence: example.english,
         speakText: example.english,
-        englishHighlight: pack.coreExpression,
+        englishHighlight: example.understand?.highlight ?? pack.coreExpression,
         chineseReference: example.chinese,
         bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
         answer: example.understand?.answer ?? [],
@@ -69,6 +70,7 @@ function buildExercisePages(packs, moduleKey) {
         stepLabel: "Step 3 of 3",
         instruction: DEEP_COPY.buildInstruction,
         promptChinese: example.build?.promptChinese ?? "",
+        chineseReference: example.chinese ?? "",
         bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
         answer: example.build?.answer ?? [],
       });
@@ -99,7 +101,6 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
-  const autoAdvanceTimerRef = useRef(null);
 
   useEffect(() => {
     setPageIndex(0);
@@ -107,26 +108,14 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
     setFeedback({ tone: "idle", title: "", body: "" });
   }, [pages]);
 
-  useEffect(
-    () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
-    },
-    []
-  );
-
   const currentPage = pages[pageIndex] ?? null;
   const isMilestone = !currentPage;
   const progressCurrent = currentPage ? pageIndex + 1 : pages.length;
   const progressTotal = pages.length;
-  const isReadyToCheck = currentPage ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length : false;
+  const selectionLimit = currentPage?.kind === "focus" ? currentPage.answer.length : 0;
+  const canAttempt = currentPage ? selectedChunks.length > 0 : false;
 
   function clearPendingAdvance() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
   }
 
   function resetSelection() {
@@ -137,10 +126,7 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
 
   function toggleChunk(chunk) {
     clearPendingAdvance();
-    setSelectedChunks((current) => {
-      const exists = current.some((item) => item === chunk);
-      return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
-    });
+    setSelectedChunks((current) => toggleDeepChunkSelection(current, chunk, selectionLimit));
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
@@ -178,7 +164,7 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
   }
 
   function check() {
-    if (!currentPage || !isReadyToCheck) {
+    if (!currentPage || !canAttempt) {
       return;
     }
 
@@ -188,9 +174,6 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
         title: DEEP_COPY.correct,
         body: currentPage.kind === "quickResponse" ? "You handled the reply." : "You built the target expression.",
       });
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        goNextPage();
-      }, 650);
       return;
     }
 
@@ -212,7 +195,8 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
     feedback,
     progressCurrent,
     progressTotal,
-    isReadyToCheck,
+    canAttempt,
+    selectionLimit,
     toggleChunk,
     reset: resetSelection,
     hint,

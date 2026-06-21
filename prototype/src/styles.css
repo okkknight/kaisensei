@@ -2363,6 +2363,15 @@ img {
   font-weight: 700;
 }
 
+.deep-english-sentence span {
+  white-space: pre-wrap;
+}
+
+.deep-english-highlight {
+  color: var(--primary);
+  font-weight: 800;
+}
+
 .deep-expression-highlight {
   display: inline-flex;
   width: fit-content;
@@ -2380,6 +2389,39 @@ img {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
+}
+
+.deep-build-example {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.deep-build-prompt {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.deep-filled-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 0.35em;
+  font-size: 1.06rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.deep-filled-sentence-text {
+  white-space: pre-wrap;
+}
+
+.deep-filled-sentence-blank {
+  color: rgba(20, 33, 61, 0.28);
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .deep-selection-stack {
@@ -2495,6 +2537,13 @@ img {
   color: var(--primary);
 }
 
+.deep-chunk-chip:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .deep-feedback-card {
   display: grid;
   gap: 4px;
@@ -2506,10 +2555,12 @@ img {
 }
 
 .deep-feedback-card.muted {
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   color: var(--muted);
-  border-color: rgba(20, 33, 61, 0.08);
-  min-height: 72px;
+  border: none;
+  padding: 0;
+  min-height: 0;
+  box-shadow: none;
   align-items: center;
   justify-items: center;
   text-align: center;

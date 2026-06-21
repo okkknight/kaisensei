@@ -2,6 +2,13 @@
 
 Append-only resume log.
 
+## 2026-06-21
+
+- Aligned Deep Mode pack content so baseExample and variations keep the same core expression across Notice, Interpret, and Interact instead of drifting into separate pack meanings
+- Updated the Deep Mode mock data, page sequencing helpers, and exercise page rendering so the frontend prototype follows the same pack-level core expression rule
+- Hardened the Deep Mode prompt and normalizer so variation payloads are validated against the pack core expression before they reach the UI
+- Verified the updated workspace with `npm --prefix prototype run build` and `npm --prefix api test`
+
 ## 2026-06-20
 
 - Added a Deep Mode frontend implementation plan that starts with reusable skeletons, validates a reference slice, then expands by page family

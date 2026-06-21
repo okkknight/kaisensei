@@ -57,6 +57,9 @@ export function NoticeModule({ noticeVM, state, photoPreviewUrl, onAdvance, onBa
   }
 
   const currentPage = sequence.currentPage;
+  const primaryActionLabel = sequence.feedback.tone === "success" ? "Continue" : DEEP_COPY.check;
+  const handlePrimaryAction = sequence.feedback.tone === "success" ? sequence.next : sequence.check;
+  const primaryActionDisabled = sequence.feedback.tone === "success" ? false : !sequence.canAttempt;
 
   return (
     <DeepCourseShell
@@ -75,8 +78,8 @@ export function NoticeModule({ noticeVM, state, photoPreviewUrl, onAdvance, onBa
           <button className="secondary-button" type="button" onClick={sequence.hint}>
             {DEEP_COPY.hint}
           </button>
-          <button className="primary-button" type="button" onClick={sequence.check} disabled={!sequence.isReadyToCheck}>
-            {DEEP_COPY.check}
+          <button className="primary-button" type="button" onClick={handlePrimaryAction} disabled={primaryActionDisabled}>
+            {primaryActionLabel}
           </button>
         </div>
       }
@@ -96,6 +99,7 @@ export function NoticeModule({ noticeVM, state, photoPreviewUrl, onAdvance, onBa
         speakText={currentPage.speakText}
         bank={currentPage.bank}
         selectedChunks={sequence.selectedChunks}
+        selectionLimit={sequence.selectionLimit}
         feedback={sequence.feedback}
         onToggleChunk={sequence.toggleChunk}
       />

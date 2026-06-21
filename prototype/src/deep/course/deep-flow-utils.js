@@ -18,3 +18,24 @@ export function joinDeepChunks(chunks) {
     .trim();
 }
 
+export function isDeepSelectionLocked(selectedChunks, selectionLimit) {
+  if (!Number.isFinite(selectionLimit) || selectionLimit <= 0) {
+    return false;
+  }
+
+  return selectedChunks.length >= selectionLimit;
+}
+
+export function toggleDeepChunkSelection(currentSelection, chunk, selectionLimit) {
+  const exists = currentSelection.some((item) => item === chunk);
+
+  if (exists) {
+    return currentSelection.filter((item) => item !== chunk);
+  }
+
+  if (isDeepSelectionLocked(currentSelection, selectionLimit)) {
+    return currentSelection;
+  }
+
+  return [...currentSelection, chunk];
+}

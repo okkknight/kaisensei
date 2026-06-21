@@ -21,7 +21,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current product state
 
-- The current codebase is still the Quick Mode prototype in `prototype/` with a real `api/`
+- The current codebase still includes the Quick Mode prototype in `prototype/` with a real `api/`
 - Camera mode, loading mode, and lesson mode all exist for Quick Mode
 - Lesson mode currently follows the four-step flow: See, Learn, Build, Use
 - Build and Use use chunk reordering with tolerant checking
@@ -30,6 +30,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells plus a Deep flow hook and completion screen
 - Quick Mode has already been further split into a lesson container plus quick-owned step, feedback, loading, error, and empty-state files
 - Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
+- Deep Mode packs now keep one core expression across baseExample and variations, and the mock / backend alignment work has been applied across Notice, Interpret, and Interact
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
 - The Deep Mode architecture baseline is being refined before feature work lands, so `deep/` should stay isolated from `quick/`
@@ -46,8 +47,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: complete the first-pass Quick/Deep shell split and continue carving the Quick lesson domain into smaller owned files
-- Status: 进行中
+- Task: align Deep Mode pack-level core expression rules so baseExample and variations stay on the same core expression across Notice, Interpret, and Interact
+- Status: 已执行待验收
 
 ## Architecture or state flow
 
@@ -87,7 +88,13 @@ Deep Mode planned states:
 - `prototype/src/quick/QuickModeApp.jsx` - current Quick Mode entry that can start from a captured file
 - `prototype/src/quick/lesson/` - quick-owned lesson container, step views, and state/effect helpers
 - `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold with overview and module shells
+- `prototype/src/deep/schema/deep-course-schema.js` - Deep Mode mock course data and pack-level core expression alignment
+- `prototype/src/deep/course/useDeepExerciseSequence.js` - Notice / Interpret page sequencing
+- `prototype/src/deep/course/useDeepInteractFlow.js` - Interact / Step In page sequencing
+- `prototype/src/deep/course/deep-flow-utils.js` - Deep Mode flow helpers
 - `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
+- `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt and rules
+- `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
 - `api/src/quick/services/codex-cli-provider.js` - Quick Mode lesson generation prompt and Codex CLI bridge
 - `api/src/quick/services/lesson-normalizer.js` - Quick Mode API payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
@@ -99,6 +106,8 @@ Deep Mode planned states:
 - `npm run dev` from the repo root starts both local services
 - `node --test test/lesson-jobs-route.test.js test/lesson-jobs.test.js`
 - `npm run build` in `prototype/`
+- `npm --prefix prototype run build`
+- `npm --prefix api test`
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 
 ## Runtime notes
@@ -113,6 +122,7 @@ Deep Mode planned states:
 - Keep the product mobile-first
 - Preserve the current Quick Mode flow while Deep Mode is being added
 - Do not let Deep Mode changes alter existing Quick Mode behavior
+- Keep Deep Mode pack content on one core expression per pack, with baseExample and variations sharing that same value
 - Use the Deep Mode spec as the source of truth for the new mode
 - Prefer isolated feature boundaries so Deep Mode can become a standalone project later
 - Keep docs compact and source-of-truth oriented

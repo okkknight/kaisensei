@@ -4,12 +4,14 @@ import { DeepFeedbackCard } from "./DeepFeedbackCard.jsx";
 import { DEEP_COPY } from "../copy.js";
 import { VoiceButton } from "../../quick/lesson/VoiceButton.jsx";
 import { useDeepSpeech } from "../useDeepSpeech.js";
+import { isDeepSelectionLocked } from "./deep-flow-utils.js";
 
-function ChunkRow({ items, selectedChunks, onToggleChunk }) {
+function ChunkRow({ items, selectedChunks, selectionLimit, onToggleChunk }) {
   const selectedChunkCounts = selectedChunks.reduce((counts, chunk) => {
     counts.set(chunk, (counts.get(chunk) ?? 0) + 1);
     return counts;
   }, new Map());
+  const selectionLocked = isDeepSelectionLocked(selectedChunks, selectionLimit);
   const availableItems = items.filter((item) => {
     const usedCount = selectedChunkCounts.get(item) ?? 0;
 
@@ -24,7 +26,12 @@ function ChunkRow({ items, selectedChunks, onToggleChunk }) {
   return (
     <div className="deep-bank-row">
       {availableItems.map((chunk, index) => (
-        <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
+        <DeepChunkChip
+          key={`${chunk}-${index}`}
+          chunk={chunk}
+          disabled={selectionLocked}
+          onClick={() => onToggleChunk(chunk)}
+        />
       ))}
     </div>
   );
@@ -44,6 +51,70 @@ function AnswerStage({ selectedChunks, onToggleChunk, emptyMessage = DEEP_COPY.b
   );
 }
 
+function renderFilledBlanks(sentenceWithBlanks, selectedChunks, onToggleChunk) {
+  if (!sentenceWithBlanks) {
+    return null;
+  }
+
+  const parts = String(sentenceWithBlanks).split(/____+/);
+
+  if (parts.length === 1) {
+    return <div className="deep-english-sentence">{sentenceWithBlanks}</div>;
+  }
+
+  const blanksNeeded = parts.length - 1;
+
+  return (
+    <div className="deep-filled-sentence" aria-label={sentenceWithBlanks}>
+      {parts.map((part, index) => (
+        <React.Fragment key={`part-${index}`}>
+          {part ? <span className="deep-filled-sentence-text">{part}</span> : null}
+          {index < blanksNeeded ? (
+            selectedChunks[index] ? (
+              <DeepChunkChip
+                key={`blank-${index}`}
+                chunk={selectedChunks[index]}
+                selected
+                onClick={() => onToggleChunk(selectedChunks[index])}
+              />
+            ) : (
+              <span className="deep-filled-sentence-blank">____</span>
+            )
+          ) : null}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+function renderUnderstandSentence(sentence, highlight) {
+  if (!sentence) {
+    return null;
+  }
+
+  if (!highlight) {
+    return <div className="deep-english-sentence">{sentence}</div>;
+  }
+
+  const index = sentence.toLowerCase().indexOf(highlight.toLowerCase());
+
+  if (index === -1) {
+    return <div className="deep-english-sentence">{sentence}</div>;
+  }
+
+  const before = sentence.slice(0, index);
+  const matched = sentence.slice(index, index + highlight.length);
+  const after = sentence.slice(index + highlight.length);
+
+  return (
+    <div className="deep-english-sentence" aria-label={sentence}>
+      {before ? <span>{before}</span> : null}
+      <span className="deep-english-highlight">{matched}</span>
+      {after ? <span>{after}</span> : null}
+    </div>
+  );
+}
+
 export function DeepExercisePage({
   kind,
   label,
@@ -59,6 +130,7 @@ export function DeepExercisePage({
   speakText = "",
   bank = [],
   selectedChunks = [],
+  selectionLimit = 0,
   feedback,
   onToggleChunk,
 }) {
@@ -85,20 +157,13 @@ export function DeepExercisePage({
 
   return (
     <div className="deep-exercise-page">
-      <div className="deep-exercise-head">
-        {stepLabel ? <span className="deep-exercise-step">{stepLabel}</span> : null}
-        <span className="deep-exercise-stage">{label}</span>
-      </div>
-
       {kind === "understand" ? (
         <section className="deep-page-card">
           <div className="deep-card-head">
-            <strong>{label}</strong>
             <p>{instruction}</p>
           </div>
           <div className="deep-card-copy">
-            {renderSentenceBlock(englishSentence, `${kind}-${label}`)}
-            {englishHighlight ? <div className="deep-expression-highlight">{englishHighlight}</div> : null}
+            {renderUnderstandSentence(englishSentence, englishHighlight)}
           </div>
         </section>
       ) : null}
@@ -106,11 +171,10 @@ export function DeepExercisePage({
       {kind === "focus" ? (
         <section className="deep-page-card">
           <div className="deep-card-head">
-            <strong>{label}</strong>
             <p>{instruction}</p>
           </div>
           <div className="deep-card-copy">
-            {renderSentenceBlock(sentenceWithBlanks, `${kind}-${label}`)}
+            {renderFilledBlanks(sentenceWithBlanks, selectedChunks, onToggleChunk)}
             <div className="deep-reference-copy">{chineseReference}</div>
           </div>
         </section>
@@ -119,11 +183,9 @@ export function DeepExercisePage({
       {kind === "build" ? (
         <section className="deep-page-card">
           <div className="deep-card-head">
-            <strong>{label}</strong>
             <p>{instruction}</p>
-          </div>
-          <div className="deep-card-copy">
-            <div className="deep-reference-copy">{promptChinese}</div>
+            <div className="deep-build-example">{chineseReference}</div>
+            <div className="deep-build-prompt">{promptChinese}</div>
           </div>
         </section>
       ) : null}
@@ -131,7 +193,6 @@ export function DeepExercisePage({
       {kind === "quickResponse" ? (
         <section className="deep-page-card">
           <div className="deep-card-head">
-            <strong>{label}</strong>
             <p>{DEEP_COPY.buildYourAnswer}</p>
           </div>
           <div className="deep-card-copy">
@@ -142,15 +203,32 @@ export function DeepExercisePage({
       ) : null}
 
       <div className="deep-selection-stack">
-        {(kind === "focus" || kind === "build" || kind === "quickResponse") ? (
+        {kind === "understand" ? (
           <>
             <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
-            <ChunkRow items={bank} selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
+            <ChunkRow
+              items={bank}
+              selectedChunks={selectedChunks}
+              selectionLimit={0}
+              onToggleChunk={onToggleChunk}
+            />
           </>
+        ) : kind === "focus" ? (
+          <ChunkRow
+            items={bank}
+            selectedChunks={selectedChunks}
+            selectionLimit={selectionLimit}
+            onToggleChunk={onToggleChunk}
+          />
         ) : (
           <>
-            <ChunkRow items={bank} selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
             <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
+            <ChunkRow
+              items={bank}
+              selectedChunks={selectedChunks}
+              selectionLimit={0}
+              onToggleChunk={onToggleChunk}
+            />
           </>
         )}
       </div>

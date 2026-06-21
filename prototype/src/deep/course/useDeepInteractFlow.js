@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-import { joinDeepChunks } from "./deep-flow-utils.js";
+import { joinDeepChunks, toggleDeepChunkSelection } from "./deep-flow-utils.js";
 
 function uniqueChunks(items = []) {
   return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
@@ -37,7 +37,7 @@ function buildInteractPages(taskPacks) {
           stepLabel: "Step 1 of 3",
           instruction: DEEP_COPY.interactReorderInstruction,
           englishSentence: example.english,
-          englishHighlight: section.coreExpression,
+          englishHighlight: example.understand?.highlight ?? section.coreExpression,
           chineseReference: example.chinese,
           bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
           answer: example.understand?.answer ?? [],
@@ -66,6 +66,7 @@ function buildInteractPages(taskPacks) {
           stepLabel: "Step 3 of 3",
           instruction: DEEP_COPY.buildInstruction,
           promptChinese: example.build?.promptChinese ?? "",
+          chineseReference: example.chinese ?? "",
           bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
           answer: example.build?.answer ?? [],
           moduleLabel: `${stepPrefix} · Build`,
@@ -146,22 +147,12 @@ export function useDeepInteractFlow(taskPacks = []) {
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
-  const autoAdvanceTimerRef = useRef(null);
 
   useEffect(() => {
     setPageIndex(0);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
   }, [pages]);
-
-  useEffect(
-    () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
-    },
-    []
-  );
 
   const currentPage = pages[pageIndex] ?? null;
   const isMilestone = !currentPage;
@@ -170,15 +161,10 @@ export function useDeepInteractFlow(taskPacks = []) {
   const progressCurrent = currentPage && currentPage.kind !== "guide"
     ? progressPages.findIndex((page) => page.id === currentPage.id) + 1
     : 0;
-  const isReadyToCheck = currentPage && currentPage.kind !== "guide"
-    ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length
-    : false;
+  const selectionLimit = currentPage?.kind === "exercise" && currentPage.pageType === "focus" ? currentPage.answer.length : 0;
+  const canAttempt = currentPage && currentPage.kind !== "guide" ? selectedChunks.length > 0 : false;
 
   function clearPendingAdvance() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
   }
 
   function reset() {
@@ -202,10 +188,7 @@ export function useDeepInteractFlow(taskPacks = []) {
 
   function toggleChunk(chunk) {
     clearPendingAdvance();
-    setSelectedChunks((current) => {
-      const exists = current.some((item) => item === chunk);
-      return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
-    });
+    setSelectedChunks((current) => toggleDeepChunkSelection(current, chunk, selectionLimit));
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
@@ -230,7 +213,7 @@ export function useDeepInteractFlow(taskPacks = []) {
   }
 
   function check() {
-    if (!currentPage || !isReadyToCheck) {
+    if (!currentPage || !canAttempt) {
       return;
     }
 
@@ -240,9 +223,6 @@ export function useDeepInteractFlow(taskPacks = []) {
         title: DEEP_COPY.correct,
         body: currentPage.kind === "dialogue" ? "You replied naturally." : "You built the target expression.",
       });
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        next();
-      }, 650);
       return;
     }
 
@@ -260,7 +240,8 @@ export function useDeepInteractFlow(taskPacks = []) {
     feedback,
     progressCurrent,
     progressTotal,
-    isReadyToCheck,
+    canAttempt,
+    selectionLimit,
     reset,
     back,
     toggleChunk,
