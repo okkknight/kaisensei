@@ -4,6 +4,8 @@ Append-only resume log.
 
 ## 2026-06-21
 
+- Fixed the Deep Mode playback order in the design docs so Notice / Interpret run example-index-first and Interact runs task-pack-first with Need / Handle interleaving by example
+- Added a regression test for Notice / Interpret sequencing so the example-index-first order stays locked in the prototype
 - Refined Deep Mode Interact so the dialogue `systemReply` is a bridge sentence and the learned Handle expression stays reserved for the user's reply
 - Added normalizer and prompt guards so bridge replies that expose the learned Handle are rejected before reaching the UI
 - Updated the Deep Mode mock Interact dialogue examples to use bridge replies instead of exposing the target Handle line early

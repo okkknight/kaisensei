@@ -32,6 +32,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
 - Deep Mode packs now keep one core expression across baseExample and variations, and the mock / backend alignment work has been applied across Notice, Interpret, and Interact
 - Interact dialogue practice now treats `systemReply` as a bridge sentence and keeps the learned Handle expression for the user's reply, instead of exposing the answer early
+- Notice / Interpret playback is now locked to the example-index-first order: for each example index, run Understand and Focus across all core expressions, then Build and Quick Response across all core expressions
+- Interact playback stays task-pack ordered: within each task pack, Need and Handle are interleaved by example index for Understand / Focus / Build, then Dialogue Practice runs
 - The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
 - The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
 - The Deep Mode architecture baseline is being refined before feature work lands, so `deep/` should stay isolated from `quick/`
@@ -48,8 +50,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: align Deep Mode Interact dialogue flow so `systemReply` becomes a bridge sentence and the learned Handle expression stays reserved for the user's reply
-- Status: 已执行待验收
+- Task: 固化 Deep Mode Notice / Interpret / Interact 的页面播放顺序，并把顺序规则写进设计文档和测试
+- Status: 验收通过
 
 ## Architecture or state flow
 
@@ -89,7 +91,7 @@ Deep Mode planned states:
 - `prototype/src/quick/QuickModeApp.jsx` - current Quick Mode entry that can start from a captured file
 - `prototype/src/quick/lesson/` - quick-owned lesson container, step views, and state/effect helpers
 - `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold with overview and module shells
-- `prototype/src/deep/schema/deep-course-schema.js` - Deep Mode mock course data and pack-level core expression alignment
+- `prototype/src/deep/schema/deep-course-schema.js` - Deep Mode mock course data and core-expression-aligned packs
 - `prototype/src/deep/course/useDeepExerciseSequence.js` - Notice / Interpret page sequencing
 - `prototype/src/deep/course/useDeepInteractFlow.js` - Interact / Step In page sequencing
 - `prototype/src/deep/course/deep-flow-utils.js` - Deep Mode flow helpers
@@ -110,6 +112,7 @@ Deep Mode planned states:
 - `npm run build` in `prototype/`
 - `npm --prefix prototype run build`
 - `npm --prefix api test`
+- `node --test prototype/src/deep/course/useDeepExerciseSequence.test.js`
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 
 ## Runtime notes
@@ -125,6 +128,8 @@ Deep Mode planned states:
 - Preserve the current Quick Mode flow while Deep Mode is being added
 - Do not let Deep Mode changes alter existing Quick Mode behavior
 - Keep Deep Mode pack content on one core expression per pack, with baseExample and variations sharing that same value
+- Keep Notice / Interpret ordering example-index-first: for a given example index, sweep Understand and Focus across all core expressions first, then Build and Quick Response across all core expressions
+- Keep Interact ordering task-pack-first, with Need and Handle interleaved by example index for Understand / Focus / Build, then Dialogue Practice
 - Treat Interact `systemReply` as a bridge sentence, not as the learned Handle target
 - Treat Step In as a continuous role-play conversation in the same scene, with the system speaking like one consistent in-scene character instead of a quiz master
 - Use the Deep Mode spec as the source of truth for the new mode
