@@ -126,6 +126,7 @@ Deep Mode planned states:
 - Do not let Deep Mode changes alter existing Quick Mode behavior
 - Keep Deep Mode pack content on one core expression per pack, with baseExample and variations sharing that same value
 - Treat Interact `systemReply` as a bridge sentence, not as the learned Handle target
+- Treat Step In as a continuous role-play conversation in the same scene, with the system speaking like one consistent in-scene character instead of a quiz master
 - Use the Deep Mode spec as the source of truth for the new mode
 - Prefer isolated feature boundaries so Deep Mode can become a standalone project later
 - Keep docs compact and source-of-truth oriented

@@ -722,7 +722,7 @@ Continue to Step In
 
 Step In 是最终挑战。
 
-> 用户综合使用 Notice、Interpret、Interact 中学到的表达，完成一段完整真实场景对话。
+> 用户综合使用 Notice、Interpret、Interact 中学到的表达，完成一段同一场景里的连续真实对话。
 
 ## 9.2 内容抽取规则
 
@@ -741,26 +741,26 @@ Step In 是最终挑战。
 
 Step In 完全使用 Dialogue Practice 对话流界面。
 
-区别是对话更完整。
+区别是对话更完整，而且系统始终扮演同一个场景角色，持续接话，而不是像老师一样逐题提问。
 
 推荐流程：
 
 ```text
-系统给出场景
+系统以场景角色开场
 ↓
 用户用 Notice 表达描述眼前情况
 ↓
-系统回应或追问
+系统继续接话或自然回应
 ↓
 用户用 Interpret 表达做出判断
 ↓
-系统给出互动机会
+系统继续推进同一场景
 ↓
 用户用 Need 表达提出需求
 ↓
-系统回复
+系统用角色语气回复
 ↓
-用户用 Handle 表达自然回应
+用户用 Handle 表达自然接话
 ```
 
 所有用户输入仍使用词组重排，不做自由输入。
@@ -1089,11 +1089,11 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
 
 ```json
 {
-  "scene": "You are sitting in a café with your laptop.",
+  "scene": "You are sitting at a desk with your laptop, and a coworker is nearby.",
   "turns": [
     {
       "speaker": "system",
-      "text": "What do you notice around you?"
+      "text": "Looks like a long afternoon."
     },
     {
       "speaker": "user",
@@ -1104,7 +1104,7 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
     },
     {
       "speaker": "system",
-      "text": "What do you think is happening here?"
+      "text": "Yeah, it feels pretty calm here."
     },
     {
       "speaker": "user",
@@ -1115,7 +1115,7 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
     },
     {
       "speaker": "system",
-      "text": "You need to charge your laptop."
+      "text": "I could use a quick break."
     },
     {
       "speaker": "user",
@@ -1126,7 +1126,7 @@ Notice 和 Interpret 共用同一结构，只通过生成规则区分内容。
     },
     {
       "speaker": "system",
-      "text": "Sorry, I am using it right now."
+      "text": "Sure, go ahead."
     },
     {
       "speaker": "user",
@@ -1387,7 +1387,8 @@ Create one final conversation using:
 - exactly {{stepIn.needExpressionCount}} learned Need expression,
 - exactly {{stepIn.handleExpressionCount}} learned Handle expression.
 
-The final conversation must form one coherent situation.
+The final conversation must form one coherent situation and feel like one continuous role-play in the same scene.
+The system must keep the same in-scene voice throughout, not switch into teacher or quiz-master mode.
 It must follow this learning arc:
 1. notice the scene,
 2. interpret the situation,

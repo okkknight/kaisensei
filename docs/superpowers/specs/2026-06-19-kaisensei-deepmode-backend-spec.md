@@ -178,7 +178,7 @@ Deep Mode 的 job 成功后，`lesson` 字段不是 Quick lesson，而是完整�
 - `Notice`：只描述客观可见内容。
 - `Interpret`：只做有照片依据的合理推测。
 - `Interact`：只生成这个场景里现实可发生的需求与回应。
-- `Step In`：只复用前面已经学过的表达，不引入新核心表达。
+- `Step In`：只复用前面已经学过的表达，不引入新核心表达，并保持同一场景里的连续角色对话语气。
 
 ---
 
@@ -359,4 +359,3 @@ Deep backend 可以认为完成，当且仅当：
 8. Deep 的 prompt、schema、validator 与 Quick 隔离。
 9. 现有共享 AI 底座仍然可复用，但不承载产品逻辑。
 10. 当前任务结束后，Deep frontend 可以只对接这个固定 contract。
-

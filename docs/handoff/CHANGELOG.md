@@ -84,6 +84,12 @@ Append-only resume log.
 - Marked `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` as the current Deep Mode implementation boundary source
 - Aligned the project context, PRD, and handoff reading order so future work starts from the same Deep Mode/Quick Mode separation
 
+## 2026-06-21
+
+- Unified Deep Mode Step In across product design, spec, backend prompt, frontend prompt copy, and prototype mock data so the final challenge reads as one continuous role-play conversation in the same scene
+- Reworded Step In guide and replay copy to stay in character instead of using quiz-style question prompts
+- Updated the Step In mock dialogue to keep the system voice consistent across turns and to avoid interviewer-style wording
+
 ## 2026-06-19
 
 - Aligned the project context and handoff pack to the current real repo state: Quick Mode remains the implemented prototype, while Deep Mode is now starting from spec rather than code

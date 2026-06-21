@@ -578,11 +578,11 @@ export function createDeepCourseLesson(level = "Normal") {
         title: "Step In",
         goal: "Complete one full scene conversation.",
         dialogue: {
-          scene: "The desk is set for a focused afternoon of work.",
+          scene: "You are at a desk with your laptop, and a coworker is nearby.",
           turns: [
             {
               speaker: "system",
-              text: "What do you see on the desk?",
+              text: "Looks like a long afternoon.",
             },
             {
               speaker: "user",
@@ -594,7 +594,7 @@ export function createDeepCourseLesson(level = "Normal") {
             },
             {
               speaker: "system",
-              text: "How does the space feel?",
+              text: "Yeah, it feels pretty calm here.",
             },
             {
               speaker: "user",
@@ -606,7 +606,7 @@ export function createDeepCourseLesson(level = "Normal") {
             },
             {
               speaker: "system",
-              text: "How would you ask for a short break?",
+              text: "I could use a quick break.",
             },
             {
               speaker: "user",
@@ -618,7 +618,7 @@ export function createDeepCourseLesson(level = "Normal") {
             },
             {
               speaker: "system",
-              text: "How would someone respond?",
+              text: "Sure, go ahead.",
             },
             {
               speaker: "user",

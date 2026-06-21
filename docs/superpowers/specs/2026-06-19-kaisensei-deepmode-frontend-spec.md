@@ -1240,7 +1240,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-让用户进入最终综合挑战前，先明确这轮要用前面学到的内容完成整段对话。
+让用户进入最终综合挑战前，先明确这轮要在同一场景里用前面学到的内容持续接话。
 
 ##### 复用关系
 
@@ -1269,8 +1269,8 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 标题 `Challenge`：固定文案
 - 目标说明：来自 `modules.stepIn.goal`
-- 追加入门语：固定为 `Use what you've learned!`
-- 中文说明：固定为 `请使用你学到的内容！`
+- 追加入门语：固定为 `Stay in character and keep the scene moving!`
+- 中文说明：固定为 `保持在场景里，继续接话！`
 - 场景说明：来自 `modules.stepIn.dialogue.scene`
 
 ##### 交互流程与状态流转
@@ -1281,7 +1281,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-完成 Step In 的第 1 段对话，使用 Notice 阶段学到的内容回答系统问题。
+完成 Step In 的第 1 段对话，使用 Notice 阶段学到的内容接住系统角色的开场。
 
 ##### 复用关系
 
@@ -1292,7 +1292,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 顶部返回按钮、主进度、缩略图入口
 - 对话时间线
-- 当前系统提问
+- 当前系统开场
 - 用户输入区
 - 候选词块池
 - 底部 `Reset / Hint / Send`
@@ -1301,14 +1301,14 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 顶：导航 + 主进度
 - 中部从场景说明和历史消息开始
-- 当前系统提问显示在时间线末尾
-- 用户输入区放在系统提问下方
+- 当前系统开场显示在时间线末尾
+- 用户输入区放在系统开场下方
 - 词块池放在输入区下方
 - 底：`Send` 操作栏
 
 ##### 组件说明与来源
 
-- 系统提问：来自 `modules.stepIn.dialogue.turns` 中当前 Notice turn 的前一条 system turn
+- 系统开场：来自 `modules.stepIn.dialogue.turns` 中当前 Notice turn 的前一条 system turn
 - 历史消息：来自已完成的前置 turns
 - 当前用户输入区：来自当前 Notice turn 的 `chunks / distractors / answer`
 - 当前来源标记：`sourceModule = notice`
@@ -1322,7 +1322,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-完成 Step In 的第 2 段对话，接住系统追问并继续表达。
+完成 Step In 的第 2 段对话，接住系统连续接话并继续表达。
 
 ##### 复用关系
 
@@ -1333,7 +1333,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 顶部返回按钮、主进度、缩略图入口
 - 对话时间线
-- 当前系统追问
+- 当前系统接话
 - 用户输入区
 - 候选词块池
 - 底部 `Reset / Hint / Send`
@@ -1342,14 +1342,14 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 - 顶：导航 + 主进度
 - 中部延续同一条对话时间线
-- 当前系统追问显示在时间线末尾
-- 用户输入区放在追问下方
+- 当前系统接话显示在时间线末尾
+- 用户输入区放在接话下方
 - 词块池放在输入区下方
 - 底：`Send` 操作栏
 
 ##### 组件说明与来源
 
-- 系统追问：来自 `modules.stepIn.dialogue.turns` 中当前 Interpret turn 的前一条 system turn
+- 系统接话：来自 `modules.stepIn.dialogue.turns` 中当前 Interpret turn 的前一条 system turn
 - 历史消息：来自已完成的前置 turns
 - 当前用户输入区：来自当前 Interpret turn 的 `chunks / distractors / answer`
 - 当前来源标记：`sourceModule = interpret`
@@ -1363,7 +1363,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-在最终挑战中完成 Interact 的 Need 轮次，回答任务提示。
+在最终挑战中完成 Interact 的 Need 轮次，继续接住场景里的任务提示。
 
 ##### 复用关系
 
@@ -1404,7 +1404,7 @@ Overview 页是 Deep Mode 的课程入口页。它只回答一件事：这张图
 
 ##### 页面作用
 
-在最终挑战中完成 Interact 的 Handle 轮次，接住系统回复并收尾当前任务。
+在最终挑战中完成 Interact 的 Handle 轮次，接住系统回复并把这一段对话收尾。
 
 ##### 复用关系
 

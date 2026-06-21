@@ -19,6 +19,7 @@ Notes:
 - The current focus is Deep Mode implementation with Quick Mode left unchanged
 - The current alignment task is keeping each Deep Mode pack on one core expression across baseExample and variations
 - The latest Interact rule is that `systemReply` should be a bridge sentence while the learned Handle expression stays for the user reply
+- The latest Step In rule is that the final dialogue should feel like one continuous role-play in the same scene, with the system staying in character instead of asking quiz-style questions
 - Treat the Deep Mode design doc as the authoritative product fact source and the Deep Mode spec as the implementation boundary source
 - Treat the structure isolation plan as the next execution step
 - Do not duplicate the same state in multiple docs

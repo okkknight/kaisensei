@@ -35,13 +35,13 @@ function buildStepInPages({ title, goal, scene, turns }) {
       kind: "turn",
       userPrompt:
         turn.sourceModule === "notice"
-          ? "Your turn: Notice"
+          ? "Stay in character: notice the scene"
           : turn.sourceModule === "interpret"
-            ? "Your turn: Interpret"
+            ? "Stay in character: share what it feels like"
             : turn.sourceModule === "interact_need"
-              ? DEEP_COPY.dialogueNeedPrompt
+              ? "Stay in character: say what you need"
               : turn.sourceModule === "interact_handle"
-                ? DEEP_COPY.dialogueHandlePrompt
+                ? "Stay in character: answer naturally"
                 : "",
       scene,
       history,
