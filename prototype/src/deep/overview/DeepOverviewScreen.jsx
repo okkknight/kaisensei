@@ -1,12 +1,12 @@
 import React from "react";
-import { IconArrowRight, IconSettings } from "@tabler/icons-react";
+import { IconSettings } from "@tabler/icons-react";
 import { DEEP_COPY } from "../copy.js";
 
-export function DeepOverviewScreen({ lesson, photoPreviewUrl, onStart, onBack }) {
-  const overview = lesson?.overview ?? {
+export function DeepOverviewScreen({ overviewVM, onStart, onBack }) {
+  const overview = overviewVM ?? {
+    photoPreviewUrl: "",
     keywords: ["coffee", "table", "laptop"],
     sceneDescriptionChinese: "安静的桌面工作场景",
-    startPromptChinese: DEEP_COPY.overviewPrompt,
   };
 
   return (
@@ -17,10 +17,10 @@ export function DeepOverviewScreen({ lesson, photoPreviewUrl, onStart, onBack })
             ←
           </button>
           <div className="screen-header-copy">
-          <div className="screen-progress-copy">
-            <span className="screen-progress-count">Overview</span>
-            <span className="screen-progress-label">Deep Mode</span>
-          </div>
+            <div className="screen-progress-copy">
+              <span className="screen-progress-count">{DEEP_COPY.overviewTitle}</span>
+              <span className="screen-progress-label">{DEEP_COPY.overviewModeLabel}</span>
+            </div>
           </div>
           <button className="camera-settings-button deep-overview-settings" type="button" aria-label="Settings">
             <IconSettings size={16} />
@@ -29,8 +29,8 @@ export function DeepOverviewScreen({ lesson, photoPreviewUrl, onStart, onBack })
 
         <button className="deep-overview-card" type="button" onClick={onStart}>
           <div className="deep-overview-media">
-            {photoPreviewUrl ? (
-              <img src={photoPreviewUrl} alt="Selected scene preview" className="deep-overview-photo" />
+            {overview.photoPreviewUrl ? (
+              <img src={overview.photoPreviewUrl} alt="Selected scene preview" className="deep-overview-photo" />
             ) : (
               <div className="deep-overview-photo deep-overview-photo-placeholder" />
             )}

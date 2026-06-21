@@ -2,7 +2,15 @@ import React from "react";
 
 export function DeepFeedbackCard({ tone = "idle", title = "", body = "", idleBody = "" }) {
   if (tone === "idle") {
-    return null;
+    if (!idleBody) {
+      return null;
+    }
+
+    return (
+      <div className="deep-feedback-card muted">
+        <p>{idleBody}</p>
+      </div>
+    );
   }
 
   return (

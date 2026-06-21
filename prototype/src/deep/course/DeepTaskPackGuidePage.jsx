@@ -13,6 +13,7 @@ function PreviewCard({ label, title, body, tone = "default" }) {
 export function DeepTaskPackGuidePage({
   taskTitle,
   scenePrompt,
+  scenePromptChinese = "",
   needExpression,
   needMeaning,
   handleExpression,
@@ -20,13 +21,10 @@ export function DeepTaskPackGuidePage({
 }) {
   return (
     <div className="deep-guide-page">
-      <div className="deep-exercise-head">
-        <span className="deep-exercise-stage">Interact</span>
-      </div>
-
       <div className="deep-stage-card deep-guide-task-card">
         <strong>{taskTitle}</strong>
         <p>{scenePrompt}</p>
+        {scenePromptChinese ? <small>{scenePromptChinese}</small> : null}
       </div>
 
       <div className="deep-stage-stack">

@@ -1,5 +1,4 @@
 import React from "react";
-import { IconArrowRight, IconRefresh } from "@tabler/icons-react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepInteractMilestonePage } from "../DeepInteractMilestonePage.jsx";
@@ -8,126 +7,116 @@ import { DeepExercisePage } from "../DeepExercisePage.jsx";
 import { DEEP_COPY } from "../../copy.js";
 import { useDeepInteractFlow } from "../useDeepInteractFlow.js";
 
-export function InteractModule({ lesson, state, photoPreviewUrl, onAdvance, onBack }) {
-  const taskPacks = lesson?.modules?.interact?.taskPacks ?? [];
+export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, onBack }) {
+  const taskPacks = interactVM?.taskPacks ?? [];
   const flow = useDeepInteractFlow(taskPacks);
-  const taskPack = flow.taskPack;
 
-  function renderFooter() {
-    if (flow.stage === "guide") {
-      return (
-        <button className="primary-button" type="button" onClick={flow.startPractice}>
-          {DEEP_COPY.startPractice} →
-        </button>
-      );
+  function handleBack() {
+    const movedWithinModule = flow.back();
+
+    if (!movedWithinModule) {
+      onBack();
     }
+  }
 
-    if (flow.stage === "milestone") {
-      return (
-        <button className="primary-button" type="button" onClick={onAdvance}>
-          {DEEP_COPY.continueToStepIn}
-        </button>
-      );
-    }
-
-    const primaryLabel = flow.stage === "dialogueHandle"
-      ? DEEP_COPY.send
-      : DEEP_COPY.check;
-
-      return (
-        <div className="lesson-footer-actions">
-          <button className="secondary-button" type="button" onClick={flow.reset}>
-            <IconRefresh size={17} />
-            {DEEP_COPY.reset}
-        </button>
-        <button className="secondary-button" type="button" onClick={flow.hint}>
-          {DEEP_COPY.hint}
-        </button>
-        <button className="primary-button" type="button" onClick={flow.feedback.tone === "success" ? flow.advance : flow.check}>
-          {primaryLabel}
-        </button>
-      </div>
+  if (flow.isMilestone) {
+    return (
+      <DeepCourseShell
+        state={state}
+        photoPreviewUrl={photoPreviewUrl}
+        onBack={handleBack}
+        onAdvance={onAdvance}
+        footerActions={
+          <button className="primary-button" type="button" onClick={onAdvance}>
+            {DEEP_COPY.continueToStepIn}
+          </button>
+        }
+      >
+        <DeepInteractMilestonePage taskPacks={taskPacks} />
+      </DeepCourseShell>
     );
   }
 
+  const currentPage = flow.currentPage;
+
   const body = (() => {
-    if (flow.stage === "guide") {
+    if (currentPage.kind === "guide") {
       return (
         <DeepTaskPackGuidePage
-          taskTitle={taskPack?.taskTitle ?? "Interact"}
-          scenePrompt={taskPack?.scenePrompt ?? ""}
-          needExpression={taskPack?.need?.coreExpression ?? ""}
-          needMeaning={taskPack?.need?.meaningChinese ?? ""}
-          handleExpression={taskPack?.handle?.coreExpression ?? ""}
-          handleMeaning={taskPack?.handle?.meaningChinese ?? ""}
+          taskTitle={currentPage.title}
+          scenePrompt={currentPage.scene}
+          scenePromptChinese={currentPage.sceneChinese}
+          needExpression={currentPage.needExpression}
+          needMeaning={currentPage.needMeaning}
+          handleExpression={currentPage.handleExpression}
+          handleMeaning={currentPage.handleMeaning}
         />
       );
     }
 
-    if (flow.stage === "milestone") {
-      return <DeepInteractMilestonePage taskPacks={taskPacks} />;
-    }
-
-    if (flow.stage === "dialogueNeed" || flow.stage === "dialogueHandle") {
-      const isNeedDialogue = flow.stage === "dialogueNeed";
-        return (
-          <DeepDialogueFlowPage
-            stageLabel={flow.stageLabel}
-            title={flow.title}
-            subtitle={flow.subtitle}
-            showHeader={false}
-            scene={flow.scene}
-            introCards={[]}
-            history={flow.stage === "dialogueNeed"
-            ? [{ speaker: "system", text: DEEP_COPY.dialogueNeedOpening, label: "System" }]
-            : flow.dialogueHistory}
-          prompt={flow.prompt}
-          hint=""
-          bank={flow.bank}
+    if (currentPage.kind === "dialogue") {
+      return (
+        <DeepDialogueFlowPage
+          scene={currentPage.scene}
+          sceneChinese={currentPage.sceneChinese}
+          history={currentPage.history}
+          userPrompt={currentPage.userPrompt}
+          bank={currentPage.bank}
           selectedChunks={flow.selectedChunks}
           feedback={flow.feedback}
           onToggleChunk={flow.toggleChunk}
-          onReset={flow.reset}
-          onHint={flow.hint}
-          onCheck={flow.check}
-          onContinue={flow.advance}
-          historyEmpty=""
-          emptyMessage={DEEP_COPY.tapChunksToBuild}
-          idleMessage={isNeedDialogue ? DEEP_COPY.tapChunksThenCheck : DEEP_COPY.tapChunksThenSend}
-          showActions={false}
         />
       );
     }
 
     return (
-        <DeepExercisePage
-          title={flow.title}
-          subtitle={flow.subtitle}
-          prompt={flow.prompt}
-          hint=""
-          bank={flow.bank}
-          selectedChunks={flow.selectedChunks}
-          feedback={flow.feedback}
-          bankFirst={flow.stage === "needBuild" || flow.stage === "handleBuild"}
-          onToggleChunk={flow.toggleChunk}
-          onReset={flow.reset}
-          onHint={flow.hint}
-          onCheck={flow.check}
-          stageLabel={flow.stageLabel}
-          stepLabel={flow.stepLabel}
-          showActions={false}
-        />
-      );
+      <DeepExercisePage
+        kind={currentPage.pageType}
+        label={currentPage.title}
+        instruction={currentPage.instruction}
+        stepLabel={currentPage.stepLabel}
+        englishSentence={currentPage.englishSentence}
+        englishHighlight={currentPage.englishHighlight}
+        sentenceWithBlanks={currentPage.sentenceWithBlanks}
+        chineseReference={currentPage.chineseReference}
+        promptChinese={currentPage.promptChinese}
+        speakText={currentPage.speakText}
+        bank={currentPage.bank}
+        selectedChunks={flow.selectedChunks}
+        feedback={flow.feedback}
+        onToggleChunk={flow.toggleChunk}
+      />
+    );
   })();
 
   return (
     <DeepCourseShell
-      lesson={lesson}
       state={state}
       photoPreviewUrl={photoPreviewUrl}
-      onBack={onBack}
+      pageProgressLabel={currentPage.kind === "guide" ? "" : interactVM?.title ?? "Interact"}
+      pageProgressCurrent={currentPage.kind === "guide" ? 0 : flow.progressCurrent}
+      pageProgressTotal={currentPage.kind === "guide" ? 0 : flow.progressTotal}
+      onBack={handleBack}
       onAdvance={onAdvance}
-      footerActions={renderFooter()}
+      footerActions={
+        currentPage.kind === "guide" ? (
+          <button className="primary-button" type="button" onClick={flow.next}>
+            {DEEP_COPY.startPractice} →
+          </button>
+        ) : (
+          <div className="lesson-footer-actions">
+            <button className="secondary-button" type="button" onClick={flow.reset}>
+              {DEEP_COPY.reset}
+            </button>
+            <button className="secondary-button" type="button" onClick={flow.hint}>
+              {DEEP_COPY.hint}
+            </button>
+            <button className="primary-button" type="button" onClick={flow.check} disabled={!flow.isReadyToCheck}>
+              {currentPage.kind === "dialogue" ? DEEP_COPY.send : DEEP_COPY.check}
+            </button>
+          </div>
+        )
+      }
     >
       {body}
     </DeepCourseShell>

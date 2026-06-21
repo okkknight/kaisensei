@@ -1,7 +1,9 @@
 import React from "react";
-import { IconCheck, IconRefresh } from "@tabler/icons-react";
 import { DEEP_COPY } from "../copy.js";
 import { DeepChunkChip } from "./DeepChunkChip.jsx";
+import { DeepFeedbackCard } from "./DeepFeedbackCard.jsx";
+import { VoiceButton } from "../../quick/lesson/VoiceButton.jsx";
+import { useDeepSpeech } from "../useDeepSpeech.js";
 
 function DialogueTurn({ turn }) {
   return (
@@ -13,104 +15,87 @@ function DialogueTurn({ turn }) {
 }
 
 export function DeepDialogueFlowPage({
-  stageLabel = "Dialogue",
-  title,
-  subtitle,
-  showHeader = true,
-  scene,
-  introCards = [],
+  scene = "",
+  sceneChinese = "",
   history = [],
-  prompt,
-  hint,
+  userPrompt = "",
   bank = [],
   selectedChunks = [],
   feedback,
   onToggleChunk,
-  onReset,
-  onCheck,
-  onContinue,
-  continueLabel = DEEP_COPY.continue,
-  historyEmpty = "",
-  showActions = false,
-  emptyMessage = DEEP_COPY.tapChunksToBuild,
 }) {
-  const canContinue = feedback.tone === "success";
-  const selectedChunkSet = new Set(selectedChunks);
-  const availableBank = bank.filter((chunk) => !selectedChunkSet.has(chunk));
+  const speech = useDeepSpeech();
+  const selectedChunkCounts = selectedChunks.reduce((counts, chunk) => {
+    counts.set(chunk, (counts.get(chunk) ?? 0) + 1);
+    return counts;
+  }, new Map());
+  const availableBank = bank.filter((chunk) => {
+    const usedCount = selectedChunkCounts.get(chunk) ?? 0;
+
+    if (usedCount === 0) {
+      return true;
+    }
+
+    selectedChunkCounts.set(chunk, usedCount - 1);
+    return false;
+  });
+  const latestSystemTurn = [...history].reverse().find((turn) => turn.speaker === "system");
 
   return (
     <div className="deep-dialogue-flow-page">
-      {showHeader ? (
-        <div className="deep-exercise-head">
-          <span className="deep-exercise-stage">{stageLabel}</span>
-          <h2>{title}</h2>
-          <p>{subtitle}</p>
-        </div>
-      ) : null}
-
       {scene ? (
         <div className="deep-dialogue-scene-card">
-          <span>Scene</span>
+          <span>{DEEP_COPY.sceneLabel}</span>
           <strong>{scene}</strong>
+          {sceneChinese ? <p>{sceneChinese}</p> : null}
         </div>
       ) : null}
 
-      {introCards.length > 0 ? (
-        <div className="deep-stage-stack">
-          {introCards.map((card) => (
-            <div key={`${card.label}-${card.title}`} className="deep-stage-card">
-              <span>{card.label}</span>
-              <strong>{card.title}</strong>
-              <p>{card.body}</p>
-              {card.caption ? <small>{card.caption}</small> : null}
-            </div>
+      {history.length > 0 ? (
+        <div className="deep-dialogue-history">
+          {history.map((turn, index) => (
+            <DialogueTurn key={`${turn.speaker}-${index}-${turn.text}`} turn={turn} />
           ))}
         </div>
       ) : null}
 
-      {history.length > 0 || historyEmpty ? (
-        <div className="deep-dialogue-history">
-          {history.length > 0 ? (
-            history.map((turn, index) => <DialogueTurn key={`${turn.speaker}-${index}-${turn.text}`} turn={turn} />)
+      {userPrompt ? (
+        <div className="deep-dialogue-user-prompt">
+          <strong>{userPrompt}</strong>
+          {latestSystemTurn?.text ? (
+            <VoiceButton
+              onClick={() => speech.speak(latestSystemTurn.text, userPrompt)}
+              active={speech.speakingKey === userPrompt}
+              label={DEEP_COPY.playAudio}
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="deep-selection-stack">
+        <div className="deep-answer-stage">
+          {selectedChunks.length > 0 ? (
+            selectedChunks.map((chunk, index) => (
+              <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
+            ))
           ) : (
-            <div className="deep-dialogue-history-empty">{historyEmpty}</div>
+            <div className="deep-answer-empty">{DEEP_COPY.buildYourAnswerChinese}</div>
           )}
         </div>
-      ) : null}
 
-      <div className="deep-exercise-prompt deep-dialogue-prompt">
-        <strong>{prompt}</strong>
-        {hint ? <p>{hint}</p> : null}
-      </div>
-
-      <div className="deep-answer-stage">
-        {selectedChunks.length > 0 ? (
-          selectedChunks.map((chunk) => (
-            <DeepChunkChip key={chunk} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
-          ))
-        ) : (
-          <div className="deep-answer-empty">{emptyMessage}</div>
-        )}
-      </div>
-
-      <div className="deep-bank-row">
-        {availableBank.map((chunk) => {
-          return <DeepChunkChip key={chunk} chunk={chunk} onClick={() => onToggleChunk(chunk)} />;
-        })}
-      </div>
-
-      {showActions ? (
-        <div className="deep-exercise-actions">
-          <button className="secondary-button" type="button" onClick={onReset}>
-            <IconRefresh size={17} />
-            {DEEP_COPY.reset}
-          </button>
-          <button className="primary-button" type="button" onClick={canContinue ? onContinue : onCheck}>
-            {canContinue ? continueLabel : DEEP_COPY.check}
-            {canContinue ? null : <IconCheck size={18} />}
-          </button>
+        <div className="deep-bank-row">
+          {availableBank.map((chunk, index) => (
+            <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
+          ))}
         </div>
-      ) : null}
+      </div>
+
+      <DeepFeedbackCard
+        tone={feedback.tone}
+        title={feedback.title}
+        body={feedback.body}
+        idleBody={DEEP_COPY.tapChunksThenSend}
+      />
     </div>
   );
 }

@@ -21,10 +21,6 @@ function SummarySection({ title, items }) {
 }
 
 export function DeepInteractMilestonePage({ taskPacks = [] }) {
-  const taskItems = taskPacks.map((taskPack) => ({
-    title: taskPack.taskTitle,
-    body: taskPack.scenePrompt,
-  }));
   const needItems = taskPacks.map((taskPack) => ({
     title: taskPack.need.coreExpression,
     body: taskPack.need.meaningChinese,
@@ -49,13 +45,12 @@ export function DeepInteractMilestonePage({ taskPacks = [] }) {
           <span>你已完成 Interact 阶段！</span>
         </div>
 
-        <SummarySection title="Completed task packs" items={taskItems} />
-        <SummarySection title="Need expressions" items={needItems} />
-        <SummarySection title="Handle expressions" items={handleItems} />
+        <SummarySection title={DEEP_COPY.needExpressionsTitle} items={needItems} />
+        <SummarySection title={DEEP_COPY.handleExpressionsTitle} items={handleItems} />
 
         <section className="deep-summary-group">
           <div className="deep-summary-group-head">
-            <span>Capability summary</span>
+            <span>{DEEP_COPY.capabilitySummaryTitle}</span>
           </div>
           <div className="deep-summary-items">
             <div className="deep-summary-item">

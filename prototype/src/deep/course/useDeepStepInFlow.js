@@ -1,82 +1,136 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-import { joinDeepChunks } from "./deep-flow-utils.js";
 
-export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
+function uniqueChunks(items = []) {
+  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
+}
+
+function buildStepInPages({ title, goal, scene, turns }) {
   const safeTurns = Array.isArray(turns) ? turns : [];
-  const [turnIndex, setTurnIndex] = useState(1);
+  const userTurns = safeTurns
+    .map((turn, index) => ({ ...turn, turnIndex: index }))
+    .filter((turn) => turn.speaker === "user");
+
+  const pages = [
+    {
+      id: "step-in-guide",
+      kind: "guide",
+      title,
+      goal,
+      scene,
+    },
+  ];
+
+  userTurns.forEach((turn) => {
+    const history = safeTurns.slice(0, turn.turnIndex).map((entry) => ({
+      speaker: entry.speaker,
+      label: entry.speaker === "system" ? "System" : "You",
+      text: entry.text,
+    }));
+    const promptTurn = safeTurns[turn.turnIndex - 1];
+
+    pages.push({
+      id: `step-in-turn-${turn.turnIndex}`,
+      kind: "turn",
+      userPrompt:
+        turn.sourceModule === "notice"
+          ? "Your turn: Notice"
+          : turn.sourceModule === "interpret"
+            ? "Your turn: Interpret"
+            : turn.sourceModule === "interact_need"
+              ? DEEP_COPY.dialogueNeedPrompt
+              : turn.sourceModule === "interact_handle"
+                ? DEEP_COPY.dialogueHandlePrompt
+                : "",
+      scene,
+      history,
+      bank: uniqueChunks([...(turn.chunks ?? []), ...(turn.distractors ?? [])]),
+      answer: turn.answer ?? [],
+    });
+  });
+
+  pages.push({
+    id: "step-in-complete",
+    kind: "complete",
+    replayTurns: safeTurns.map((turn) => ({
+      speaker: turn.speaker,
+      label: turn.speaker === "system" ? "System" : "You",
+      text: turn.text,
+    })),
+  });
+
+  return pages;
+}
+
+export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", turns = [] } = {}) {
+  const pages = useMemo(() => buildStepInPages({ title, goal, scene, turns }), [goal, scene, title, turns]);
+  const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
-  const [isComplete, setIsComplete] = useState(false);
   const autoAdvanceTimerRef = useRef(null);
 
-  const currentSystemTurn = safeTurns[turnIndex - 1] ?? null;
-  const currentUserTurn = safeTurns[turnIndex] ?? null;
-  const historyTurns = useMemo(() => {
-    if (turnIndex <= 1) {
-      return [];
-    }
+  useEffect(() => {
+    setPageIndex(0);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+  }, [pages]);
 
-    return safeTurns.slice(0, turnIndex - 1).map((turn) => ({
-      speaker: turn.speaker,
-      text: turn.text,
-      label: turn.speaker === "system" ? "System" : "You",
-    }));
-  }, [safeTurns, turnIndex]);
+  useEffect(
+    () => () => {
+      if (autoAdvanceTimerRef.current) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+      }
+    },
+    []
+  );
 
-  const currentAnswer = currentUserTurn?.answer ?? [];
-  const currentPrompt = currentSystemTurn?.text ?? "";
-  const currentScene = scene || "Complete the full scene conversation.";
-  const activeTurnSource = currentUserTurn?.sourceModule ?? "";
-  const currentPromptLabel = activeTurnSource === "notice"
-    ? "Notice turn"
-    : activeTurnSource === "interpret"
-      ? "Interpret turn"
-      : activeTurnSource === "interact_need"
-        ? "Interact · Need"
-        : activeTurnSource === "interact_handle"
-          ? "Interact · Handle"
-          : "Step In";
+  const currentPage = pages[pageIndex] ?? null;
+  const replayTurns = pages[pages.length - 1]?.replayTurns ?? [];
+  const progressPages = pages.filter((page) => page.kind === "turn");
+  const progressTotal = progressPages.length;
+  const progressCurrent = currentPage?.kind === "turn"
+    ? progressPages.findIndex((page) => page.id === currentPage.id) + 1
+    : 0;
+  const isReadyToCheck = currentPage?.kind === "turn"
+    ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length
+    : false;
 
-  function clearSelection() {
+  function clearPendingAdvance() {
     if (autoAdvanceTimerRef.current) {
       window.clearTimeout(autoAdvanceTimerRef.current);
       autoAdvanceTimerRef.current = null;
     }
+  }
+
+  function reset() {
+    clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
-  function reset() {
-    if (isComplete) {
-      setTurnIndex(1);
-      setIsComplete(false);
-      clearSelection();
-      return;
+  function back() {
+    clearPendingAdvance();
+
+    if (pageIndex === 0) {
+      return false;
     }
 
-    clearSelection();
+    setPageIndex((current) => current - 1);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+    return true;
   }
 
-  function hint() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    const firstChunk = Array.isArray(currentAnswer) ? currentAnswer[0] : "";
-    setFeedback({
-      tone: "hinted",
-      title: DEEP_COPY.hint,
-      body: firstChunk ? `Try "${firstChunk}" first.` : "Try a smaller chunk first.",
-    });
+  function next() {
+    clearPendingAdvance();
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+    setPageIndex((current) => current + 1);
   }
 
   function toggleChunk(chunk) {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
+    clearPendingAdvance();
     setSelectedChunks((current) => {
       const exists = current.some((item) => item === chunk);
       return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
@@ -84,19 +138,28 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
+  function hint() {
+    const firstChunk = Array.isArray(currentPage?.answer) ? currentPage.answer[0] : "";
+    setFeedback({
+      tone: "hinted",
+      title: DEEP_COPY.hint,
+      body: firstChunk ? `Try "${firstChunk}" first.` : "Try a smaller chunk first.",
+    });
+  }
+
   function check() {
-    if (selectedChunks.length === 0 || !currentUserTurn) {
+    if (currentPage?.kind !== "turn" || !isReadyToCheck) {
       return;
     }
 
-    if (isDeepAnswerMatch(selectedChunks, currentAnswer)) {
+    if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
       setFeedback({
         tone: "success",
         title: DEEP_COPY.correct,
         body: "You kept the conversation moving.",
       });
       autoAdvanceTimerRef.current = window.setTimeout(() => {
-        advance();
+        next();
       }, 650);
       return;
     }
@@ -108,75 +171,25 @@ export function useDeepStepInFlow({ scene = "", turns = [] } = {}) {
     });
   }
 
-  useEffect(
-    () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
-    },
-    []
-  );
-
-  function advance() {
-    clearSelection();
-
-    if (isComplete) {
-      return;
-    }
-
-    if (turnIndex + 2 >= safeTurns.length) {
-      setIsComplete(true);
-      return;
-    }
-
-    setTurnIndex((current) => current + 2);
-  }
-
-  const currentBank = currentUserTurn ? [...(currentUserTurn.chunks ?? []), ...(currentUserTurn.distractors ?? [])] : [];
-
   return {
-    isComplete,
-    currentScene,
-    currentPrompt,
-    currentPromptLabel,
-    historyTurns,
-    currentBank,
-    currentAnswer,
+    currentPage,
+    replayTurns,
     selectedChunks,
     feedback,
-    toggleChunk,
+    progressCurrent,
+    progressTotal,
+    isReadyToCheck,
     reset,
+    back,
+    next,
+    toggleChunk,
     hint,
     check,
-    advance,
-    currentUserTurn,
-    replayTurns: safeTurns.map((turn) => ({
-      speaker: turn.speaker,
-      text: turn.text,
-      label: turn.speaker === "system" ? "System" : "You",
-    })),
-    summaryItems: [
-      ...new Map(
-        safeTurns
-          .filter((turn) => turn.speaker === "user" && turn.sourceModule)
-          .map((turn) => [
-            `${turn.sourceModule}-${turn.text}`,
-            {
-              title:
-                turn.sourceModule === "notice"
-                  ? "Notice"
-                  : turn.sourceModule === "interpret"
-                    ? "Interpret"
-                    : turn.sourceModule === "interact_need"
-                      ? "Need"
-                      : turn.sourceModule === "interact_handle"
-                        ? "Handle"
-                        : "Step In",
-              body: joinDeepChunks(turn.answer ?? []),
-            },
-          ])
-      ).values(),
-    ],
+    restartReplay: () => {
+      setPageIndex(0);
+      setSelectedChunks([]);
+      setFeedback({ tone: "idle", title: "", body: "" });
+    },
   };
 }
 

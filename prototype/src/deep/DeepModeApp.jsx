@@ -1,6 +1,7 @@
 import React from "react";
 import { DeepLoadingScreen } from "./loading/DeepLoadingScreen.jsx";
 import { DeepCompletionScreen } from "./completion/DeepCompletionScreen.jsx";
+import { DeepErrorScreen } from "./error/DeepErrorScreen.jsx";
 import DeepOverviewScreen from "./overview/DeepOverviewScreen.jsx";
 import NoticeModule from "./course/notice/NoticeModule.jsx";
 import InterpretModule from "./course/interpret/InterpretModule.jsx";
@@ -15,23 +16,33 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
     onExitToCamera,
   });
 
+  if (flow.errorState || !flow.viewModel) {
+    return <DeepErrorScreen onRetry={flow.retryFromError} onBackToCamera={flow.exitToCamera} />;
+  }
+
   if (flow.phase === "loading") {
     return <DeepLoadingScreen message={flow.loadingMessage} progress={flow.state.loadingMessageIndex === 0 ? 30 : flow.state.loadingMessageIndex === 1 ? 60 : 90} />;
   }
 
   if (flow.phase === "overview") {
-    return <DeepOverviewScreen lesson={flow.lesson} photoPreviewUrl={flow.photoPreviewUrl} onStart={flow.goNext} onBack={flow.goBack} />;
+    return <DeepOverviewScreen overviewVM={flow.viewModel.overviewVM} onStart={flow.goNext} onBack={flow.goBack} />;
   }
 
   if (flow.phase === "completion") {
-    return <DeepCompletionScreen lesson={flow.lesson} photoPreviewUrl={flow.photoPreviewUrl} onBack={flow.goBack} onExitToCamera={onExitToCamera} />;
+    return (
+      <DeepCompletionScreen
+        completionVM={flow.viewModel.completionVM}
+        onBack={flow.restartCourse}
+        onExitToCamera={flow.exitToCamera}
+      />
+    );
   }
 
   const phaseContent = {
-    notice: <NoticeModule lesson={flow.lesson} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
-    interpret: <InterpretModule lesson={flow.lesson} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
-    interact: <InteractModule lesson={flow.lesson} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
-    stepIn: <StepInModule lesson={flow.lesson} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
+    notice: <NoticeModule noticeVM={flow.viewModel.noticeVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
+    interpret: <InterpretModule interpretVM={flow.viewModel.interpretVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
+    interact: <InteractModule interactVM={flow.viewModel.interactVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
+    stepIn: <StepInModule stepInVM={flow.viewModel.stepInVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} onRestart={flow.restartCourse} onExitToCamera={flow.exitToCamera} />,
   }[flow.phase];
 
   return phaseContent;

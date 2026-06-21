@@ -619,3 +619,92 @@ export function createDeepCourseLesson(level = "Normal") {
 }
 
 export const DEEP_COURSE_SCHEMA = createDeepCourseLesson("Normal");
+
+export function createDeepCourseViewModel({ lesson, photoPreviewUrl = "" } = {}) {
+  if (!lesson) {
+    return null;
+  }
+
+  const noticePacks = lesson?.modules?.notice?.expressionPacks ?? [];
+  const interpretPacks = lesson?.modules?.interpret?.expressionPacks ?? [];
+  const interactTaskPacks = lesson?.modules?.interact?.taskPacks ?? [];
+  const interactDialogues = interactTaskPacks.flatMap((taskPack) => taskPack?.dialogues ?? []);
+  const stepInTurns = lesson?.modules?.stepIn?.dialogue?.turns ?? [];
+
+  return {
+    overviewVM: {
+      photoPreviewUrl,
+      keywords: lesson?.overview?.keywords ?? [],
+      sceneDescriptionChinese: lesson?.overview?.sceneDescriptionChinese ?? "",
+    },
+    noticeVM: {
+      title: lesson?.modules?.notice?.title ?? "Notice",
+      goal: lesson?.modules?.notice?.goal ?? "",
+      expressionPacks: noticePacks,
+    },
+    interpretVM: {
+      title: lesson?.modules?.interpret?.title ?? "Interpret",
+      goal: lesson?.modules?.interpret?.goal ?? "",
+      expressionPacks: interpretPacks,
+    },
+    interactVM: {
+      title: lesson?.modules?.interact?.title ?? "Interact",
+      goal: lesson?.modules?.interact?.goal ?? "",
+      taskPacks: interactTaskPacks,
+      dialogues: interactDialogues,
+    },
+    stepInVM: {
+      title: lesson?.modules?.stepIn?.title ?? "Step In",
+      goal: lesson?.modules?.stepIn?.goal ?? "",
+      scene: lesson?.modules?.stepIn?.dialogue?.scene ?? "",
+      turns: stepInTurns,
+    },
+    completionVM: {
+      photoPreviewUrl,
+      noticeItems: noticePacks.map((pack) => ({
+        title: pack?.coreExpression ?? "",
+        body: pack?.meaningChinese ?? "",
+      })),
+      interpretItems: interpretPacks.map((pack) => ({
+        title: pack?.coreExpression ?? "",
+        body: pack?.meaningChinese ?? "",
+      })),
+      interactItems: interactTaskPacks.flatMap((taskPack) => [
+        {
+          title: taskPack?.need?.coreExpression ?? "",
+          body: taskPack?.need?.meaningChinese ?? "",
+        },
+        {
+          title: taskPack?.handle?.coreExpression ?? "",
+          body: taskPack?.handle?.meaningChinese ?? "",
+        },
+      ]),
+      turns: stepInTurns,
+      stageSummaries: {
+        notice: noticePacks.map((pack) => ({
+          title: pack?.coreExpression ?? "",
+          body: pack?.meaningChinese ?? "",
+        })),
+        interpret: interpretPacks.map((pack) => ({
+          title: pack?.coreExpression ?? "",
+          body: pack?.meaningChinese ?? "",
+        })),
+        interact: interactTaskPacks.flatMap((taskPack) => [
+          {
+            title: taskPack?.need?.coreExpression ?? "",
+            body: taskPack?.need?.meaningChinese ?? "",
+          },
+          {
+            title: taskPack?.handle?.coreExpression ?? "",
+            body: taskPack?.handle?.meaningChinese ?? "",
+          },
+        ]),
+        stepIn: stepInTurns.map((turn) => ({
+          speaker: turn?.speaker ?? "system",
+          label: turn?.speaker === "system" ? "System" : "You",
+          text: turn?.text ?? "",
+        })),
+      },
+    },
+  };
+}

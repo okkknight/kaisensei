@@ -1,114 +1,140 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-import { getExampleVariants, joinDeepChunks } from "./deep-flow-utils.js";
+import { joinDeepChunks } from "./deep-flow-utils.js";
 
-const INTERACT_STAGES = [
-  "guide",
-  "needUnderstand",
-  "needFocus",
-  "needBuild",
-  "handleUnderstand",
-  "handleFocus",
-  "handleBuild",
-  "dialogueNeed",
-  "dialogueHandle",
-  "milestone",
-];
-
-function getStageLabel(stage) {
-  if (stage === "guide") return "Task Pack";
-  if (stage === "needUnderstand") return "Need · Understand";
-  if (stage === "needFocus") return "Need · Focus";
-  if (stage === "needBuild") return "Need · Build";
-  if (stage === "handleUnderstand") return "Handle · Understand";
-  if (stage === "handleFocus") return "Handle · Focus";
-  if (stage === "handleBuild") return "Handle · Build";
-  if (stage === "dialogueNeed") return "Dialogue Practice · Need";
-  if (stage === "dialogueHandle") return "Dialogue Practice · Handle";
-  return "Milestone";
+function uniqueChunks(items = []) {
+  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
 }
 
-function getSectionKey(stage) {
-  if (stage.startsWith("need")) return "need";
-  if (stage.startsWith("handle")) return "handle";
-  return "";
+function buildInteractPages(taskPacks) {
+  const pages = [];
+
+  taskPacks.forEach((taskPack) => {
+    pages.push({
+      id: `${taskPack.id}-guide`,
+      kind: "guide",
+      title: taskPack.taskTitle,
+      scene: taskPack.scenePrompt,
+      sceneChinese: taskPack.sceneDescriptionChinese ?? "",
+      needExpression: taskPack.need.coreExpression,
+      needMeaning: taskPack.need.meaningChinese,
+      handleExpression: taskPack.handle.coreExpression,
+      handleMeaning: taskPack.handle.meaningChinese,
+    });
+
+    ["need", "handle"].forEach((sectionKey) => {
+      const section = taskPack[sectionKey];
+      const examples = [section?.baseExample, ...(section?.variations ?? [])].filter(Boolean);
+      const stepPrefix = sectionKey === "need" ? "Need" : "Handle";
+
+      examples.forEach((example) => {
+        pages.push({
+          id: `${taskPack.id}-${sectionKey}-${example.english}-understand`,
+          kind: "exercise",
+          pageType: "understand",
+          title: section.coreExpression,
+          stepLabel: "Step 1 of 3",
+          instruction: DEEP_COPY.interactReorderInstruction,
+          englishSentence: example.english,
+          englishHighlight: section.coreExpression,
+          chineseReference: example.chinese,
+          bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+          answer: example.understand?.answer ?? [],
+          moduleLabel: `${stepPrefix} · Understand`,
+        });
+
+        pages.push({
+          id: `${taskPack.id}-${sectionKey}-${example.english}-focus`,
+          kind: "exercise",
+          pageType: "focus",
+          title: section.coreExpression,
+          stepLabel: "Step 2 of 3",
+          instruction: DEEP_COPY.focusInstruction,
+          sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
+          chineseReference: example.chinese,
+          bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+          answer: example.focus?.answer ?? [],
+          moduleLabel: `${stepPrefix} · Focus`,
+        });
+
+        pages.push({
+          id: `${taskPack.id}-${sectionKey}-${example.english}-build`,
+          kind: "exercise",
+          pageType: "build",
+          title: section.coreExpression,
+          stepLabel: "Step 3 of 3",
+          instruction: DEEP_COPY.buildInstruction,
+          promptChinese: example.build?.promptChinese ?? "",
+          bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+          answer: example.build?.answer ?? [],
+          moduleLabel: `${stepPrefix} · Build`,
+        });
+      });
+    });
+
+    const dialogue = taskPack?.dialogues?.[0];
+
+    pages.push({
+      id: `${taskPack.id}-dialogue-need`,
+      kind: "dialogue",
+      userPrompt: DEEP_COPY.dialogueNeedPrompt,
+      scene: dialogue?.scene ?? taskPack.scenePrompt,
+      sceneChinese: dialogue?.sceneDescriptionChinese ?? taskPack.sceneDescriptionChinese ?? "",
+      history: [
+        {
+          speaker: "system",
+          label: "System",
+          text: dialogue?.openingLine ?? DEEP_COPY.dialogueNeedOpening,
+        },
+      ],
+      bank: uniqueChunks([...(dialogue?.need?.chunks ?? []), ...(dialogue?.need?.distractors ?? [])]),
+      answer: dialogue?.need?.answer ?? [],
+    });
+
+    pages.push({
+      id: `${taskPack.id}-dialogue-handle`,
+      kind: "dialogue",
+      userPrompt: DEEP_COPY.dialogueHandlePrompt,
+      scene: dialogue?.scene ?? taskPack.scenePrompt,
+      sceneChinese: dialogue?.sceneDescriptionChinese ?? taskPack.sceneDescriptionChinese ?? "",
+      history: [
+        {
+          speaker: "user",
+          label: "You",
+          text: joinDeepChunks(dialogue?.need?.answer ?? []),
+        },
+        {
+          speaker: "system",
+          label: "System",
+          text: dialogue?.systemReply ?? "",
+        },
+      ],
+      bank: uniqueChunks([...(dialogue?.handle?.chunks ?? []), ...(dialogue?.handle?.distractors ?? [])]),
+      answer: dialogue?.handle?.answer ?? [],
+    });
+  });
+
+  return pages;
 }
 
-function getExercisePhase(stage) {
-  if (stage.endsWith("Understand")) return "understand";
-  if (stage.endsWith("Focus")) return "focus";
-  if (stage.endsWith("Build")) return "build";
-  return "understand";
-}
-
-function getExerciseData(example, stage, title, subtitle) {
-  const phase = getExercisePhase(stage);
-
-  if (!example) {
-    return {
-      title,
-      subtitle,
-      prompt: "",
-      hint: "",
-      bank: [],
-      answer: [],
-    };
-  }
-
-  if (phase === "understand") {
-    return {
-      title,
-      subtitle,
-      prompt: example.english,
-      hint: example.chinese,
-      bank: example.understand?.chunks ?? [],
-      answer: example.understand?.answer ?? [],
-    };
-  }
-
-  if (phase === "focus") {
-    return {
-      title,
-      subtitle,
-      prompt: example.focus?.sentenceWithBlanks ?? "",
-      hint: example.chinese,
-      bank: example.focus?.choices ?? [],
-      answer: example.focus?.answer ?? [],
-    };
-  }
-
-  return {
-    title,
-    subtitle,
-    prompt: example.build?.promptChinese ?? "",
-    hint: example.chinese,
-    bank: example.build?.chunks ?? [],
-    answer: example.build?.answer ?? [],
-  };
-}
-
-function getHintMessage(stage, answer) {
-  const firstChunk = Array.isArray(answer) ? answer[0] : "";
+function getHintMessage(page) {
+  const firstChunk = Array.isArray(page?.answer) ? page.answer[0] : "";
 
   if (!firstChunk) {
     return "Try a smaller chunk first.";
   }
 
-  if (stage === "needUnderstand" || stage === "handleUnderstand") {
-    return `Start with "${firstChunk}".`;
+  if (page.kind === "dialogue") {
+    return `Try "${firstChunk}" first.`;
   }
 
-  if (stage === "needFocus" || stage === "handleFocus") {
+  if (page.pageType === "focus") {
     return `Look for the blank that matches "${firstChunk}".`;
   }
 
-  if (stage === "needBuild" || stage === "handleBuild") {
+  if (page.pageType === "build") {
     return `Begin with "${firstChunk}".`;
-  }
-
-  if (stage === "dialogueNeed" || stage === "dialogueHandle") {
-    return `Try "${firstChunk}" first.`;
   }
 
   return `Start with "${firstChunk}".`;
@@ -116,148 +142,66 @@ function getHintMessage(stage, answer) {
 
 export function useDeepInteractFlow(taskPacks = []) {
   const safeTaskPacks = Array.isArray(taskPacks) ? taskPacks : [];
-  const [taskIndex, setTaskIndex] = useState(0);
-  const [stage, setStage] = useState("guide");
-  const [needExampleIndex, setNeedExampleIndex] = useState(0);
-  const [handleExampleIndex, setHandleExampleIndex] = useState(0);
+  const pages = useMemo(() => buildInteractPages(safeTaskPacks), [safeTaskPacks]);
+  const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
-  const [dialogueHistory, setDialogueHistory] = useState([]);
   const autoAdvanceTimerRef = useRef(null);
 
-  const taskPack = safeTaskPacks[taskIndex] ?? null;
-  const needExamples = useMemo(() => getExampleVariants(taskPack?.need), [taskPack]);
-  const handleExamples = useMemo(() => getExampleVariants(taskPack?.handle), [taskPack]);
-  const needExample = needExamples[needExampleIndex] ?? null;
-  const handleExample = handleExamples[handleExampleIndex] ?? null;
-  const dialogue = taskPack?.dialogues?.[0] ?? null;
-  const isNeedStage = stage.startsWith("need");
-  const isHandleStage = stage.startsWith("handle");
-  const isExerciseStage = isNeedStage || isHandleStage;
-  const stageLabel = getStageLabel(stage);
-  const stepLabel = stage === "needUnderstand"
-    ? "Step 1 of 3"
-    : stage === "needFocus"
-      ? "Step 2 of 3"
-      : stage === "needBuild"
-        ? "Step 3 of 3"
-        : stage === "handleUnderstand"
-          ? "Step 1 of 3"
-          : stage === "handleFocus"
-            ? "Step 2 of 3"
-            : stage === "handleBuild"
-              ? "Step 3 of 3"
-              : "";
+  useEffect(() => {
+    setPageIndex(0);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+  }, [pages]);
 
-  const exerciseData = useMemo(() => {
-    if (!isExerciseStage) {
-      return null;
-    }
+  useEffect(
+    () => () => {
+      if (autoAdvanceTimerRef.current) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+      }
+    },
+    []
+  );
 
-    const example = isNeedStage ? needExample : handleExample;
-    const title = isNeedStage ? taskPack?.need?.coreExpression ?? "Need" : taskPack?.handle?.coreExpression ?? "Handle";
-    const subtitle = isNeedStage ? taskPack?.need?.meaningChinese ?? "" : taskPack?.handle?.meaningChinese ?? "";
+  const currentPage = pages[pageIndex] ?? null;
+  const isMilestone = !currentPage;
+  const progressPages = pages.filter((page) => page.kind !== "guide");
+  const progressTotal = progressPages.length;
+  const progressCurrent = currentPage && currentPage.kind !== "guide"
+    ? progressPages.findIndex((page) => page.id === currentPage.id) + 1
+    : 0;
+  const isReadyToCheck = currentPage && currentPage.kind !== "guide"
+    ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length
+    : false;
 
-    return getExerciseData(example, stage, title, subtitle);
-  }, [handleExample, isExerciseStage, isNeedStage, needExample, stage, taskPack]);
-
-  const dialogueData = useMemo(() => {
-    if (stage !== "dialogueNeed" && stage !== "dialogueHandle") {
-      return null;
-    }
-
-    if (!dialogue) {
-      return {
-        title: taskPack?.taskTitle ?? "Interact",
-        subtitle: taskPack?.scenePrompt ?? "",
-        scene: taskPack?.scenePrompt ?? "",
-        prompt: stage === "dialogueNeed" ? DEEP_COPY.dialogueNeedPrompt : DEEP_COPY.dialogueHandlePrompt,
-        hint: "",
-        bank: [],
-        answer: [],
-      };
-    }
-
-    if (stage === "dialogueNeed") {
-      return {
-        title: taskPack?.taskTitle ?? "Interact",
-        subtitle: taskPack?.scenePrompt ?? "",
-        scene: dialogue.scene,
-        prompt: DEEP_COPY.dialogueNeedPrompt,
-        hint: taskPack?.need?.meaningChinese ?? "",
-        bank: [...(dialogue.need?.chunks ?? []), ...(dialogue.need?.distractors ?? [])],
-        answer: dialogue.need?.answer ?? [],
-      };
-    }
-
-    return {
-      title: taskPack?.taskTitle ?? "Interact",
-      subtitle: taskPack?.scenePrompt ?? "",
-      scene: dialogue.scene,
-      prompt: DEEP_COPY.dialogueHandlePrompt,
-      hint: taskPack?.handle?.meaningChinese ?? "",
-      bank: [...(dialogue.handle?.chunks ?? []), ...(dialogue.handle?.distractors ?? [])],
-      answer: dialogue.handle?.answer ?? [],
-    };
-  }, [dialogue, stage, taskPack]);
-
-  const bank = exerciseData?.bank ?? dialogueData?.bank ?? [];
-  const answer = exerciseData?.answer ?? dialogueData?.answer ?? [];
-  const title = exerciseData?.title ?? dialogueData?.title ?? "Interact";
-  const subtitle = exerciseData?.subtitle ?? dialogueData?.subtitle ?? "";
-  const prompt = exerciseData?.prompt ?? dialogueData?.prompt ?? "";
-  const hint = exerciseData?.hint ?? dialogueData?.hint ?? "";
-  const scene = dialogueData?.scene ?? taskPack?.scenePrompt ?? "";
-  const introCards = useMemo(() => {
-    if (stage === "dialogueNeed" || stage === "dialogueHandle") {
-      return [
-        {
-          label: "Task",
-          title: taskPack?.taskTitle ?? "Interact",
-          body: taskPack?.scenePrompt ?? "",
-          caption: taskPack?.need?.coreExpression && taskPack?.handle?.coreExpression
-            ? `${taskPack.need.coreExpression} · ${taskPack.handle.coreExpression}`
-            : "",
-        },
-      ];
-    }
-
-    return [];
-  }, [stage, taskPack]);
-
-  function clearSelection() {
+  function clearPendingAdvance() {
     if (autoAdvanceTimerRef.current) {
       window.clearTimeout(autoAdvanceTimerRef.current);
       autoAdvanceTimerRef.current = null;
     }
+  }
+
+  function reset() {
+    clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
-  function reset() {
-    clearSelection();
-    if (stage === "dialogueHandle" || stage === "dialogueNeed") {
-      return;
-    }
-  }
+  function back() {
+    clearPendingAdvance();
 
-  function revealHint() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
+    if (pageIndex === 0) {
+      return false;
     }
-    setFeedback({
-      tone: "hinted",
-      title: DEEP_COPY.hint,
-      body: getHintMessage(stage, answer),
-    });
+
+    setPageIndex((current) => current - 1);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+    return true;
   }
 
   function toggleChunk(chunk) {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
+    clearPendingAdvance();
     setSelectedChunks((current) => {
       const exists = current.some((item) => item === chunk);
       return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
@@ -265,29 +209,39 @@ export function useDeepInteractFlow(taskPacks = []) {
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
-  function startPractice() {
-    clearSelection();
-    setStage("needUnderstand");
-  }
-
-  function check() {
-    if (selectedChunks.length === 0) {
+  function hint() {
+    if (!currentPage) {
       return;
     }
 
-    if (isDeepAnswerMatch(selectedChunks, answer)) {
+    clearPendingAdvance();
+    setFeedback({
+      tone: "hinted",
+      title: DEEP_COPY.hint,
+      body: getHintMessage(currentPage),
+    });
+  }
+
+  function next() {
+    clearPendingAdvance();
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+    setPageIndex((current) => current + 1);
+  }
+
+  function check() {
+    if (!currentPage || !isReadyToCheck) {
+      return;
+    }
+
+    if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
       setFeedback({
         tone: "success",
         title: DEEP_COPY.correct,
-        body:
-          stage === "dialogueNeed"
-            ? "You asked for what you needed."
-            : stage === "dialogueHandle"
-              ? "You replied naturally."
-              : "You built the target expression.",
+        body: currentPage.kind === "dialogue" ? "You replied naturally." : "You built the target expression.",
       });
       autoAdvanceTimerRef.current = window.setTimeout(() => {
-        advance();
+        next();
       }, 650);
       return;
     }
@@ -299,132 +253,28 @@ export function useDeepInteractFlow(taskPacks = []) {
     });
   }
 
-  useEffect(
-    () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
-    },
-    []
-  );
-
-  function advance() {
-    clearSelection();
-
-    if (stage === "guide") {
-      setStage("needUnderstand");
-      return;
-    }
-
-    if (stage === "needUnderstand") {
-      setStage("needFocus");
-      return;
-    }
-
-    if (stage === "needFocus") {
-      setStage("needBuild");
-      return;
-    }
-
-    if (stage === "needBuild") {
-      if (needExampleIndex + 1 < needExamples.length) {
-        setNeedExampleIndex((current) => current + 1);
-        setStage("needUnderstand");
-        return;
-      }
-
-      setHandleExampleIndex(0);
-      setStage("handleUnderstand");
-      return;
-    }
-
-    if (stage === "handleUnderstand") {
-      setStage("handleFocus");
-      return;
-    }
-
-    if (stage === "handleFocus") {
-      setStage("handleBuild");
-      return;
-    }
-
-    if (stage === "handleBuild") {
-      if (handleExampleIndex + 1 < handleExamples.length) {
-        setHandleExampleIndex((current) => current + 1);
-        setStage("handleUnderstand");
-        return;
-      }
-
-      setDialogueHistory([]);
-      setStage("dialogueNeed");
-      return;
-    }
-
-    if (stage === "dialogueNeed") {
-      if (!dialogue) {
-        setStage("dialogueHandle");
-        return;
-      }
-
-      setDialogueHistory([
-        { speaker: "user", text: joinDeepChunks(dialogue.need?.answer ?? []) },
-        { speaker: "system", text: dialogue.systemReply ?? "" },
-      ]);
-      setStage("dialogueHandle");
-      return;
-    }
-
-    if (stage === "dialogueHandle") {
-      if (taskIndex + 1 < safeTaskPacks.length) {
-        setTaskIndex((current) => current + 1);
-        setNeedExampleIndex(0);
-        setHandleExampleIndex(0);
-        setDialogueHistory([]);
-        setStage("guide");
-        return;
-      }
-
-      setStage("milestone");
-    }
-  }
-
-  function getFooterMode() {
-    if (stage === "guide") {
-      return "start";
-    }
-
-    return feedback.tone === "success" ? "continue" : "check";
-  }
-
   return {
-    stage,
-    stageLabel,
-    stepLabel,
-    taskIndex,
-    taskPack,
-    taskTotal: safeTaskPacks.length,
-    exerciseData,
-    dialogueData,
-    introCards,
-    dialogueHistory,
-    bank,
-    answer,
-    title,
-    subtitle,
-    prompt,
-    hint,
-    scene,
+    currentPage,
+    isMilestone,
     selectedChunks,
     feedback,
-    footerMode: getFooterMode(),
-    startPractice,
-    toggleChunk,
+    progressCurrent,
+    progressTotal,
+    isReadyToCheck,
     reset,
-    hint: revealHint,
+    back,
+    toggleChunk,
+    hint,
     check,
-    advance,
-    setStage,
-    safeTaskPacks,
+    next,
+    needItems: safeTaskPacks.map((taskPack) => ({
+      title: taskPack?.need?.coreExpression ?? "",
+      body: taskPack?.need?.meaningChinese ?? "",
+    })),
+    handleItems: safeTaskPacks.map((taskPack) => ({
+      title: taskPack?.handle?.coreExpression ?? "",
+      body: taskPack?.handle?.meaningChinese ?? "",
+    })),
   };
 }
 

@@ -2,270 +2,194 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
 
-const stageOrder = ["understand", "focus", "build", "quickResponse", "milestone"];
-
-function getExerciseStageLabel(stage) {
-  if (stage === "understand") return "Understand";
-  if (stage === "focus") return "Focus";
-  if (stage === "build") return "Build";
-  if (stage === "quickResponse") return "Quick Response";
-  return "Milestone";
+function uniqueChunks(items = []) {
+  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
 }
 
-function getPackStageData(pack, stage) {
-  if (stage === "understand") {
-    return {
-      title: pack.coreExpression,
-      subtitle: pack.meaningChinese,
-      prompt: pack.baseExample.english,
-      hint: pack.baseExample.chinese,
-      bank: pack.baseExample.understand.chunks,
-      answer: pack.baseExample.understand.answer,
-      distractors: pack.baseExample.understand.distractors || [],
-    };
-  }
-
-  if (stage === "focus") {
-    return {
-      title: pack.coreExpression,
-      subtitle: pack.meaningChinese,
-      prompt: pack.baseExample.focus.sentenceWithBlanks,
-      hint: pack.baseExample.chinese,
-      bank: pack.baseExample.focus.choices,
-      answer: pack.baseExample.focus.answer,
-      distractors: pack.baseExample.focus.distractors || [],
-    };
-  }
-
-  if (stage === "build") {
-    return {
-      title: pack.coreExpression,
-      subtitle: pack.meaningChinese,
-      prompt: pack.baseExample.build.promptChinese,
-      hint: pack.baseExample.chinese,
-      bank: pack.baseExample.build.chunks,
-      answer: pack.baseExample.build.answer,
-      distractors: pack.baseExample.build.distractors || [],
-    };
-  }
-
-  const quickResponse = pack.quickResponses[0];
-  return {
-    title: pack.coreExpression,
-    subtitle: pack.meaningChinese,
-    prompt: quickResponse.question,
-    hint: "",
-    bank: quickResponse.chunks,
-    answer: quickResponse.answer,
-    distractors: quickResponse.distractors || [],
-  };
-}
-
-function getHintMessage(stage, answer) {
+function getHintMessage(kind, answer) {
   const firstChunk = Array.isArray(answer) ? answer[0] : "";
 
   if (!firstChunk) {
     return "Try a smaller chunk first.";
   }
 
-  if (stage === "understand") {
+  if (kind === "understand") {
     return `Start with "${firstChunk}".`;
   }
 
-  if (stage === "focus") {
+  if (kind === "focus") {
     return `Look for the blank that matches "${firstChunk}".`;
   }
 
-  if (stage === "build") {
+  if (kind === "build") {
     return `Begin with "${firstChunk}".`;
   }
 
   return `Try "${firstChunk}" first.`;
 }
 
-export function useDeepExerciseSequence(packs = []) {
-  const safePacks = Array.isArray(packs) && packs.length > 0 ? packs : [];
-  const [progress, setProgress] = useState({ packIndex: 0, stage: "understand" });
-  const [exampleIndex, setExampleIndex] = useState(0);
-  const [quickResponseIndex, setQuickResponseIndex] = useState(0);
-  const [selectedChunks, setSelectedChunks] = useState([]);
-  const [feedback, setFeedback] = useState({
-    tone: "idle",
-    title: "",
-    body: "",
+function buildExercisePages(packs, moduleKey) {
+  const pages = [];
+
+  packs.forEach((pack) => {
+    const examples = [pack?.baseExample, ...(pack?.variations ?? [])].filter(Boolean);
+
+    examples.forEach((example) => {
+      pages.push({
+        id: `${pack.id}-${example.english}-understand`,
+        kind: "understand",
+        label: pack.coreExpression,
+        stepLabel: "Step 1 of 3",
+        instruction: moduleKey === "interact" ? DEEP_COPY.interactReorderInstruction : DEEP_COPY.reorderInstruction,
+        englishSentence: example.english,
+        speakText: example.english,
+        englishHighlight: pack.coreExpression,
+        chineseReference: example.chinese,
+        bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+        answer: example.understand?.answer ?? [],
+      });
+
+      pages.push({
+        id: `${pack.id}-${example.english}-focus`,
+        kind: "focus",
+        label: pack.coreExpression,
+        stepLabel: "Step 2 of 3",
+        instruction: DEEP_COPY.focusInstruction,
+        sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
+        speakText: example.english,
+        chineseReference: example.chinese,
+        bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+        answer: example.focus?.answer ?? [],
+      });
+
+      pages.push({
+        id: `${pack.id}-${example.english}-build`,
+        kind: "build",
+        label: pack.coreExpression,
+        stepLabel: "Step 3 of 3",
+        instruction: DEEP_COPY.buildInstruction,
+        promptChinese: example.build?.promptChinese ?? "",
+        bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+        answer: example.build?.answer ?? [],
+      });
+    });
+
+    (pack?.quickResponses ?? []).forEach((response, responseIndex) => {
+      pages.push({
+        id: `${pack.id}-quick-response-${responseIndex}`,
+        kind: "quickResponse",
+        label: pack.coreExpression,
+        stepLabel: "",
+        question: response.question,
+        speakText: response.question,
+        questionChinese:
+          moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese,
+        bank: uniqueChunks([...(response.chunks ?? []), ...(response.distractors ?? [])]),
+        answer: response.answer ?? [],
+      });
+    });
   });
+
+  return pages;
+}
+
+export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {}) {
+  const safePacks = Array.isArray(packs) ? packs : [];
+  const pages = useMemo(() => buildExercisePages(safePacks, moduleKey), [moduleKey, safePacks]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [selectedChunks, setSelectedChunks] = useState([]);
+  const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const autoAdvanceTimerRef = useRef(null);
 
-  const currentPack = safePacks[progress.packIndex] ?? null;
-  const currentExamples = useMemo(() => {
-    if (!currentPack) {
-      return [];
-    }
+  useEffect(() => {
+    setPageIndex(0);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+  }, [pages]);
 
-    return [currentPack.baseExample, ...(currentPack.variations ?? [])].filter(Boolean);
-  }, [currentPack]);
-  const currentExample = currentExamples[exampleIndex] ?? null;
-  const currentQuickResponses = currentPack?.quickResponses ?? [];
-  const currentQuickResponse = currentQuickResponses[quickResponseIndex] ?? currentQuickResponses[0] ?? null;
-  const currentStageData = useMemo(() => {
-    if (!currentPack) {
-      return {
-        title: "",
-        subtitle: "",
-        prompt: "",
-        hint: "",
-        bank: [],
-        answer: [],
-        distractors: [],
-      };
-    }
+  useEffect(
+    () => () => {
+      if (autoAdvanceTimerRef.current) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+      }
+    },
+    []
+  );
 
-    if (progress.stage === "quickResponse") {
-      return getPackStageData(
-        {
-          coreExpression: currentPack.coreExpression,
-          meaningChinese: currentPack.meaningChinese,
-          quickResponses: [currentQuickResponse].filter(Boolean),
-        },
-        progress.stage
-      );
-    }
+  const currentPage = pages[pageIndex] ?? null;
+  const isMilestone = !currentPage;
+  const progressCurrent = currentPage ? pageIndex + 1 : pages.length;
+  const progressTotal = pages.length;
+  const isReadyToCheck = currentPage ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length : false;
 
-    if (currentExample) {
-      return getPackStageData(
-        {
-          coreExpression: currentPack.coreExpression,
-          meaningChinese: currentPack.meaningChinese,
-          baseExample: currentExample,
-          quickResponses: currentPack.quickResponses,
-        },
-        progress.stage
-      );
-    }
-
-    return {
-      title: "",
-      subtitle: "",
-      prompt: "",
-      hint: "",
-      bank: [],
-      answer: [],
-      distractors: [],
-    };
-  }, [currentExample, currentPack, currentQuickResponse, progress.stage]);
-
-  const bank = currentStageData?.bank ?? [];
-  const answer = currentStageData?.answer ?? [];
-  const solved = progress.stage === "milestone";
-  const currentStageLabel = getExerciseStageLabel(progress.stage);
-  const stepLabel = progress.stage === "understand"
-    ? "Step 1 of 3"
-    : progress.stage === "focus"
-      ? "Step 2 of 3"
-      : progress.stage === "build"
-        ? "Step 3 of 3"
-        : "";
-
-  function reset() {
+  function clearPendingAdvance() {
     if (autoAdvanceTimerRef.current) {
       window.clearTimeout(autoAdvanceTimerRef.current);
       autoAdvanceTimerRef.current = null;
     }
+  }
+
+  function resetSelection() {
+    clearPendingAdvance();
     setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+  }
+
+  function toggleChunk(chunk) {
+    clearPendingAdvance();
+    setSelectedChunks((current) => {
+      const exists = current.some((item) => item === chunk);
+      return exists ? current.filter((item) => item !== chunk) : [...current, chunk];
+    });
     setFeedback({ tone: "idle", title: "", body: "" });
   }
 
   function hint() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
+    if (!currentPage) {
+      return;
     }
+
+    clearPendingAdvance();
     setFeedback({
       tone: "hinted",
       title: DEEP_COPY.hint,
-      body: getHintMessage(progress.stage, answer),
+      body: getHintMessage(currentPage.kind, currentPage.answer),
     });
   }
 
-  function toggleChunk(chunk) {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    setSelectedChunks((current) => {
-      const exists = current.some((item) => item === chunk);
-      if (exists) {
-        return current.filter((item) => item !== chunk);
-      }
-
-      return [...current, chunk];
-    });
-    setFeedback({ tone: "idle", title: "", body: "" });
-  }
-
-  function advance() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
+  function goNextPage() {
+    clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setPageIndex((current) => current + 1);
+  }
 
-    if (progress.stage === "understand") {
-      setProgress((current) => ({ ...current, stage: "focus" }));
-      return;
+  function goPreviousPage() {
+    clearPendingAdvance();
+
+    if (pageIndex === 0) {
+      return false;
     }
 
-    if (progress.stage === "focus") {
-      setProgress((current) => ({ ...current, stage: "build" }));
-      return;
-    }
-
-    if (progress.stage === "build") {
-      if (exampleIndex + 1 < currentExamples.length) {
-        setExampleIndex((index) => index + 1);
-        setProgress((current) => ({ ...current, stage: "understand" }));
-        return;
-      }
-
-      setQuickResponseIndex(0);
-      setProgress((current) => ({ ...current, stage: "quickResponse" }));
-      return;
-    }
-
-    if (progress.stage === "quickResponse") {
-      if (quickResponseIndex + 1 < currentQuickResponses.length) {
-        setQuickResponseIndex((index) => index + 1);
-        return;
-      }
-
-      if (progress.packIndex + 1 < safePacks.length) {
-        setExampleIndex(0);
-        setQuickResponseIndex(0);
-        setProgress((current) => ({ packIndex: current.packIndex + 1, stage: "understand" }));
-        return;
-      }
-
-      setProgress((current) => ({ ...current, stage: "milestone" }));
-      return;
-    }
-
-    setProgress((current) => ({ ...current, stage: "milestone" }));
+    setPageIndex((current) => current - 1);
+    setSelectedChunks([]);
+    setFeedback({ tone: "idle", title: "", body: "" });
+    return true;
   }
 
   function check() {
-    if (selectedChunks.length === 0) {
+    if (!currentPage || !isReadyToCheck) {
       return;
     }
 
-    if (isDeepAnswerMatch(selectedChunks, answer)) {
+    if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
       setFeedback({
         tone: "success",
         title: DEEP_COPY.correct,
-        body: currentStageLabel === "Quick Response" ? "You handled the reply." : "You built the target expression.",
+        body: currentPage.kind === "quickResponse" ? "You handled the reply." : "You built the target expression.",
       });
       autoAdvanceTimerRef.current = window.setTimeout(() => {
-        advance();
+        goNextPage();
       }, 650);
       return;
     }
@@ -277,31 +201,25 @@ export function useDeepExerciseSequence(packs = []) {
     });
   }
 
-  useEffect(
-    () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
-    },
-    []
-  );
-
   return {
-    packIndex: progress.packIndex,
-    currentPack,
-    currentStageData,
-    currentStageLabel,
-    stepLabel,
-    stage: progress.stage,
-    bank,
-    answer,
+    currentPage,
+    isMilestone,
+    milestoneItems: safePacks.map((pack) => ({
+      title: pack?.coreExpression ?? "",
+      body: pack?.meaningChinese ?? "",
+    })),
     selectedChunks,
     feedback,
-    solved,
-    reset,
-    hint,
+    progressCurrent,
+    progressTotal,
+    isReadyToCheck,
     toggleChunk,
+    reset: resetSelection,
+    hint,
     check,
-    advance,
+    next: goNextPage,
+    back: goPreviousPage,
   };
 }
+
+export default useDeepExerciseSequence;

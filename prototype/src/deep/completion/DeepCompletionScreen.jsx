@@ -20,27 +20,18 @@ function SummaryGroup({ title, items }) {
   );
 }
 
-export function DeepCompletionScreen({ lesson, photoPreviewUrl, onBack, onExitToCamera }) {
-  const noticeItems = lesson?.modules?.notice?.expressionPacks?.map((pack) => ({
-    title: pack.coreExpression,
-    body: pack.meaningChinese,
-  })) ?? [];
-  const interpretItems = lesson?.modules?.interpret?.expressionPacks?.map((pack) => ({
-    title: pack.coreExpression,
-    body: pack.meaningChinese,
-  })) ?? [];
-  const interactItems = lesson?.modules?.interact?.taskPacks?.flatMap((pack) => [
-    { title: pack.need.coreExpression, body: pack.need.meaningChinese },
-    { title: pack.handle.coreExpression, body: pack.handle.meaningChinese },
-  ]) ?? [];
-  const stepInTurns = lesson?.modules?.stepIn?.dialogue?.turns ?? [];
+export function DeepCompletionScreen({ completionVM, onBack, onExitToCamera }) {
+  const noticeItems = completionVM?.noticeItems ?? [];
+  const interpretItems = completionVM?.interpretItems ?? [];
+  const interactItems = completionVM?.interactItems ?? [];
+  const stepInTurns = completionVM?.turns ?? [];
 
   return (
     <div className="screen lesson-screen deep-completion-screen">
       <div className="lesson-content deep-completion-content">
         <div className="deep-completion-card">
           <div className="deep-completion-hero">
-            {photoPreviewUrl ? <img src={photoPreviewUrl} alt="Completed scene" className="deep-completion-photo" /> : <div className="deep-completion-photo deep-completion-photo-placeholder" />}
+            {completionVM?.photoPreviewUrl ? <img src={completionVM.photoPreviewUrl} alt="Completed scene" className="deep-completion-photo" /> : <div className="deep-completion-photo deep-completion-photo-placeholder" />}
             <div className="deep-completion-badge">
               <IconSparkles size={18} />
             </div>
@@ -58,7 +49,7 @@ export function DeepCompletionScreen({ lesson, photoPreviewUrl, onBack, onExitTo
 
           <section className="deep-summary-group">
             <div className="deep-summary-group-head">
-              <span>Step In</span>
+              <span>{DEEP_COPY.completionReplayTitle}</span>
             </div>
             <div className="deep-dialogue-replay">
               {stepInTurns.map((turn, index) => (

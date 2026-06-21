@@ -4,15 +4,18 @@ import { ModuleProgress } from "./ModuleProgress.jsx";
 import { DEEP_PHASE_META } from "./module-registry.js";
 
 export function DeepCourseShell({
-  lesson,
   state,
   onBack,
   onAdvance,
   photoPreviewUrl,
+  pageProgressLabel = "",
+  pageProgressCurrent = 0,
+  pageProgressTotal = 0,
   footerActions,
   children,
 }) {
   const currentPhaseMeta = DEEP_PHASE_META[state.phase] ?? DEEP_PHASE_META.notice;
+  const showPageProgress = Boolean(pageProgressLabel) && pageProgressTotal > 0;
 
   return (
     <div className="screen lesson-screen deep-course-screen">
@@ -33,6 +36,14 @@ export function DeepCourseShell({
         </div>
 
         <ModuleProgress activePhase={state.phase} completedPhases={state.completedPhases} />
+        {showPageProgress ? (
+          <div className="deep-page-progress">
+            <span>{pageProgressLabel}</span>
+            <strong>
+              {pageProgressCurrent} / {pageProgressTotal}
+            </strong>
+          </div>
+        ) : null}
         {children}
       </div>
 

@@ -1,25 +1,31 @@
 import React from "react";
+import { IconSparkles } from "@tabler/icons-react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
 import { useDeepExerciseSequence } from "../useDeepExerciseSequence.js";
 import { DEEP_COPY } from "../../copy.js";
 
-export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onBack }) {
-  const packs = lesson?.modules?.interpret?.expressionPacks ?? [];
-  const sequence = useDeepExerciseSequence(packs);
+export function InterpretModule({ interpretVM, state, photoPreviewUrl, onAdvance, onBack }) {
+  const packs = interpretVM?.expressionPacks ?? [];
+  const sequence = useDeepExerciseSequence({
+    packs,
+    moduleKey: "interpret",
+  });
 
-  if (sequence.stage === "milestone") {
-    const summaryItems = packs.map((pack) => ({
-      title: pack?.coreExpression ?? "",
-      body: pack?.meaningChinese ?? "",
-    }));
+  function handleBack() {
+    const movedWithinModule = sequence.back();
 
+    if (!movedWithinModule) {
+      onBack();
+    }
+  }
+
+  if (sequence.isMilestone) {
     return (
       <DeepCourseShell
-        lesson={lesson}
         state={state}
         photoPreviewUrl={photoPreviewUrl}
-        onBack={onBack}
+        onBack={handleBack}
         onAdvance={onAdvance}
         footerActions={
           <button className="primary-button" type="button" onClick={onAdvance}>
@@ -34,8 +40,8 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
             <span>你已完成 Interpret 阶段！</span>
           </div>
           <div className="deep-summary-landing-list">
-            <div className="deep-summary-section-title">Core expressions you interpreted</div>
-            {summaryItems.map((item) => (
+            <div className="deep-summary-section-title">{DEEP_COPY.completedInterpretTitle}</div>
+            {sequence.milestoneItems.map((item) => (
               <div key={item.title} className="deep-summary-row">
                 <strong>{item.title}</strong>
                 <span>{item.body}</span>
@@ -43,19 +49,24 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
             ))}
           </div>
         </div>
+        <div className="deep-summary-landing-icon">
+          <IconSparkles size={20} />
+        </div>
       </DeepCourseShell>
     );
   }
 
-  const currentStageData = sequence.currentStageData;
+  const currentPage = sequence.currentPage;
 
   return (
     <DeepCourseShell
-      lesson={lesson}
       state={state}
       photoPreviewUrl={photoPreviewUrl}
-      onBack={onBack}
-      onAdvance={sequence.advance}
+      pageProgressLabel={interpretVM?.title ?? "Interpret"}
+      pageProgressCurrent={sequence.progressCurrent}
+      pageProgressTotal={sequence.progressTotal}
+      onBack={handleBack}
+      onAdvance={sequence.next}
       footerActions={
         <div className="lesson-footer-actions">
           <button className="secondary-button" type="button" onClick={sequence.reset}>
@@ -64,27 +75,29 @@ export function InterpretModule({ lesson, state, photoPreviewUrl, onAdvance, onB
           <button className="secondary-button" type="button" onClick={sequence.hint}>
             {DEEP_COPY.hint}
           </button>
-          <button className="primary-button" type="button" onClick={sequence.feedback.tone === "success" ? sequence.advance : sequence.check}>
+          <button className="primary-button" type="button" onClick={sequence.check} disabled={!sequence.isReadyToCheck}>
             {DEEP_COPY.check}
           </button>
         </div>
       }
     >
       <DeepExercisePage
-        title={currentStageData.title}
-        subtitle={currentStageData.subtitle}
-        prompt={currentStageData.prompt}
-        hint={currentStageData.hint}
-        bank={sequence.bank}
+        kind={currentPage.kind}
+        label={currentPage.label}
+        instruction={currentPage.instruction}
+        stepLabel={currentPage.stepLabel}
+        englishSentence={currentPage.englishSentence}
+        englishHighlight={currentPage.englishHighlight}
+        sentenceWithBlanks={currentPage.sentenceWithBlanks}
+        chineseReference={currentPage.chineseReference}
+        promptChinese={currentPage.promptChinese}
+        question={currentPage.question}
+        questionChinese={currentPage.questionChinese}
+        speakText={currentPage.speakText}
+        bank={currentPage.bank}
         selectedChunks={sequence.selectedChunks}
         feedback={sequence.feedback}
-        bankFirst={sequence.stage === "build"}
         onToggleChunk={sequence.toggleChunk}
-        onReset={sequence.reset}
-        onCheck={sequence.check}
-        stageLabel={sequence.currentStageLabel}
-        stepLabel={sequence.stepLabel}
-        showActions={false}
       />
     </DeepCourseShell>
   );
