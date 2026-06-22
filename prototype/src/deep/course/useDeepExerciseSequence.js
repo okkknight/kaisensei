@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-import { toggleDeepChunkSelection } from "./deep-flow-utils.js";
-
-function uniqueChunks(items = []) {
-  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
-}
+import { buildShuffledChunkBank, toggleDeepChunkSelection } from "./deep-flow-utils.js";
 
 function getHintMessage(kind, answer) {
   const firstChunk = Array.isArray(answer) ? answer[0] : "";
@@ -46,7 +42,10 @@ function buildExercisePages(packs, moduleKey) {
       speakText: example.english,
       englishHighlight: pack.coreExpression,
       chineseReference: example.chinese,
-      bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])],
+        `${pack.id}:${example.english}:understand`
+      ),
       answer: example.understand?.answer ?? [],
     };
   }
@@ -61,7 +60,10 @@ function buildExercisePages(packs, moduleKey) {
       sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
       speakText: example.english,
       chineseReference: example.chinese,
-      bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])],
+        `${pack.id}:${example.english}:focus`
+      ),
       answer: example.focus?.answer ?? [],
     };
   }
@@ -75,7 +77,10 @@ function buildExercisePages(packs, moduleKey) {
       instruction: DEEP_COPY.buildInstruction,
       promptChinese: example.build?.promptChinese ?? "",
       chineseReference: example.chinese ?? "",
-      bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])],
+        `${pack.id}:${example.english}:build`
+      ),
       answer: example.build?.answer ?? [],
     };
   }
@@ -92,7 +97,10 @@ function buildExercisePages(packs, moduleKey) {
       speakText: response.question,
       questionChinese:
         moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese,
-      bank: uniqueChunks([...(response.chunks ?? []), ...(response.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(response.chunks ?? []), ...(response.distractors ?? [])],
+        `${pack.id}:${example.english}:quickResponse`
+      ),
       answer: response.answer ?? [],
     };
   }

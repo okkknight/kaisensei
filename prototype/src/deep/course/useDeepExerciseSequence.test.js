@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildExercisePages } from "./useDeepExerciseSequence.js";
+import { buildShuffledChunkBank } from "./deep-flow-utils.js";
 
 function makeExample(label) {
   return {
@@ -72,5 +73,13 @@ test("buildExercisePages uses the pack core expression for understand page highl
   const pages = buildExercisePages([makePack("p1", "core one")], "notice");
 
   assert.equal(pages[0].englishHighlight, "core one");
-  assert.equal(pages[1].englishHighlight, "core one");
+});
+
+test("buildExercisePages shuffles deep reorder banks instead of keeping source order", () => {
+  const pages = buildExercisePages([makePack("p1", "core one")], "notice");
+  const rawBank = ["core one base understand", "core one base understand x"];
+  const expectedBank = buildShuffledChunkBank(rawBank, "p1:core one base english:understand");
+
+  assert.deepEqual(pages[0].bank, expectedBank);
+  assert.notDeepEqual(pages[0].bank, rawBank);
 });

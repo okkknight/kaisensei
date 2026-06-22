@@ -1,9 +1,31 @@
+import { shuffleChunks } from "../../quick/lesson/lesson-helpers.js";
+
 export function getExampleVariants(section) {
   if (!section) {
     return [];
   }
 
   return [section.baseExample, ...(section.variations ?? [])].filter(Boolean);
+}
+
+export function uniqueChunks(items = []) {
+  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
+}
+
+export function buildShuffledChunkBank(items = [], seed = "") {
+  const unique = uniqueChunks(items);
+
+  if (unique.length <= 1) {
+    return unique;
+  }
+
+  const shuffled = shuffleChunks(unique, seed);
+
+  if (shuffled.every((item, index) => item === unique[index])) {
+    return [...shuffled.slice(1), shuffled[0]];
+  }
+
+  return shuffled;
 }
 
 export function joinDeepChunks(chunks) {

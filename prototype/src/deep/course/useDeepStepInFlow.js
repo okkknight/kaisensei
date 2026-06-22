@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-
-function uniqueChunks(items = []) {
-  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
-}
+import { buildShuffledChunkBank } from "./deep-flow-utils.js";
 
 function buildStepInPages({ title, goal, scene, turns }) {
   const safeTurns = Array.isArray(turns) ? turns : [];
@@ -28,7 +25,6 @@ function buildStepInPages({ title, goal, scene, turns }) {
       label: entry.speaker === "system" ? "System" : "You",
       text: entry.text,
     }));
-    const promptTurn = safeTurns[turn.turnIndex - 1];
 
     pages.push({
       id: `step-in-turn-${turn.turnIndex}`,
@@ -45,7 +41,10 @@ function buildStepInPages({ title, goal, scene, turns }) {
                 : "",
       scene,
       history,
-      bank: uniqueChunks([...(turn.chunks ?? []), ...(turn.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(turn.chunks ?? []), ...(turn.distractors ?? [])],
+        `step-in:${turn.turnIndex}:${turn.text ?? ""}`
+      ),
       answer: turn.answer ?? [],
     });
   });
@@ -62,6 +61,8 @@ function buildStepInPages({ title, goal, scene, turns }) {
 
   return pages;
 }
+
+export { buildStepInPages };
 
 export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", turns = [] } = {}) {
   const pages = useMemo(() => buildStepInPages({ title, goal, scene, turns }), [goal, scene, title, turns]);

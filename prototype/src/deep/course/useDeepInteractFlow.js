@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
-import { joinDeepChunks, toggleDeepChunkSelection } from "./deep-flow-utils.js";
-
-function uniqueChunks(items = []) {
-  return [...new Set((Array.isArray(items) ? items : []).filter(Boolean))];
-}
+import { buildShuffledChunkBank, joinDeepChunks, toggleDeepChunkSelection } from "./deep-flow-utils.js";
 
 function buildInteractPages(taskPacks) {
   const pages = [];
@@ -56,7 +52,10 @@ function buildInteractPages(taskPacks) {
               englishSentence: example.english,
               englishHighlight: section.coreExpression,
               chineseReference: example.chinese,
-              bank: uniqueChunks([...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])]),
+              bank: buildShuffledChunkBank(
+                [...(example.understand?.chunks ?? []), ...(example.understand?.distractors ?? [])],
+                `${taskPack.id}:${sectionKey}:${example.english}:understand`
+              ),
               answer: example.understand?.answer ?? [],
               moduleLabel: `${stepPrefix} · Understand`,
             });
@@ -72,7 +71,10 @@ function buildInteractPages(taskPacks) {
               instruction: DEEP_COPY.focusInstruction,
               sentenceWithBlanks: example.focus?.sentenceWithBlanks ?? "",
               chineseReference: example.chinese,
-              bank: uniqueChunks([...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])]),
+              bank: buildShuffledChunkBank(
+                [...(example.focus?.choices ?? []), ...(example.focus?.distractors ?? [])],
+                `${taskPack.id}:${sectionKey}:${example.english}:focus`
+              ),
               answer: example.focus?.answer ?? [],
               moduleLabel: `${stepPrefix} · Focus`,
             });
@@ -88,7 +90,10 @@ function buildInteractPages(taskPacks) {
               instruction: DEEP_COPY.buildInstruction,
               promptChinese: example.build?.promptChinese ?? "",
               chineseReference: example.chinese ?? "",
-              bank: uniqueChunks([...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])]),
+              bank: buildShuffledChunkBank(
+                [...(example.build?.chunks ?? []), ...(example.build?.distractors ?? [])],
+                `${taskPack.id}:${sectionKey}:${example.english}:build`
+              ),
               answer: example.build?.answer ?? [],
               moduleLabel: `${stepPrefix} · Build`,
             });
@@ -112,7 +117,10 @@ function buildInteractPages(taskPacks) {
           text: dialogue?.openingLine ?? DEEP_COPY.dialogueNeedOpening,
         },
       ],
-      bank: uniqueChunks([...(dialogue?.need?.chunks ?? []), ...(dialogue?.need?.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(dialogue?.need?.chunks ?? []), ...(dialogue?.need?.distractors ?? [])],
+        `${taskPack.id}:dialogue:need`
+      ),
       answer: dialogue?.need?.answer ?? [],
     });
 
@@ -134,7 +142,10 @@ function buildInteractPages(taskPacks) {
           text: dialogue?.systemReply ?? "",
         },
       ],
-      bank: uniqueChunks([...(dialogue?.handle?.chunks ?? []), ...(dialogue?.handle?.distractors ?? [])]),
+      bank: buildShuffledChunkBank(
+        [...(dialogue?.handle?.chunks ?? []), ...(dialogue?.handle?.distractors ?? [])],
+        `${taskPack.id}:dialogue:handle`
+      ),
       answer: dialogue?.handle?.answer ?? [],
     });
   });

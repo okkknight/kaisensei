@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildInteractPages } from "./useDeepInteractFlow.js";
+import { buildShuffledChunkBank } from "./deep-flow-utils.js";
 
 function makeExample(label) {
   return {
@@ -101,4 +102,13 @@ test("buildInteractPages uses the section core expression for understand page hi
 
   assert.equal(pages[1].englishHighlight, "task one need");
   assert.equal(pages[2].englishHighlight, "task one handle");
+});
+
+test("buildInteractPages shuffles deep reorder banks instead of keeping source order", () => {
+  const pages = buildInteractPages([makeTaskPack("task-1", "task one")]);
+  const rawBank = ["task one need base understand", "task one need base understand x"];
+  const expectedBank = buildShuffledChunkBank(rawBank, "task-1:need:task one need base english:understand");
+
+  assert.deepEqual(pages[1].bank, expectedBank);
+  assert.notDeepEqual(pages[1].bank, rawBank);
 });
