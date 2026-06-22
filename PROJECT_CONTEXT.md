@@ -33,11 +33,12 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode Interact still uses the current configured shape of 2 task packs, each with Need and Handle, and that count is treated as configurable rather than a hard design limit
 - Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still checks structure, answer coverage, and required arrays
 - Deep Mode normalizer and JSON structure were not changed in this prompt pass, so the contract remains stable while generation quality improves
+- Mobile lesson screens now keep their bottom action bars floating above the viewport on small screens, so long lesson pages do not trap the next-step buttons below the scroll area
 
 ## Current latest task
 
-- Task: Rebuild the Deep Mode generation prompt so one photo produces several useful, scene-grounded core expressions and pack-specific learning angles, without changing the data structure
-- Status: 已执行待验收
+- Task: Make the lesson footer fixed on mobile across lesson screens so long completion and exercise pages keep the action buttons reachable
+- Status: 验收通过
 
 ## Architecture or state flow
 
@@ -70,9 +71,12 @@ Deep Mode planned flow:
 - `npm --prefix api test`
 - `npm --prefix prototype run test:deepmode`
 - `npm --prefix prototype run build`
+- `cd prototype && VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm run build`
+- `rsync -a --delete prototype/dist/ root@89.208.242.44:/opt/boringmax/site/kaisensei/`
 - `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 - Latest API verification after the Deep Mode prompt quality rebuild: `npm --prefix api test`
+- Latest frontend deployment verification: `curl -fsS https://boringmax.com/kaisensei/` and `curl -fsS https://boringmax.com/kaisensei/assets/index-D6csJCFz.css`
 
 ## Runtime notes
 
@@ -82,6 +86,7 @@ Deep Mode planned flow:
 - Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
+- Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
 
 ## Key files
 
@@ -102,6 +107,8 @@ Deep Mode planned flow:
 - `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt
 - `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
+- `prototype/src/deep/course/DeepCourseShell.jsx` - shared Deep Mode shell with footer slot
+- `prototype/src/styles.css` - global lesson and mobile footer layout
 - `docs/handoff/README.md` - handoff index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
 
@@ -118,6 +125,7 @@ Deep Mode planned flow:
 - Keep Deep Mode prompt and its regression assertions in sync whenever generation rules change
 - Keep generation-quality changes separate from structure or schema changes unless the user explicitly asks for both
 - For backend prompt edits, verify the API test suite and then sync the API source to the VPS
+- For mobile footer layout changes, rebuild the prototype, sync `prototype/dist/` to the VPS, and verify the live page on a phone-sized viewport
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
@@ -137,3 +145,4 @@ Deep Mode planned flow:
 - Shared contract or prompt changes may affect both Quick Mode and Deep Mode
 - Deep Mode schema, sequencing, and normalizer changes should stay in the Deep feature domain unless a shared boundary is intentionally being refactored
 - This prompt rebuild only changes Deep Mode generation quality, but shared AI tracing and contract boundaries still deserve a quick regression check whenever the prompt changes
+- The global mobile footer behavior affects Quick Mode, Deep Mode, error screens, and any other lesson screen that uses `lesson-footer`

@@ -2213,6 +2213,33 @@ img {
   gap: 16px;
 }
 
+@media (max-width: 767px) {
+  .lesson-screen {
+    position: relative;
+  }
+
+  .lesson-content {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .lesson-footer {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 0;
+    z-index: 12;
+    margin-top: 0;
+    padding-top: 12px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0), rgba(255, 252, 247, 0.96) 28%, rgba(255, 252, 247, 0.99));
+    backdrop-filter: blur(14px);
+  }
+
+  .lesson-footer .lesson-footer-actions {
+    max-width: 100%;
+  }
+}
+
 .deep-course-header {
   align-items: center;
 }

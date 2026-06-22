@@ -20,15 +20,15 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
   }
 
   if (flow.isMilestone) {
-    return (
-      <DeepCourseShell
-        state={state}
-        photoPreviewUrl={photoPreviewUrl}
-        onBack={handleBack}
-        onAdvance={onAdvance}
-        footerActions={
-          <button className="primary-button" type="button" onClick={onAdvance}>
-            {DEEP_COPY.continueToStepIn}
+      return (
+        <DeepCourseShell
+          state={state}
+          photoPreviewUrl={photoPreviewUrl}
+          onBack={handleBack}
+          onAdvance={onAdvance}
+          footerActions={
+            <button className="primary-button" type="button" onClick={onAdvance}>
+              {DEEP_COPY.continueToStepIn}
           </button>
         }
       >

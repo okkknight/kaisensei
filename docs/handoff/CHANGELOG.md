@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Built the mobile lesson footer fix, synced `prototype/dist/` to the VPS, restarted the live services, and verified the deployed site serves the new mobile footer CSS
+- Made the lesson footer float above the viewport on small screens so long Quick Mode and Deep Mode pages keep their bottom action buttons reachable, and added extra bottom padding to lesson content to avoid overlap
+- Updated the handoff context to treat the mobile footer fix as the current task and the global lesson-footer behavior as a cross-feature impact
+
 - Rebuilt the Deep Mode generation prompt around a senior-English-teacher role, with `coreExpression` defined as a learnable high-frequency phrase, collocation, or practical expression instead of a sentence, and with same-scene pack differentiation emphasized across Notice, Interpret, and Interact
 - Updated the Deep Mode prompt regression coverage so the new teaching-focused wording stays locked in and the old clause-slicing / template-heavy wording stays out
 - Kept the Deep Mode contract and normalizer unchanged in this pass, then verified the API suite with `npm --prefix api test`
