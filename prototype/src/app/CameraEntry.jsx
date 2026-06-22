@@ -289,8 +289,6 @@ export function CameraEntry({
           </button>
         </div>
 
-        {mode === MODE_DEEP ? <p className="camera-mode-note">深度模式预留中，进入后会走深度课程流程。</p> : null}
-
         <div className="camera-action-row" aria-label="Camera actions">
           <button className="camera-side-button" type="button" onClick={openPicker} aria-label="Upload photo">
             <IconUpload size={18} />
