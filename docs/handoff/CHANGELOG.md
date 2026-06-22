@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Replaced the Deep Mode chunk-count hard gate with lighter prompt guidance for Understand chunk cuts, steering the model toward simple Chinese sentence parts and away from meaningless碎片词块 such as 的 / 了 / 什么
+- Relaxed the Deep Mode normalizer so Understand / Build / Quick Response no longer fail only because chunk counts fall outside a fixed range, while keeping structural and answer-coverage checks intact
+- Verified the prompt/normalizer refresh with `npm --prefix api test`, then synced the updated API files to the VPS and restarted `kaisensei.service`
+
 - Tightened Deep Mode Understand / Build / Quick Response chunk rules to 3-6, aligned the prompt, normalizer, API fixtures, and prototype mock schema, and verified the result with `npm --prefix api test` and `npm --prefix prototype run test:deepmode`
 
 - Added a Deep Mode integration spec and execution plan that lock the confirmed联调 decisions: backend-only `overview.startPromptChinese`, required `scenePromptChinese` on Interact guide data, canonical Step In `sourceModule` mapping, `pack.coreExpression` as the only highlight source, a nested Deep contract shape, and frontend job polling
