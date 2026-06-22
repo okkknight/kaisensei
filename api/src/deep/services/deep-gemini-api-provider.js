@@ -100,12 +100,14 @@ export function createDeepGeminiApiProvider({
   return {
     async generateLesson({ imageBuffer, mimeType, level, traceId, repairNotes }) {
       const startedAt = Date.now();
+      const promptStartedAt = Date.now();
       const prompt = buildDeepCoursePrompt({
         level,
         repairNotes,
         config: deepCourseDefaultConfig,
         fixedCopy: deepCourseDefaultFixedCopy,
       });
+      const promptMs = Date.now() - promptStartedAt;
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const imagePart = {
         inline_data: {
@@ -121,6 +123,7 @@ export function createDeepGeminiApiProvider({
         imageBytes: imageBuffer.length,
         model,
         mode: "deep",
+        promptMs,
       });
 
       try {
@@ -181,15 +184,36 @@ export function createDeepGeminiApiProvider({
           throw toRuntimeError("The lesson got lost on the way.", "Gemini response did not include any text");
         }
 
+        const extractStartedAt = Date.now();
         const jsonText = extractJsonText(raw);
+        traceLog("provider", "json_extracted", {
+          traceId: traceId || "",
+          ms: Date.now() - extractStartedAt,
+          mode: "deep",
+          rawBytes: raw.length,
+          jsonBytes: jsonText.length,
+        });
+
+        const parseStartedAt = Date.now();
         let parsed;
         try {
           parsed = JSON.parse(jsonText);
         } catch {
           throw toRuntimeError("The lesson got lost on the way.", "Gemini output was not valid JSON");
         }
+        traceLog("provider", "json_parsed", {
+          traceId: traceId || "",
+          ms: Date.now() - parseStartedAt,
+          mode: "deep",
+        });
 
+        const normalizeStartedAt = Date.now();
         const lesson = normalizeDeepCoursePayload(parsed);
+        traceLog("provider", "lesson_normalized", {
+          traceId: traceId || "",
+          ms: Date.now() - normalizeStartedAt,
+          mode: "deep",
+        });
 
         traceLog("provider", "lesson_ready", {
           traceId: traceId || "",

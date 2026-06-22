@@ -53,6 +53,8 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           traceId: payload.traceId || "",
           jobId,
           level: payload.level,
+          mode: payload.mode || "quick",
+          queueMs: payload.jobCreatedAt ? Date.now() - new Date(payload.jobCreatedAt).getTime() : undefined,
         });
 
         jobStore.update(jobId, { status: "running", error: null });
@@ -75,6 +77,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
             traceLog("runner", "provider_start", {
               traceId: payload.traceId || "",
               jobId,
+              mode: payload.mode || "quick",
             });
 
             const lesson = await activeProvider.generateLesson(
@@ -88,6 +91,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
               traceId: payload.traceId || "",
               jobId,
               providerMs: Date.now() - providerStartedAt,
+              mode: payload.mode || "quick",
             });
 
             jobStore.update(jobId, {
@@ -100,6 +104,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
               traceId: payload.traceId || "",
               jobId,
               totalMs: Date.now() - startedAt,
+              mode: payload.mode || "quick",
             });
 
             return;
@@ -117,6 +122,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           jobId,
           totalMs: Date.now() - startedAt,
           error: lastError instanceof Error ? lastError.message : String(lastError),
+          mode: payload.mode || "quick",
         });
 
         jobStore.update(jobId, {

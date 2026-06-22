@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createLessonJob, getLessonJob, LessonApiError } from "../../lib/lesson-api.js";
 import { DEEP_COPY } from "../copy.js";
+import { createDeepLessonTraceId, logDeepLessonTrace, roundDeepLessonMs } from "./deep-lesson-trace.js";
 
 const loadingMessages = DEEP_COPY.loading;
 const loadingTickMs = 850;
@@ -61,6 +62,10 @@ export function useDeepModeJobLifecycle({
     }, loadingTickMs);
   }
 
+  function createTraceId() {
+    return createDeepLessonTraceId();
+  }
+
   function cancelPendingWork() {
     requestIdRef.current += 1;
     stopPolling();
@@ -75,20 +80,34 @@ export function useDeepModeJobLifecycle({
     setScreen("error");
   }
 
-  async function pollJob(jobId, requestId) {
+  async function pollJob(jobId, requestId, traceId, flowStartedAt) {
     pollTimerRef.current = window.setTimeout(async () => {
       try {
+        const pollStartedAt = performance.now();
         const job = await getLessonJob(jobId);
         if (requestIdRef.current !== requestId) return;
 
+        logDeepLessonTrace("poll_status", {
+          traceId,
+          jobId,
+          status: job.status,
+          pollMs: roundDeepLessonMs(performance.now() - pollStartedAt),
+          elapsedMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+        });
+
         if (job.status === "queued" || job.status === "running") {
-          await pollJob(jobId, requestId);
+          await pollJob(jobId, requestId, traceId, flowStartedAt);
           return;
         }
 
         stopLoadingTicker();
 
         if (job.status === "succeeded") {
+          logDeepLessonTrace("flow_done", {
+            traceId,
+            jobId,
+            totalMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+          });
           setLesson(job.lesson);
           setLevel(job.lesson.level);
           setScreen("lesson");
@@ -96,21 +115,35 @@ export function useDeepModeJobLifecycle({
           return;
         }
 
+        logDeepLessonTrace("flow_failed", {
+          traceId,
+          jobId,
+          totalMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+          status: job.status,
+        });
         showError(job.error?.message || DEEP_COPY.retryAction);
       } catch (error) {
         if (requestIdRef.current !== requestId) return;
         stopLoadingTicker();
         const message = error instanceof LessonApiError ? error.message : DEEP_COPY.retryAction;
+        logDeepLessonTrace("poll_error", {
+          traceId,
+          jobId,
+          elapsedMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+          message,
+        });
         showError(message);
       }
     }, pollDelayMs);
   }
 
-  async function generateLessonFromFile(file, nextLevel) {
+  async function generateLessonFromFile(file, nextLevel, source = "upload") {
     if (!file) return;
 
     cancelPendingWork();
     const requestId = requestIdRef.current;
+    const traceId = createTraceId();
+    const flowStartedAt = performance.now();
     setErrorState(null);
     setScreen("loading");
     setLesson(null);
@@ -119,20 +152,52 @@ export function useDeepModeJobLifecycle({
     selectedFileRef.current = file;
     startLoadingTicker();
 
+    logDeepLessonTrace("flow_start", {
+      traceId,
+      source,
+      level: nextLevel,
+      fileName: file.name,
+      fileType: file.type,
+      fileBytes: file.size,
+    });
+
     try {
+      const uploadStartedAt = performance.now();
+      logDeepLessonTrace("upload_start", {
+        traceId,
+        source,
+        level: nextLevel,
+        uploadBytes: file.size,
+        uploadType: file.type,
+      });
+
       const created = await createLessonJob({
         image: file,
         level: nextLevel,
         mode: "deep",
+        traceId,
       });
 
       if (requestIdRef.current !== requestId) return;
 
-      await pollJob(created.jobId, requestId);
+      logDeepLessonTrace("upload_done", {
+        traceId,
+        jobId: created.jobId,
+        elapsedMs: roundDeepLessonMs(performance.now() - uploadStartedAt),
+      });
+
+      await pollJob(created.jobId, requestId, traceId, flowStartedAt);
     } catch (error) {
       if (requestIdRef.current !== requestId) return;
       stopLoadingTicker();
       const message = error instanceof LessonApiError ? error.message : DEEP_COPY.retryAction;
+      logDeepLessonTrace("flow_failed", {
+        traceId,
+        source,
+        level: nextLevel,
+        message,
+        totalMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+      });
       showError(message);
     }
   }

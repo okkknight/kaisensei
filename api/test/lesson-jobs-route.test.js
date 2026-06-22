@@ -137,8 +137,11 @@ test("POST /v1/lesson-jobs persists mode and keeps the legacy quick default", as
 
   assert.equal(deepRes.statusCode, 202);
   const deepCreated = deepRes.json();
+  assert.equal(deepCreated.traceId, "trace-deep");
   assert.equal(jobStore.get(deepCreated.jobId).mode, "deep");
+  assert.equal(jobStore.get(deepCreated.jobId).traceId, "trace-deep");
   assert.equal(calls[0].payload.mode, "deep");
+  assert.equal(calls[0].payload.traceId, "trace-deep");
 
   const quickBody = buildMultipartBody({
     fields: { level: "Advanced", traceId: "trace-quick" },

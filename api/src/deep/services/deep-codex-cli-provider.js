@@ -57,11 +57,22 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
   return {
     async generateLesson({ imageBuffer, mimeType, level, traceId, repairNotes }) {
       const startedAt = Date.now();
+      const workspaceStartedAt = Date.now();
       const workspace = await createImageWorkspace({
         imageBuffer,
         mimeType,
         prefix: "kaisensei-deep-",
       });
+      const workspaceMs = Date.now() - workspaceStartedAt;
+
+      const promptStartedAt = Date.now();
+      const prompt = buildDeepCoursePrompt({
+        level,
+        repairNotes,
+        config: deepCourseDefaultConfig,
+        fixedCopy: deepCourseDefaultFixedCopy,
+      });
+      const promptMs = Date.now() - promptStartedAt;
 
       traceLog("provider", "lesson_prepare", {
         traceId: traceId || "",
@@ -69,6 +80,8 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
         mimeType,
         imageBytes: imageBuffer.length,
         mode: "deep",
+        workspaceMs,
+        promptMs,
       });
 
       try {
@@ -84,12 +97,7 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
           binary,
           model,
           imagePath: workspace.imagePath,
-          prompt: buildDeepCoursePrompt({
-            level,
-            repairNotes,
-            config: deepCourseDefaultConfig,
-            fixedCopy: deepCourseDefaultFixedCopy,
-          }),
+          prompt,
           cwd: workspace.tempDir,
         });
 
@@ -105,7 +113,17 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
           });
         }
 
+        const extractStartedAt = Date.now();
         const jsonText = extractJsonText(raw);
+        traceLog("provider", "json_extracted", {
+          traceId: traceId || "",
+          mode: "deep",
+          ms: Date.now() - extractStartedAt,
+          rawBytes: raw.length,
+          jsonBytes: jsonText.length,
+        });
+
+        const parseStartedAt = Date.now();
         let parsed;
         try {
           parsed = JSON.parse(jsonText);
@@ -114,8 +132,19 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
             code: "provider_parse_error",
           });
         }
+        traceLog("provider", "json_parsed", {
+          traceId: traceId || "",
+          mode: "deep",
+          ms: Date.now() - parseStartedAt,
+        });
 
+        const normalizeStartedAt = Date.now();
         const lesson = normalizeDeepCoursePayload(parsed);
+        traceLog("provider", "lesson_normalized", {
+          traceId: traceId || "",
+          mode: "deep",
+          ms: Date.now() - normalizeStartedAt,
+        });
 
         traceLog("provider", "lesson_ready", {
           traceId: traceId || "",

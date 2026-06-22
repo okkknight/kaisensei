@@ -107,7 +107,7 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         });
       }
 
-      const job = jobStore.create({ level, mode });
+      const job = jobStore.create({ level, mode, traceId });
       traceLog("route", "job_received", {
         traceId,
         jobId: job.jobId,
@@ -119,18 +119,31 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         totalMs: Date.now() - requestStartedAt,
       });
 
-      jobRunner.enqueue(job.jobId, { imageBuffer, mimeType, level, mode, traceId });
+      jobRunner.enqueue(job.jobId, {
+        imageBuffer,
+        mimeType,
+        level,
+        mode,
+        traceId,
+        jobCreatedAt: job.createdAt,
+      });
 
       return reply.status(202).send({
         jobId: job.jobId,
         status: job.status,
+        traceId: job.traceId || traceId || "",
       });
     });
 
     app.get(`${prefix}/lesson-jobs/:jobId`, async (request, reply) => {
+      const requestStartedAt = Date.now();
       const job = jobStore.get(request.params.jobId);
 
       if (!job) {
+        traceLog("route", "job_poll_not_found", {
+          jobId: request.params.jobId,
+          totalMs: Date.now() - requestStartedAt,
+        });
         return reply.status(404).send({
           error: {
             code: "job_not_found",
@@ -138,6 +151,14 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
           },
         });
       }
+
+      traceLog("route", "job_polled", {
+        traceId: job.traceId || "",
+        jobId: job.jobId,
+        status: job.status,
+        mode: job.mode,
+        totalMs: Date.now() - requestStartedAt,
+      });
 
       return reply.send(job);
     });
