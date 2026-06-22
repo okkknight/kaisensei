@@ -132,12 +132,14 @@ test("normalizeDeepCoursePayload rejects understand chunks that are not Chinese"
   assert.throws(() => normalizeDeepCoursePayload(payload), /Expected Chinese chunk/i);
 });
 
-test("normalizeDeepCoursePayload rejects build chunks outside the 3 to 6 range", () => {
+test("normalizeDeepCoursePayload accepts short build chunk sets when they are otherwise valid", () => {
   const payload = buildValidDeepCoursePayload();
   payload.modules.notice.expressionPacks[0].baseExample.build.chunks = ["A coffee mug", "is next to"];
   payload.modules.notice.expressionPacks[0].baseExample.build.answer = ["A coffee mug", "is next to"];
 
-  assert.throws(() => normalizeDeepCoursePayload(payload), /between 3 and 6 chunks/i);
+  const normalized = normalizeDeepCoursePayload(payload);
+
+  assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.build.chunks.length, 2);
 });
 
 test("normalizeDeepCoursePayload canonicalizes stepIn sourceModule aliases", () => {

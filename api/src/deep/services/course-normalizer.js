@@ -136,19 +136,6 @@ function countBlanks(sentence) {
   return matches ? matches.length : 0;
 }
 
-function ensureChunkCountInRange(chunks, path, config = deepCourseDefaultConfig.exercise) {
-  if (!Array.isArray(chunks)) {
-    fail(`Missing or invalid array at ${path}`, { path });
-  }
-
-  const min = config.chunkMinCount ?? 3;
-  const max = config.chunkMaxCount ?? 6;
-
-  if (chunks.length < min || chunks.length > max) {
-    fail(`Expected ${path} to contain between ${min} and ${max} chunks`, { path });
-  }
-}
-
 function normalizeReorderExercise(exercise, path, expectedDistractorCount) {
   if (!isPlainObject(exercise)) {
     fail(`Missing or invalid object at ${path}`, { path });
@@ -229,8 +216,6 @@ function ensureChineseChunks(value, path) {
 
 function normalizeUnderstandExercise(exercise, path, config = deepCourseDefaultConfig.exercise) {
   const normalized = normalizeReorderExercise(exercise, path, config.understandDistractorCount);
-  ensureChunkCountInRange(normalized.chunks, `${path}.chunks`, config);
-  ensureChunkCountInRange(normalized.answer, `${path}.answer`, config);
 
   return {
     ...normalized,
@@ -242,8 +227,6 @@ function normalizeUnderstandExercise(exercise, path, config = deepCourseDefaultC
 
 function normalizeBuildExercise(exercise, path, config = deepCourseDefaultConfig.exercise) {
   const normalized = normalizeReorderExercise(exercise, path, config.buildDistractorCount);
-  ensureChunkCountInRange(normalized.chunks, `${path}.chunks`, config);
-  ensureChunkCountInRange(normalized.answer, `${path}.answer`, config);
   return normalized;
 }
 
@@ -312,8 +295,6 @@ function normalizeQuickResponse(quickResponse, path, config = deepCourseDefaultC
   ensureUnique(chunks, `${path}.chunks`);
   ensureUnique(distractors, `${path}.distractors`);
   ensureAnswerCoverage(answer, chunks, `${path}.answer`);
-  ensureChunkCountInRange(chunks, `${path}.chunks`, config);
-  ensureChunkCountInRange(answer, `${path}.answer`, config);
 
   return {
     ...quickResponse,

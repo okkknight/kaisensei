@@ -90,8 +90,9 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Every baseExample\.english and every variation\.english must visibly contain the exact coreExpression/i);
   assert.match(prompts[0], /Understand exercises must use Chinese chunks, Chinese distractors, and Chinese answers/i);
-  assert.match(prompts[0], /Understand chunks must be natural Chinese phrases and contain 3 to 6 chunks/i);
-  assert.match(prompts[0], /Build chunks and Quick Response chunks must be natural English phrases and contain 3 to 6 chunks/i);
+  assert.match(prompts[0], /Understand chunks must be natural Chinese phrases\./i);
+  assert.match(prompts[0], /Build chunks and Quick Response chunks must be natural English phrases\./i);
+  assert.match(prompts[0], /Do not add filler chunks just to satisfy a count/i);
   assert.match(prompts[0], /Never use English chunks in Understand/i);
   assert.match(prompts[0], /REQUIRED INNER SHAPES:/);
   assert.match(prompts[0], /Quick Response attached to each baseExample and variation/);
