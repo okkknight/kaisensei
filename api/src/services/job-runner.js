@@ -38,6 +38,33 @@ function buildRepairNotes(error) {
   return `Previous attempt failed. ${message}`;
 }
 
+function describeJobError(error) {
+  if (error instanceof LessonValidationError) {
+    return {
+      name: error.name,
+      code: error.code || error.details?.code || "lesson_validation_error",
+      message: error.message,
+      details: error.details || null,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name || "Error",
+      code: error.code || "provider_runtime_error",
+      message: error.message,
+      details: error.details || null,
+    };
+  }
+
+  return {
+    name: typeof error,
+    code: "provider_runtime_error",
+    message: String(error),
+    details: null,
+  };
+}
+
 function resolveProvider({ provider, providers, mode }) {
   const providerMap = providers || (provider ? { quick: provider } : {});
   const requestedMode = String(mode || "quick").toLowerCase();
@@ -111,7 +138,23 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           } catch (error) {
             lastError = error;
 
+            traceLog("runner", "provider_error", {
+              traceId: payload.traceId || "",
+              jobId,
+              mode: payload.mode || "quick",
+              attempt,
+              maxAttempts,
+              ...describeJobError(error),
+            });
+
             if (attempt < maxAttempts) {
+              traceLog("runner", "provider_retrying", {
+                traceId: payload.traceId || "",
+                jobId,
+                mode: payload.mode || "quick",
+                attempt,
+                maxAttempts,
+              });
               continue;
             }
           }
@@ -121,7 +164,7 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           traceId: payload.traceId || "",
           jobId,
           totalMs: Date.now() - startedAt,
-          error: lastError instanceof Error ? lastError.message : String(lastError),
+          ...describeJobError(lastError),
           mode: payload.mode || "quick",
         });
 
