@@ -70,7 +70,7 @@ export function buildDeepCoursePrompt({
     "- Do not replace the coreExpression with a synonym, pronoun, abbreviation, or looser paraphrase.",
     "- If a draft sentence does not visibly contain the coreExpression, rewrite the sentence until it does.",
     "- Understand exercises must use Chinese chunks, Chinese distractors, and Chinese answers that together form the Chinese meaning of the example.",
-    "- Understand chunks must be natural Chinese phrases.",
+    "- Understand chunks should usually follow simple Chinese sentence parts such as subject, predicate, object, and modifier, and must not use meaningless碎片词块 such as 的、了、什么.",
     "- Never use English chunks in Understand.",
     "- Build chunks and Quick Response chunks must be natural English phrases.",
     "- Do not add filler chunks just to satisfy a count; rewrite the sentence instead if needed.",
