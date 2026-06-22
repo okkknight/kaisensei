@@ -28,14 +28,16 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode Interact playback is locked to task-pack-first ordering
 - Interact dialogue practice now uses a bridge `systemReply` and keeps the learned Handle expression for the user reply
 - Step In dialogue now reads as a continuous in-scene role-play instead of quiz-style turns
-- Deep Mode Understand chunk guidance is currently prompt-led: cut by simple Chinese sentence parts such as subject / predicate / object / modifier, avoid碎片词块 like 的 / 了 / 什么, and do not add filler chunks just to satisfy a count
+- The Deep Mode generator prompt has been rebuilt around a senior-English-teacher role, with `coreExpression` defined as a learnable high-frequency phrase, collocation, or practical expression rather than a sentence
+- Deep Mode generation now asks the model to learn from one photo through different expression angles on the same scene, instead of slicing one template across every pack
+- Deep Mode Interact still uses the current configured shape of 2 task packs, each with Need and Handle, and that count is treated as configurable rather than a hard design limit
 - Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still checks structure, answer coverage, and required arrays
-- Deep Mode prompt quality is being tightened so core expressions stay educational, useful, and differentiated across packs, with lighter but still specific chunk guidance
+- Deep Mode normalizer and JSON structure were not changed in this prompt pass, so the contract remains stable while generation quality improves
 
 ## Current latest task
 
-- Task: Refine the Deep Mode generation prompt so core expressions are high-frequency, practical, reusable teaching points with clearer pack differentiation and less template drift
-- Status: 验收通过
+- Task: Rebuild the Deep Mode generation prompt so one photo produces several useful, scene-grounded core expressions and pack-specific learning angles, without changing the data structure
+- Status: 已执行待验收
 
 ## Architecture or state flow
 
@@ -70,7 +72,7 @@ Deep Mode planned flow:
 - `npm --prefix prototype run build`
 - `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
-- Latest API verification after the Deep Mode prompt quality refresh: `npm --prefix api test`
+- Latest API verification after the Deep Mode prompt quality rebuild: `npm --prefix api test`
 
 ## Runtime notes
 
@@ -113,24 +115,25 @@ Deep Mode planned flow:
 - Keep Interact ordering task-pack-first
 - Treat Interact `systemReply` as a bridge sentence, not the learned Handle target
 - Treat Step In as a continuous role-play conversation in the same scene
-- Keep Deep Mode prompt and its test assertions in sync whenever generation rules change
+- Keep Deep Mode prompt and its regression assertions in sync whenever generation rules change
+- Keep generation-quality changes separate from structure or schema changes unless the user explicitly asks for both
 - For backend prompt edits, verify the API test suite and then sync the API source to the VPS
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
 
-- Whether Deep Mode should move from prompt-led chunk guidance to a true two-step generation protocol remains open if chunk quality still drifts
+- Whether Deep Mode should eventually move from prompt-only generation to a two-step generation protocol remains open if quality still drifts
 - Deep Mode remains the main active area; Quick Mode should only change when a shared shell fix is explicitly needed
 
 ## Main risks and tradeoffs
 
 - Deep Mode can drift back into the old snapspeak-style structure if the flow helpers are not kept isolated
 - Shared AI / contract changes can still affect both modes, so prompt and normalizer edits need a quick regression check
-- Prompt-led chunk guidance is lighter weight but still depends on model behavior; if the model keeps producing odd chunks, a true two-step protocol may be needed
-- If chunk-count or content-shape rules are loosened without tests, the UI can silently diverge from the contract again
+- Prompt-only quality improvements are lightweight, but they still depend on model behavior; if the output keeps drifting, a stronger generation pipeline may be needed
+- If prompt guidance changes without regression tests, the UI can silently diverge from the contract again
 
 ## Cross-feature impact
 
 - Shared contract or prompt changes may affect both Quick Mode and Deep Mode
 - Deep Mode schema, sequencing, and normalizer changes should stay in the Deep feature domain unless a shared boundary is intentionally being refactored
-- Prompt and normalizer changes in Deep Mode do not currently alter Quick Mode behavior, but shared AI tracing and contract boundaries still deserve a quick regression check
+- This prompt rebuild only changes Deep Mode generation quality, but shared AI tracing and contract boundaries still deserve a quick regression check whenever the prompt changes

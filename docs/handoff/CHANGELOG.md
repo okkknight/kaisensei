@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Rebuilt the Deep Mode generation prompt around a senior-English-teacher role, with `coreExpression` defined as a learnable high-frequency phrase, collocation, or practical expression instead of a sentence, and with same-scene pack differentiation emphasized across Notice, Interpret, and Interact
+- Updated the Deep Mode prompt regression coverage so the new teaching-focused wording stays locked in and the old clause-slicing / template-heavy wording stays out
+- Kept the Deep Mode contract and normalizer unchanged in this pass, then verified the API suite with `npm --prefix api test`
+
 - Refreshed the Deep Mode generation prompt so the model acts as an English teaching system, core expressions stay high-frequency and practical, same-module packs stay clearly differentiated, and chunk guidance is specific without being overly template-driven
 - Removed the extra Deep Mode template-prefix constraint from the prompt and kept the regression assertions aligned with the new quality rules
 - Verified the prompt refresh with `node --test api/test/deep-course-provider.test.js`, then synced the updated API source to the VPS and restarted `kaisensei.service`

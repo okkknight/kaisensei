@@ -11,6 +11,16 @@ This document describes how to publish and verify the current `kaisensei` deploy
 - Static files: `/opt/boringmax/site/kaisensei`
 - App source on VPS: `/opt/boringmax/kaisensei`
 
+## VPS access
+
+- Hostname: `fine-bits-1.localdomain`
+- Public IP: `89.208.242.44`
+- SSH port: `22`
+- SSH user: `root`
+- OS: `AlmaLinux 9 x86_64`
+
+Use this host for source sync, service restarts, and live verification.
+
 ## What runs where
 
 ### 1) `kaisensei.service`
