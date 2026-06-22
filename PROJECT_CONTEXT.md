@@ -19,56 +19,38 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Not a test-prep product
 - Not the old snapspeak mode structure
 
-## Current product state
+## Current implementation status
 
-- The current codebase still includes the Quick Mode prototype in `prototype/` with a real `api/`
-- Camera mode, loading mode, and lesson mode all exist for Quick Mode
-- Lesson mode currently follows the four-step flow: See, Learn, Build, Use
-- Build and Use use chunk reordering with tolerant checking
-- The AI calling底座已从 feature 逻辑里拆出到 `api/src/shared/ai/`，Quick Mode 继续保留自己的 prompt / normalizer / provider 实现
-- The root `npm run dev` entry still starts both frontend and API for local work, so the browser only needs `http://127.0.0.1:5173/`
-- The frontend has a thin `AppShell`, a shared `CameraEntry`, a Quick entry that can accept an initial captured file, and a Deep scaffold with overview / module shells plus a Deep flow hook and completion screen
-- Quick Mode has already been further split into a lesson container plus quick-owned step, feedback, loading, error, and empty-state files
-- Deep Mode is now being defined as a separate mode, and the codebase is being split so it can grow without touching Quick Mode behavior
-- Deep Mode packs now keep one core expression across baseExample and variations, and the mock / backend alignment work has been applied across Notice, Interpret, and Interact
-- Interact dialogue practice now treats `systemReply` as a bridge sentence and keeps the learned Handle expression for the user's reply, instead of exposing the answer early
-- Notice / Interpret playback is now locked to the example-index-first order: for each example index, run Understand and Focus across all core expressions, then Build and Quick Response across all core expressions
-- Interact playback stays task-pack ordered: within each task pack, Need and Handle are interleaved by example index for Understand / Focus / Build, then Dialogue Practice runs
-- The Deep Mode design facts source is `docs/kaisensei_deep_mode_product_design.md`
-- The Deep Mode implementation boundary source is `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md`
-- The Deep Mode architecture baseline is being refined before feature work lands, so `deep/` should stay isolated from `quick/`
-
-## Current scan notes before the next split
-
-- Deep Mode is not a simple alternate lesson template; it has its own overview page plus Notice, Interpret, Interact, Step In, and completion flow
-- Notice and Interpret reuse the same three-step micro-exercise skeleton, but the content generation rules are different
-- Interact is task-pack based and includes a short dialogue loop, not just static chunk reordering
-- Step In reuses the dialogue flow again, but only with expressions already earned in earlier modules
-- Deep Mode needs its own copy, storage namespace, and course state boundaries so it can later become a standalone project
-- The next structural split should therefore center on mode entry, shell routing, and clear mode-owned feature domains, not on trying to share lesson-level components between Quick and Deep
-- Deep Mode is currently in an architecture-first phase: the flow hook and completion page have been separated, but Notice / Interpret / Interact / Step In business logic is still pending
+- Quick Mode remains the implemented lesson flow in `prototype/` and should stay unchanged unless explicitly requested
+- Deep Mode is now split into its own feature domain with separate overview, Notice, Interpret, Interact, Step In, and completion surfaces
+- Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
+- Deep Mode Notice / Interpret playback is locked to example-index-first ordering
+- Deep Mode Interact playback is locked to task-pack-first ordering
+- Interact dialogue practice now uses a bridge `systemReply` and keeps the learned Handle expression for the user reply
+- Step In dialogue now reads as a continuous in-scene role-play instead of quiz-style turns
+- The recent schema / prompt / normalizer tightening for Understand, Build, and Quick Response chunk counts has been applied and verified
 
 ## Current latest task
 
-- Task: 固化 Deep Mode Notice / Interpret / Interact 的页面播放顺序，并把顺序规则写进设计文档和测试
+- Task: 收紧 Deep Mode Understand / Build / Quick Response chunk 规则到 3-6，并统一 prompt / normalizer / mock
 - Status: 验收通过
 
 ## Architecture or state flow
 
-Current implemented Quick Mode states:
+Current Quick Mode states:
 
 1. Camera Mode
 2. Loading Mode
 3. Lesson Mode
 
-Current implemented lesson steps:
+Current Quick Mode lesson steps:
 
 1. See
 2. Learn
 3. Build
 4. Use
 
-Deep Mode planned states:
+Deep Mode planned flow:
 
 1. Camera entry with mode selection
 2. Loading / generation
@@ -79,75 +61,66 @@ Deep Mode planned states:
 7. Step In
 8. Completion
 
-## Key files
-
-- `docs/kaisensei_PRD.md` - product boundary and Deep Mode V2 confirmation
-- `docs/kaisensei_deep_mode_product_design.md` - detailed Deep Mode product design
-- `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - current Deep Mode implementation spec
-- `docs/superpowers/plans/2026-06-19-kaisensei-deepmode-structure-isolation-plan.md` - next execution plan for the structure split
-- `prototype/src/App.jsx` - current Quick Mode prototype shell
-- `prototype/src/app/AppShell.jsx` - thin shell that routes between camera, Quick Mode, and Deep Mode
-- `prototype/src/app/CameraEntry.jsx` - shared first-screen camera and mode selector
-- `prototype/src/quick/QuickModeApp.jsx` - current Quick Mode entry that can start from a captured file
-- `prototype/src/quick/lesson/` - quick-owned lesson container, step views, and state/effect helpers
-- `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold with overview and module shells
-- `prototype/src/deep/schema/deep-course-schema.js` - Deep Mode mock course data and core-expression-aligned packs
-- `prototype/src/deep/course/useDeepExerciseSequence.js` - Notice / Interpret page sequencing
-- `prototype/src/deep/course/useDeepInteractFlow.js` - Interact / Step In page sequencing
-- `prototype/src/deep/course/deep-flow-utils.js` - Deep Mode flow helpers
-- `prototype/src/deep/course/DeepDialogueFlowPage.jsx` - Interact dialogue timeline and answer layout
-- `api/src/shared/ai/` - shared AI calling base for provider adapters, workspace helpers, and unified errors
-- `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt and rules
-- `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
-- `api/src/quick/services/codex-cli-provider.js` - Quick Mode lesson generation prompt and Codex CLI bridge
-- `api/src/quick/services/lesson-normalizer.js` - Quick Mode API payload validation and normalization
-- `api/src/contracts/lesson.js` - lesson contract shape
-- `docs/handoff/README.md` - short reading index
-- `docs/handoff/CHANGELOG.md` - append-only resume log
-
 ## Verified commands
 
-- `npm run dev` from the repo root starts both local services
-- `node --test test/lesson-jobs-route.test.js test/lesson-jobs.test.js`
-- `npm run build` in `prototype/`
-- `npm --prefix prototype run build`
 - `npm --prefix api test`
-- `node --test prototype/src/deep/course/useDeepExerciseSequence.test.js`
+- `npm --prefix prototype run test:deepmode`
+- `npm --prefix prototype run build`
+- `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 
 ## Runtime notes
 
-- The API runs separately from the Vite prototype and must be restarted to pick up prompt/contract changes
+- The API runs separately from the Vite prototype and must be restarted to pick up backend changes
 - The root `npm run dev` script launches both services together and keeps local requests same-origin through the Vite `/v1` proxy
-- The prototype uses Vite dev server hot reload for UI changes
-- Current local URLs are `http://127.0.0.1:5173/` for the prototype and `http://127.0.0.1:3001/` for the API
+- Local URLs are `http://127.0.0.1:5173/` for the prototype and `http://127.0.0.1:3001/` for the API
+- Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
+
+## Key files
+
+- `docs/kaisensei_deep_mode_product_design.md` - Deep Mode product facts
+- `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - Deep Mode implementation boundary
+- `docs/superpowers/specs/2026-06-22-kaisensei-deepmode-integration-spec.md` - current backend/frontend integration decisions
+- `docs/superpowers/plans/2026-06-22-kaisensei-deepmode-integration-plan.md` - current integration execution plan
+- `prototype/src/App.jsx` - thin app wrapper
+- `prototype/src/app/AppShell.jsx` - mode shell and routing
+- `prototype/src/app/CameraEntry.jsx` - shared entry surface
+- `prototype/src/quick/QuickModeApp.jsx` - Quick Mode entry
+- `prototype/src/quick/lesson/` - Quick Mode lesson container and helpers
+- `prototype/src/deep/DeepModeApp.jsx` - Deep Mode scaffold
+- `prototype/src/deep/schema/deep-course-schema.js` - Deep Mode mock course data
+- `prototype/src/deep/course/useDeepExerciseSequence.js` - Notice / Interpret sequencing
+- `prototype/src/deep/course/useDeepInteractFlow.js` - Interact sequencing
+- `api/src/shared/ai/` - shared AI provider base
+- `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt
+- `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
+- `api/src/contracts/lesson.js` - lesson contract shape
+- `docs/handoff/README.md` - handoff index
+- `docs/handoff/CHANGELOG.md` - append-only resume log
 
 ## Working rules
 
 - Keep the product mobile-first
-- Preserve the current Quick Mode flow while Deep Mode is being added
-- Do not let Deep Mode changes alter existing Quick Mode behavior
-- Keep Deep Mode pack content on one core expression per pack, with baseExample and variations sharing that same value
-- Keep Notice / Interpret ordering example-index-first: for a given example index, sweep Understand and Focus across all core expressions first, then Build and Quick Response across all core expressions
-- Keep Interact ordering task-pack-first, with Need and Handle interleaved by example index for Understand / Focus / Build, then Dialogue Practice
-- Treat Interact `systemReply` as a bridge sentence, not as the learned Handle target
-- Treat Step In as a continuous role-play conversation in the same scene, with the system speaking like one consistent in-scene character instead of a quiz master
-- Use the Deep Mode spec as the source of truth for the new mode
-- Prefer isolated feature boundaries so Deep Mode can become a standalone project later
-- Keep docs compact and source-of-truth oriented
+- Preserve Quick Mode while Deep Mode is being added
+- Keep Deep Mode isolated so it can later become a standalone project
+- Keep one `coreExpression` across each Deep Mode pack's baseExample and variations
+- Keep Notice / Interpret ordering example-index-first
+- Keep Interact ordering task-pack-first
+- Treat Interact `systemReply` as a bridge sentence, not the learned Handle target
+- Treat Step In as a continuous role-play conversation in the same scene
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
 
-- The next work is Deep Mode implementation on top of the isolated structure; Quick Mode should stay untouched unless a cross-mode shell fix is explicitly needed
+- Deep Mode remains the main active area; Quick Mode should only change when a shared shell fix is explicitly needed
 
 ## Main risks and tradeoffs
 
-- Easy to drift back into the old snapspeak mode structure
-- Easy to overcouple Deep Mode with Quick Mode if the entry boundary is not kept thin
-- Deep Mode should not inherit Quick Mode implementation shortcuts that make later extraction harder
-- Lesson content should stay short and practical, or the 1-minute promise will break
+- Deep Mode can drift back into the old snapspeak-style structure if the flow helpers are not kept isolated
+- Shared AI / contract changes can still affect both modes, so prompt and normalizer edits need a quick regression check
+- If chunk-count or content-shape rules are loosened without tests, the UI can silently diverge from the contract again
 
 ## Cross-feature impact
 
-Changes to the shared lesson contract or prompt still affect Quick Mode and any future shared API path. Deep Mode-specific work should stay in its own feature domain and avoid changing Quick Mode unless explicitly required.
+- Shared contract or prompt changes may affect both Quick Mode and Deep Mode
+- Deep Mode schema, sequencing, and normalizer changes should stay in the Deep feature domain unless a shared boundary is intentionally being refactored

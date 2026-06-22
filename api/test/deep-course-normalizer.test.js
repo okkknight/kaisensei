@@ -8,9 +8,9 @@ function makeExample(label) {
     english: `${label} english`,
     chinese: `${label} 中文`,
     understand: {
-      chunks: [`${label} understand A`, `${label} understand B`],
-      distractors: [`${label} understand x`],
-      answer: [`${label} understand A`, `${label} understand B`],
+      chunks: [`${label} 中文词块甲`, `${label} 中文词块乙`, `${label} 中文词块丙`],
+      distractors: [`${label} 中文干扰词`],
+      answer: [`${label} 中文词块甲`, `${label} 中文词块乙`, `${label} 中文词块丙`],
     },
     focus: {
       sentenceWithBlanks: `${label} ____ ____ the desk.`,
@@ -20,15 +20,15 @@ function makeExample(label) {
     },
     build: {
       promptChinese: `${label} build`,
-      chunks: [`${label} build A`, `${label} build B`],
+      chunks: [`${label} build A`, `${label} build B`, `${label} build C`],
       distractors: [`${label} build x`],
-      answer: [`${label} build A`, `${label} build B`],
+      answer: [`${label} build A`, `${label} build B`, `${label} build C`],
     },
     quickResponse: {
       question: `${label} question`,
-      chunks: [`${label} quick`],
+      chunks: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
       distractors: [`${label} quick x`],
-      answer: [`${label} quick`],
+      answer: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
     },
   };
 }
@@ -99,6 +99,45 @@ test("normalizeDeepCoursePayload accepts quick responses on each example", () =>
   assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
   assert.equal(normalized.modules.notice.expressionPacks[0].variations[0].quickResponse.question, "a coffee mug variation question");
   assert.equal(normalized.modules.notice.expressionPacks[1].baseExample.quickResponse.question, "a laptop base question");
+});
+
+test("normalizeDeepCoursePayload rejects base examples that do not visibly contain their core expression", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.notice.expressionPacks[0].baseExample.english = "A mug is on the desk.";
+
+  assert.throws(() => normalizeDeepCoursePayload(payload), /visibly contain its coreExpression/i);
+});
+
+test("normalizeDeepCoursePayload rejects variations that do not visibly contain their core expression", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.interpret.expressionPacks[0].variations[0].english = "The desk feels calm and focused.";
+
+  assert.throws(() => normalizeDeepCoursePayload(payload), /visibly contain its coreExpression/i);
+});
+
+test("normalizeDeepCoursePayload rejects understand chunks that are not Chinese", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.interpret.expressionPacks[0].baseExample.understand.chunks = [
+    "It looks like",
+    "someone is checking",
+    "the project setup",
+  ];
+  payload.modules.interpret.expressionPacks[0].baseExample.understand.distractors = ["a quick break"];
+  payload.modules.interpret.expressionPacks[0].baseExample.understand.answer = [
+    "It looks like",
+    "someone is checking",
+    "the project setup",
+  ];
+
+  assert.throws(() => normalizeDeepCoursePayload(payload), /Expected Chinese chunk/i);
+});
+
+test("normalizeDeepCoursePayload rejects build chunks outside the 3 to 6 range", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.notice.expressionPacks[0].baseExample.build.chunks = ["A coffee mug", "is next to"];
+  payload.modules.notice.expressionPacks[0].baseExample.build.answer = ["A coffee mug", "is next to"];
+
+  assert.throws(() => normalizeDeepCoursePayload(payload), /between 3 and 6 chunks/i);
 });
 
 test("normalizeDeepCoursePayload canonicalizes stepIn sourceModule aliases", () => {

@@ -123,6 +123,7 @@ export function useDeepModeJobLifecycle({
       const created = await createLessonJob({
         image: file,
         level: nextLevel,
+        mode: "deep",
       });
 
       if (requestIdRef.current !== requestId) return;

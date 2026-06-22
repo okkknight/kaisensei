@@ -86,6 +86,15 @@ function normalizeDeepText(text) {
     .trim();
 }
 
+function ensureContainsCoreExpression(text, coreExpression, path) {
+  const normalizedText = normalizeDeepText(text);
+  const normalizedCoreExpression = normalizeDeepText(coreExpression);
+
+  if (!normalizedText.includes(normalizedCoreExpression)) {
+    fail(`Expected ${path} to visibly contain its coreExpression`, { path });
+  }
+}
+
 function joinChunks(chunks) {
   if (!Array.isArray(chunks)) {
     return "";
@@ -125,6 +134,19 @@ function limitArrayLength(values, expectedLength) {
 function countBlanks(sentence) {
   const matches = String(sentence).match(/____/g);
   return matches ? matches.length : 0;
+}
+
+function ensureChunkCountInRange(chunks, path, config = deepCourseDefaultConfig.exercise) {
+  if (!Array.isArray(chunks)) {
+    fail(`Missing or invalid array at ${path}`, { path });
+  }
+
+  const min = config.chunkMinCount ?? 3;
+  const max = config.chunkMaxCount ?? 6;
+
+  if (chunks.length < min || chunks.length > max) {
+    fail(`Expected ${path} to contain between ${min} and ${max} chunks`, { path });
+  }
 }
 
 function normalizeReorderExercise(exercise, path, expectedDistractorCount) {
@@ -189,7 +211,43 @@ function normalizeMaybeReorderExercise(exercise, path, config = deepCourseDefaul
   return normalizeReorderExercise(exercise, path, expectedDistractorCount);
 }
 
-function normalizeBaseExample(baseExample, path, config = deepCourseDefaultConfig.exercise) {
+function containsCjk(text) {
+  return /[\p{Script=Han}]/u.test(String(text || ""));
+}
+
+function ensureChineseChunks(value, path) {
+  const chunks = ensureStringArray(value, path);
+
+  chunks.forEach((chunk, index) => {
+    if (!containsCjk(chunk)) {
+      fail(`Expected Chinese chunk at ${path}[${index}]`, { path });
+    }
+  });
+
+  return chunks;
+}
+
+function normalizeUnderstandExercise(exercise, path, config = deepCourseDefaultConfig.exercise) {
+  const normalized = normalizeReorderExercise(exercise, path, config.understandDistractorCount);
+  ensureChunkCountInRange(normalized.chunks, `${path}.chunks`, config);
+  ensureChunkCountInRange(normalized.answer, `${path}.answer`, config);
+
+  return {
+    ...normalized,
+    chunks: ensureChineseChunks(normalized.chunks, `${path}.chunks`),
+    distractors: ensureChineseChunks(normalized.distractors, `${path}.distractors`),
+    answer: ensureChineseChunks(normalized.answer, `${path}.answer`),
+  };
+}
+
+function normalizeBuildExercise(exercise, path, config = deepCourseDefaultConfig.exercise) {
+  const normalized = normalizeReorderExercise(exercise, path, config.buildDistractorCount);
+  ensureChunkCountInRange(normalized.chunks, `${path}.chunks`, config);
+  ensureChunkCountInRange(normalized.answer, `${path}.answer`, config);
+  return normalized;
+}
+
+function normalizeBaseExample(baseExample, path, coreExpression, config = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(baseExample)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -197,13 +255,15 @@ function normalizeBaseExample(baseExample, path, config = deepCourseDefaultConfi
   const english = ensureString(baseExample.english, `${path}.english`);
   const chinese = ensureString(baseExample.chinese, `${path}.chinese`);
 
+  ensureContainsCoreExpression(english, coreExpression, `${path}.english`);
+
   return {
     ...baseExample,
     english,
     chinese,
-    understand: normalizeMaybeReorderExercise(baseExample.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
+    understand: normalizeUnderstandExercise(baseExample.understand || {}, `${path}.understand`, config),
     focus: normalizeMaybeReorderExercise(baseExample.focus || {}, `${path}.focus`, config),
-    build: normalizeMaybeReorderExercise(baseExample.build || {}, `${path}.build`, config, config.buildDistractorCount),
+    build: normalizeBuildExercise(baseExample.build || {}, `${path}.build`, config),
     quickResponse: normalizeQuickResponse(baseExample.quickResponse || {}, `${path}.quickResponse`, config),
   };
 }
@@ -225,14 +285,16 @@ function normalizeVariation(variation, path, coreExpression, config = deepCourse
     });
   }
 
+  ensureContainsCoreExpression(english, coreExpression, `${path}.english`);
+
   return {
     ...variation,
     coreExpression,
     english,
     chinese,
-    understand: normalizeMaybeReorderExercise(variation.understand || {}, `${path}.understand`, config, config.understandDistractorCount),
+    understand: normalizeUnderstandExercise(variation.understand || {}, `${path}.understand`, config),
     focus: normalizeMaybeReorderExercise(variation.focus || {}, `${path}.focus`, config),
-    build: normalizeMaybeReorderExercise(variation.build || {}, `${path}.build`, config, config.buildDistractorCount),
+    build: normalizeBuildExercise(variation.build || {}, `${path}.build`, config),
     quickResponse: normalizeQuickResponse(variation.quickResponse || {}, `${path}.quickResponse`, config),
   };
 }
@@ -250,6 +312,8 @@ function normalizeQuickResponse(quickResponse, path, config = deepCourseDefaultC
   ensureUnique(chunks, `${path}.chunks`);
   ensureUnique(distractors, `${path}.distractors`);
   ensureAnswerCoverage(answer, chunks, `${path}.answer`);
+  ensureChunkCountInRange(chunks, `${path}.chunks`, config);
+  ensureChunkCountInRange(answer, `${path}.answer`, config);
 
   return {
     ...quickResponse,
@@ -279,7 +343,7 @@ function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.no
   const id = ensureString(pack.id, `${path}.id`);
   const coreExpression = ensureString(pack.coreExpression, `${path}.coreExpression`);
   const meaningChinese = ensureString(pack.meaningChinese, `${path}.meaningChinese`);
-  const baseExample = normalizeBaseExample(pack.baseExample || {}, `${path}.baseExample`, exerciseConfig);
+  const baseExample = normalizeBaseExample(pack.baseExample || {}, `${path}.baseExample`, coreExpression, exerciseConfig);
   const variations = Array.isArray(pack.variations)
     ? pack.variations.map((variation, index) => normalizeVariation(variation, `${path}.variations[${index}]`, coreExpression, exerciseConfig))
     : [];
@@ -324,14 +388,14 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
       ...need,
       coreExpression: needCoreExpression,
       meaningChinese: ensureString(need.meaningChinese, `${path}.need.meaningChinese`),
-      baseExample: normalizeMaybeReorderExercise(need.baseExample || {}, `${path}.need.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
+      baseExample: normalizeBaseExample(need.baseExample || {}, `${path}.need.baseExample`, needCoreExpression, exerciseConfig),
       variations: needVariations.map((variation, index) => normalizeVariation(variation, `${path}.need.variations[${index}]`, needCoreExpression, exerciseConfig)),
     },
     handle: {
       ...handle,
       coreExpression: handleCoreExpression,
       meaningChinese: ensureString(handle.meaningChinese, `${path}.handle.meaningChinese`),
-      baseExample: normalizeMaybeReorderExercise(handle.baseExample || {}, `${path}.handle.baseExample`, exerciseConfig, exerciseConfig.buildDistractorCount),
+      baseExample: normalizeBaseExample(handle.baseExample || {}, `${path}.handle.baseExample`, handleCoreExpression, exerciseConfig),
       variations: handleVariations.map((variation, index) => normalizeVariation(variation, `${path}.handle.variations[${index}]`, handleCoreExpression, exerciseConfig)),
     },
     dialogues: dialogues.map((dialogue, index) => {

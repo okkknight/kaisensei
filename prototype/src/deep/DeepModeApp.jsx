@@ -21,7 +21,7 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
   }
 
   if (flow.phase === "loading") {
-    return <DeepLoadingScreen message={flow.loadingMessage} progress={flow.state.loadingMessageIndex === 0 ? 30 : flow.state.loadingMessageIndex === 1 ? 60 : 90} />;
+    return <DeepLoadingScreen message={flow.loadingMessage} stageIndex={flow.state.loadingMessageIndex} />;
   }
 
   if (!flow.viewModel) {

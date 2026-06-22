@@ -2087,7 +2087,8 @@ img {
 .deep-loading-copy {
   display: grid;
   gap: 10px;
-  justify-items: flex-start;
+  justify-items: center;
+  text-align: center;
 }
 
 .deep-loading-copy p {
@@ -2101,6 +2102,7 @@ img {
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.45;
+  max-width: 20rem;
 }
 
 .deep-loading-copy strong {

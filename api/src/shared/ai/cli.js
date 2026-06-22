@@ -5,7 +5,7 @@ import { AIProviderError } from "./errors.js";
 
 export async function runCliPrompt({
   binary = process.env.CODEX_BINARY || "codex",
-  model = process.env.CODEX_MODEL || "gpt-5.4-mini",
+  model = process.env.CODEX_MODEL || "gpt-5.5",
   cwd,
   imagePath,
   prompt,

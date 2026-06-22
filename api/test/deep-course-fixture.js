@@ -1,8 +1,8 @@
 function makeUnderstandExercise(label) {
   return {
-    chunks: [`${label} A`, `${label} B`],
-    distractors: [`${label} extra`],
-    answer: [`${label} A`, `${label} B`],
+    chunks: [`${label} 中文词块甲`, `${label} 中文词块乙`, `${label} 中文词块丙`],
+    distractors: [`${label} 中文干扰词`],
+    answer: [`${label} 中文词块甲`, `${label} 中文词块乙`, `${label} 中文词块丙`],
   };
 }
 
@@ -18,18 +18,18 @@ function makeFocusExercise(label) {
 function makeBuildExercise(label) {
   return {
     promptChinese: `${label} 的英文怎么说？`,
-    chunks: [`${label} A`, `${label} B`],
+    chunks: [`${label} A`, `${label} B`, `${label} C`],
     distractors: [`${label} extra`],
-    answer: [`${label} A`, `${label} B`],
+    answer: [`${label} A`, `${label} B`, `${label} C`],
   };
 }
 
 function makeQuickResponse(label) {
   return {
     question: `Quick response for ${label}?`,
-    chunks: [`${label} reply A`, `${label} reply B`],
+    chunks: [`${label} reply A`, `${label} reply B`, `${label} reply C`],
     distractors: [`${label} reply extra`],
-    answer: [`${label} reply A`, `${label} reply B`],
+    answer: [`${label} reply A`, `${label} reply B`, `${label} reply C`],
   };
 }
 

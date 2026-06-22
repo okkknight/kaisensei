@@ -4,6 +4,8 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Tightened Deep Mode Understand / Build / Quick Response chunk rules to 3-6, aligned the prompt, normalizer, API fixtures, and prototype mock schema, and verified the result with `npm --prefix api test` and `npm --prefix prototype run test:deepmode`
+
 - Added a Deep Mode integration spec and execution plan that lock the confirmed联调 decisions: backend-only `overview.startPromptChinese`, required `scenePromptChinese` on Interact guide data, canonical Step In `sourceModule` mapping, `pack.coreExpression` as the only highlight source, a nested Deep contract shape, and frontend job polling
 - Hardened the Deep Mode backend contract, prompt, and normalizer so `scenePromptChinese` is required on task packs and Step In source-module aliases normalize to `notice`, `interpret`, `interact_need`, and `interact_handle`
 - Switched the Deep Mode frontend flow from local mock lesson generation to a job-polling lifecycle, and updated the Interact flow to read `scenePromptChinese` while keeping understand highlighting anchored to `coreExpression`

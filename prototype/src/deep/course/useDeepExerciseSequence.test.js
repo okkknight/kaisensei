@@ -10,6 +10,7 @@ function makeExample(label) {
       chunks: [`${label} understand`],
       distractors: [`${label} understand x`],
       answer: [`${label} understand`],
+      highlight: `${label} highlight`,
     },
     focus: {
       sentenceWithBlanks: `${label} ____ ____`,
@@ -65,4 +66,11 @@ test("buildExercisePages orders Notice and Interpret by example index first, the
       "p2-core two variation english-quick-response",
     ]
   );
+});
+
+test("buildExercisePages uses the pack core expression for understand page highlighting", () => {
+  const pages = buildExercisePages([makePack("p1", "core one")], "notice");
+
+  assert.equal(pages[0].englishHighlight, "core one");
+  assert.equal(pages[1].englishHighlight, "core one");
 });

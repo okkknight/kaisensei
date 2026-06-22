@@ -10,6 +10,7 @@ function makeExample(label) {
       chunks: [`${label} understand`],
       distractors: [`${label} understand x`],
       answer: [`${label} understand`],
+      highlight: `${label} highlight`,
     },
     focus: {
       sentenceWithBlanks: `${label} ____ ____`,
@@ -93,4 +94,11 @@ test("buildInteractPages interleaves need and handle by example within each task
       "task-2-dialogue-handle",
     ]
   );
+});
+
+test("buildInteractPages uses the section core expression for understand page highlighting", () => {
+  const pages = buildInteractPages([makeTaskPack("task-1", "task one")]);
+
+  assert.equal(pages[1].englishHighlight, "task one need");
+  assert.equal(pages[2].englishHighlight, "task one handle");
 });

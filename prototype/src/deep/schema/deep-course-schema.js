@@ -111,9 +111,9 @@ export function createDeepCourseLesson(level = "Normal") {
               },
               quickResponse: {
                 question: "What is next to the laptop?",
-                chunks: ["A coffee mug"],
+                chunks: ["A coffee mug", "is next to", "the laptop"],
                 distractors: ["A notebook"],
-                answer: ["A coffee mug"],
+                answer: ["A coffee mug", "is next to", "the laptop"],
               },
             },
             variations: [
@@ -140,9 +140,9 @@ export function createDeepCourseLesson(level = "Normal") {
                 },
                 quickResponse: {
                   question: "What sits beside the laptop?",
-                  chunks: ["A coffee mug"],
+                  chunks: ["A coffee mug", "sits beside", "the laptop"],
                   distractors: ["A notebook"],
-                  answer: ["A coffee mug"],
+                  answer: ["A coffee mug", "sits beside", "the laptop"],
                 },
               }),
             ],
@@ -174,9 +174,9 @@ export function createDeepCourseLesson(level = "Normal") {
               },
               quickResponse: {
                 question: "What is open on the desk?",
-                chunks: ["A laptop"],
+                chunks: ["A laptop", "is open", "on the desk"],
                 distractors: ["A plant"],
-                answer: ["A laptop"],
+                answer: ["A laptop", "is open", "on the desk"],
               },
             },
             variations: [
@@ -197,15 +197,15 @@ export function createDeepCourseLesson(level = "Normal") {
                 },
                 build: {
                   promptChinese: "把以下词组排列成正确的句子",
-                  chunks: ["The laptop", "is ready for work"],
+                  chunks: ["The laptop", "is ready for", "work"],
                   distractors: ["by the window"],
-                  answer: ["The laptop", "is ready for work"],
+                  answer: ["The laptop", "is ready for", "work"],
                 },
                 quickResponse: {
                   question: "What is ready for work?",
-                  chunks: ["A laptop"],
+                  chunks: ["The laptop", "is ready for", "work"],
                   distractors: ["A plant"],
-                  answer: ["A laptop"],
+                  answer: ["The laptop", "is ready for", "work"],
                 },
               }),
             ],
@@ -224,10 +224,10 @@ export function createDeepCourseLesson(level = "Normal") {
               english: "It looks like a quiet work setup.",
               chinese: "看起来像一个安静的工作环境。",
               understand: createReorderExercise({
-                chunks: ["这看起来像", "一个安静的工作环境"],
+                chunks: ["这看起来像", "一个", "安静的工作环境"],
                 distractors: ["一个热闹派对"],
                 highlight: "quiet work setup",
-                answer: ["这看起来像", "一个安静的工作环境"],
+                answer: ["这看起来像", "一个", "安静的工作环境"],
               }),
               focus: {
                 sentenceWithBlanks: "It looks like a ____ work ____.",
@@ -237,15 +237,15 @@ export function createDeepCourseLesson(level = "Normal") {
               },
               build: {
                 promptChinese: "把以下词组排列成正确的句子",
-                chunks: ["It looks like", "a quiet work setup"],
+                chunks: ["It looks like", "a quiet work", "setup"],
                 distractors: ["a busy party"],
-                answer: ["It looks like", "a quiet work setup"],
+                answer: ["It looks like", "a quiet work", "setup"],
               },
               quickResponse: {
                 question: "How does the space feel?",
-                chunks: ["It feels calm and focused."],
+                chunks: ["It feels", "calm", "and focused"],
                 distractors: ["It feels loud and crowded."],
-                answer: ["It feels calm and focused."],
+                answer: ["It feels", "calm", "and focused"],
               },
             },
             variations: [
@@ -253,10 +253,10 @@ export function createDeepCourseLesson(level = "Normal") {
                 english: "The desk feels like a quiet work setup.",
                 chinese: "这张桌子感觉像一个安静的工作环境。",
                 understand: createReorderExercise({
-                  chunks: ["这张桌子", "感觉像", "一个安静的工作环境"],
+                  chunks: ["这张桌子", "感觉像", "一个", "安静的工作环境"],
                   distractors: ["一趟短途散步"],
                   highlight: "a quiet work setup",
-                  answer: ["这张桌子", "感觉像", "一个安静的工作环境"],
+                  answer: ["这张桌子", "感觉像", "一个", "安静的工作环境"],
                 }),
                 focus: {
                   sentenceWithBlanks: "The desk feels like a ____ work ____.",
@@ -272,9 +272,9 @@ export function createDeepCourseLesson(level = "Normal") {
                 },
                 quickResponse: {
                   question: "How does the desk feel?",
-                  chunks: ["It feels calm and focused."],
+                  chunks: ["It feels", "calm", "and focused"],
                   distractors: ["It feels loud and crowded."],
-                  answer: ["It feels calm and focused."],
+                  answer: ["It feels", "calm", "and focused"],
                 },
               }),
             ],
@@ -300,15 +300,15 @@ export function createDeepCourseLesson(level = "Normal") {
               },
               build: {
                 promptChinese: "把以下词组排列成正确的句子",
-                chunks: ["The laptop", "seems ready for work"],
+                chunks: ["The laptop", "seems ready for", "work"],
                 distractors: ["needs a nap"],
-                answer: ["The laptop", "seems ready for work"],
+                answer: ["The laptop", "seems ready for", "work"],
               },
               quickResponse: {
                 question: "What seems ready for work?",
-                chunks: ["The laptop"],
+                chunks: ["The laptop", "is", "ready for work"],
                 distractors: ["The plant"],
-                answer: ["The laptop"],
+                answer: ["The laptop", "is", "ready for work"],
               },
             },
             variations: [
@@ -316,10 +316,10 @@ export function createDeepCourseLesson(level = "Normal") {
                 english: "Someone seems ready for work here.",
                 chinese: "这里看起来有人已经准备好工作了。",
                 understand: createReorderExercise({
-                  chunks: ["这里看起来有人", "已经准备好工作了"],
+                  chunks: ["这里看起来", "有人", "已经准备好工作了"],
                   distractors: ["出去吃午饭"],
                   highlight: "ready for work",
-                  answer: ["这里看起来有人", "已经准备好工作了"],
+                  answer: ["这里看起来", "有人", "已经准备好工作了"],
                 }),
                 focus: {
                   sentenceWithBlanks: "Someone seems ready for ____ here.",
@@ -335,9 +335,9 @@ export function createDeepCourseLesson(level = "Normal") {
                 },
                 quickResponse: {
                   question: "Who seems ready for work here?",
-                  chunks: ["Someone"],
+                  chunks: ["Someone", "is", "ready for work"],
                   distractors: ["Nobody"],
-                  answer: ["Someone"],
+                  answer: ["Someone", "is", "ready for work"],
                 },
               }),
             ],
@@ -371,13 +371,13 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["quiet"],
                   answer: ["short", "break"],
                 },
-                build: {
-                  promptChinese: "把以下词组排列成正确的句子",
-                  chunks: ["Can I take", "a short break"],
-                  distractors: ["the keyboard"],
-                  answer: ["Can I take", "a short break"],
-                },
+              build: {
+                promptChinese: "把以下词组排列成正确的句子",
+                chunks: ["Can I take", "a short", "break"],
+                distractors: ["the keyboard"],
+                answer: ["Can I take", "a short", "break"],
               },
+            },
               variations: [
                 createVariation({
               english: "Could I take a short break now?",
@@ -396,9 +396,9 @@ export function createDeepCourseLesson(level = "Normal") {
                   },
                   build: {
                     promptChinese: "把以下词组排列成正确的句子",
-                    chunks: ["Could I take", "a short break now"],
+                    chunks: ["Could I take", "a short break", "now"],
                     distractors: ["for a meal"],
-                    answer: ["Could I take", "a short break now"],
+                    answer: ["Could I take", "a short break", "now"],
                   },
                 }),
               ],
@@ -410,10 +410,10 @@ export function createDeepCourseLesson(level = "Normal") {
               english: "Sure, go ahead.",
               chinese: "当然，可以。",
               understand: createReorderExercise({
-                  chunks: ["当然", "可以"],
+                  chunks: ["当然", "可以", "啊"],
                   distractors: ["等等"],
                   highlight: "go ahead",
-                  answer: ["当然", "可以"],
+                  answer: ["当然", "可以", "啊"],
               }),
                 focus: {
                   sentenceWithBlanks: "Sure, ____ ____.",
@@ -421,22 +421,22 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["back"],
                   answer: ["go", "ahead"],
                 },
-                build: {
-                  promptChinese: "把以下词组排列成正确的句子",
-                  chunks: ["Sure", "go ahead"],
-                  distractors: ["wait here"],
-                  answer: ["Sure", "go ahead"],
-                },
+              build: {
+                promptChinese: "把以下词组排列成正确的句子",
+                chunks: ["Sure", "go", "ahead"],
+                distractors: ["wait here"],
+                answer: ["Sure", "go", "ahead"],
               },
+            },
               variations: [
                 createVariation({
               english: "Of course, go ahead.",
               chinese: "当然，可以。",
               understand: createReorderExercise({
-                  chunks: ["当然", "可以"],
+                  chunks: ["当然", "可以", "啊"],
                   distractors: ["现在就赶快"],
                   highlight: "go ahead",
-                  answer: ["当然", "可以"],
+                  answer: ["当然", "可以", "啊"],
               }),
                   focus: {
                     sentenceWithBlanks: "Of course, ____ ____.",
@@ -446,9 +446,9 @@ export function createDeepCourseLesson(level = "Normal") {
                   },
                   build: {
                     promptChinese: "把以下词组排列成正确的句子",
-                    chunks: ["Of course", "go ahead"],
+                    chunks: ["Of course", "go", "ahead"],
                     distractors: ["rush now"],
-                    answer: ["Of course", "go ahead"],
+                    answer: ["Of course", "go", "ahead"],
                   },
                 }),
               ],
@@ -493,13 +493,13 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["music"],
                   answer: ["coffee"],
                 },
-                build: {
-                  promptChinese: "把以下词组排列成正确的句子",
-                  chunks: ["Do you want", "some coffee"],
-                  distractors: ["a notebook"],
-                  answer: ["Do you want", "some coffee"],
-                },
+              build: {
+                promptChinese: "把以下词组排列成正确的句子",
+                chunks: ["Do you want", "some", "coffee"],
+                distractors: ["a notebook"],
+                answer: ["Do you want", "some", "coffee"],
               },
+            },
               variations: [
                 createVariation({
               english: "Would you like some coffee?",
@@ -518,9 +518,9 @@ export function createDeepCourseLesson(level = "Normal") {
                   },
                   build: {
                     promptChinese: "把以下词组排列成正确的句子",
-                    chunks: ["Would you like", "some coffee"],
+                    chunks: ["Would you like", "some", "coffee"],
                     distractors: ["a cup of tea"],
-                    answer: ["Would you like", "some coffee"],
+                    answer: ["Would you like", "some", "coffee"],
                   },
                 }),
               ],
@@ -532,10 +532,10 @@ export function createDeepCourseLesson(level = "Normal") {
               english: "Yes, please.",
               chinese: "好的，请。",
               understand: createReorderExercise({
-                    chunks: ["好的", "请"],
-                    distractors: ["不用了"],
-                    highlight: "please",
-                    answer: ["好的", "请"],
+                  chunks: ["好的", "请", "吧"],
+                  distractors: ["不用了"],
+                  highlight: "please",
+                  answer: ["好的", "请", "吧"],
               }),
                 focus: {
                   sentenceWithBlanks: "Yes, ____.",
@@ -543,22 +543,22 @@ export function createDeepCourseLesson(level = "Normal") {
                   distractors: ["thanks"],
                   answer: ["please"],
                 },
-                build: {
-                  promptChinese: "把以下词组排列成正确的句子",
-                  chunks: ["Yes", "please"],
-                  distractors: ["no thanks"],
-                  answer: ["Yes", "please"],
-                },
+              build: {
+                promptChinese: "把以下词组排列成正确的句子",
+                chunks: ["Yes", "please", "now"],
+                distractors: ["no thanks"],
+                answer: ["Yes", "please", "now"],
               },
+            },
               variations: [
                 createVariation({
               english: "Sure, please.",
               chinese: "好的，请。",
               understand: createReorderExercise({
-                    chunks: ["好的", "请"],
-                    distractors: ["今天不行"],
-                    highlight: "please",
-                    answer: ["好的", "请"],
+                  chunks: ["好的", "请", "吧"],
+                  distractors: ["今天不行"],
+                  highlight: "please",
+                  answer: ["好的", "请", "吧"],
               }),
                   focus: {
                     sentenceWithBlanks: "Sure, ____.",
@@ -568,9 +568,9 @@ export function createDeepCourseLesson(level = "Normal") {
                   },
                   build: {
                     promptChinese: "把以下词组排列成正确的句子",
-                    chunks: ["Sure", "please"],
+                    chunks: ["Sure", "please", "thanks"],
                     distractors: ["not today"],
-                    answer: ["Sure", "please"],
+                    answer: ["Sure", "please", "thanks"],
                   },
                 }),
               ],

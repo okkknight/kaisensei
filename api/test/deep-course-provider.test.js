@@ -9,9 +9,9 @@ function makeExample(label) {
     english: `${label} english`,
     chinese: `${label} 中文`,
     understand: {
-      chunks: [`${label} understand A`, `${label} understand B`],
-      distractors: [`${label} understand x`],
-      answer: [`${label} understand A`, `${label} understand B`],
+      chunks: [`${label} 理解词块甲`, `${label} 理解词块乙`, `${label} 理解词块丙`],
+      distractors: [`${label} 理解干扰词`],
+      answer: [`${label} 理解词块甲`, `${label} 理解词块乙`, `${label} 理解词块丙`],
     },
     focus: {
       sentenceWithBlanks: `${label} ____ ____ the desk.`,
@@ -21,15 +21,15 @@ function makeExample(label) {
     },
     build: {
       promptChinese: `${label} build`,
-      chunks: [`${label} build A`, `${label} build B`],
+      chunks: [`${label} build A`, `${label} build B`, `${label} build C`],
       distractors: [`${label} build x`],
-      answer: [`${label} build A`, `${label} build B`],
+      answer: [`${label} build A`, `${label} build B`, `${label} build C`],
     },
     quickResponse: {
       question: `${label} question`,
-      chunks: [`${label} quick`],
+      chunks: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
       distractors: [`${label} quick x`],
-      answer: [`${label} quick`],
+      answer: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
     },
   };
 }
@@ -88,8 +88,14 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /interact_handle/);
   assert.match(prompts[0], /systemReply inside each dialogue must be a bridge sentence/);
   assert.match(prompts[0], /continuous role-play in the same scene/);
+  assert.match(prompts[0], /Every baseExample\.english and every variation\.english must visibly contain the exact coreExpression/i);
+  assert.match(prompts[0], /Understand exercises must use Chinese chunks, Chinese distractors, and Chinese answers/i);
+  assert.match(prompts[0], /Understand chunks must be natural Chinese phrases and contain 3 to 6 chunks/i);
+  assert.match(prompts[0], /Build chunks and Quick Response chunks must be natural English phrases and contain 3 to 6 chunks/i);
+  assert.match(prompts[0], /Never use English chunks in Understand/i);
   assert.match(prompts[0], /REQUIRED INNER SHAPES:/);
   assert.match(prompts[0], /Quick Response attached to each baseExample and variation/);
+  assert.match(prompts[0], /UNDERSTAND EXAMPLE:/);
   assert.match(prompts[0], /"quickResponse": \{/);
   assert.equal(course.mode, "deep");
   assert.equal(course.level, "normal");

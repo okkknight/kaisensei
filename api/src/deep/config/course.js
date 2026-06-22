@@ -27,6 +27,8 @@ export const deepCourseDefaultConfig = {
     handleExpressionCount: 1,
   },
   exercise: {
+    chunkMinCount: 3,
+    chunkMaxCount: 6,
     understandDistractorCount: 1,
     focusBlankCount: 2,
     focusDistractorCount: 1,
