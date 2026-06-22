@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Brought Quick Mode's Normal / Advanced tuning into the Deep prompt so Normal stays clearer and more direct while Advanced stays more polished but still practical, and added a regression test for the new level-specific prompt wording
+- Re-verified the API suite after the Deep prompt level tuning update with `npm --prefix api test`, synced the updated API source to the VPS, and restarted `kaisensei.service`
+
 - Built the mobile lesson footer fix, synced `prototype/dist/` to the VPS, restarted the live services, and verified the deployed site serves the new mobile footer CSS
 - Made the lesson footer float above the viewport on small screens so long Quick Mode and Deep Mode pages keep their bottom action buttons reachable, and added extra bottom padding to lesson content to avoid overlap
 - Updated the handoff context to treat the mobile footer fix as the current task and the global lesson-footer behavior as a cross-feature impact

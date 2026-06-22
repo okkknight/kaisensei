@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createDeepCodexCliProvider } from "../src/deep/services/deep-codex-cli-provider.js";
 import { createProviderRegistry } from "../src/services/provider-registry.js";
+import { buildDeepCoursePrompt } from "../src/deep/services/course-prompt.js";
 import { buildValidDeepCoursePayload } from "./deep-course-fixture.js";
 
 function makeExample(label) {
@@ -105,7 +106,7 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /scenePromptChinese/);
   assert.match(prompts[0], /interact_need/);
   assert.match(prompts[0], /interact_handle/);
-  assert.match(prompts[0], /systemReply inside each dialogue must be a bridge sentence/);
+  assert.match(prompts[0], /systemReply inside each dialogue must be one short natural line of dialogue from the other person in the scene\./);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);
   assert.match(prompts[0], /Build and Quick Response chunks are English phrases only\./i);
@@ -140,4 +141,19 @@ test("provider registry creates a deep provider alongside the quick provider", (
       process.env.LESSON_PROVIDER = originalProvider;
     }
   }
+});
+
+test("deep prompt uses different level tuning for normal and advanced lessons", () => {
+  const normalPrompt = buildDeepCoursePrompt({ level: "Normal" });
+  const advancedPrompt = buildDeepCoursePrompt({ level: "Advanced" });
+
+  assert.match(normalPrompt, /LEVEL TUNING:/);
+  assert.match(normalPrompt, /Normal tone:/);
+  assert.match(normalPrompt, /clearest, most direct wording for the scene/i);
+  assert.doesNotMatch(normalPrompt, /Advanced tone:/);
+
+  assert.match(advancedPrompt, /LEVEL TUNING:/);
+  assert.match(advancedPrompt, /Advanced tone:/);
+  assert.match(advancedPrompt, /more polished, natural expression/i);
+  assert.doesNotMatch(advancedPrompt, /Normal tone:/);
 });

@@ -16,7 +16,7 @@ Notes:
 - Keep `PROJECT_CONTEXT.md` authoritative and concise
 - Keep `CHANGELOG.md` append-only
 - Deep Mode is the active focus; Quick Mode should remain stable unless a shared boundary is being changed on purpose
-- The latest verified UI change is the mobile lesson footer fix: bottom action bars now float on small screens so long lesson pages still leave the next-step button reachable
-- The latest verified change is the Deep Mode prompt rebuild: the generator is framed as a senior English teacher, `coreExpression` is treated as a learnable phrase or collocation, different packs are asked to teach different angles from the same photo, and the JSON structure stays unchanged
+- The latest verified change is the Deep Mode level tuning update: Normal now asks for clearer, simpler, more direct phrasing, while Advanced asks for a more polished but still practical expression style
+- The Deep Mode prompt also keeps the senior-English-teacher framing, `coreExpression` as a learnable phrase or collocation, and same-scene pack differentiation
 - The Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still enforces structure and answer coverage
 - If a future task touches the shared AI or lesson contract boundary, verify both Quick Mode and Deep Mode

@@ -30,6 +30,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Step In dialogue now reads as a continuous in-scene role-play instead of quiz-style turns
 - The Deep Mode generator prompt has been rebuilt around a senior-English-teacher role, with `coreExpression` defined as a learnable high-frequency phrase, collocation, or practical expression rather than a sentence
 - Deep Mode generation now asks the model to learn from one photo through different expression angles on the same scene, instead of slicing one template across every pack
+- Deep Mode now mirrors Quick Mode's Normal / Advanced tuning, with Normal pushing for clearer and simpler phrasing and Advanced pushing for a more polished but still practical expression style
 - Deep Mode Interact still uses the current configured shape of 2 task packs, each with Need and Handle, and that count is treated as configurable rather than a hard design limit
 - Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still checks structure, answer coverage, and required arrays
 - Deep Mode normalizer and JSON structure were not changed in this prompt pass, so the contract remains stable while generation quality improves
@@ -37,7 +38,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Make the lesson footer fixed on mobile across lesson screens so long completion and exercise pages keep the action buttons reachable
+- Task: Bring Quick Mode's Normal / Advanced tuning into the Deep prompt so the two levels have explicit but lightweight generation differences
 - Status: 验收通过
 
 ## Architecture or state flow
@@ -107,8 +108,6 @@ Deep Mode planned flow:
 - `api/src/deep/services/course-prompt.js` - Deep Mode generation prompt
 - `api/src/deep/services/course-normalizer.js` - Deep Mode payload validation and normalization
 - `api/src/contracts/lesson.js` - lesson contract shape
-- `prototype/src/deep/course/DeepCourseShell.jsx` - shared Deep Mode shell with footer slot
-- `prototype/src/styles.css` - global lesson and mobile footer layout
 - `docs/handoff/README.md` - handoff index
 - `docs/handoff/CHANGELOG.md` - append-only resume log
 
@@ -125,7 +124,7 @@ Deep Mode planned flow:
 - Keep Deep Mode prompt and its regression assertions in sync whenever generation rules change
 - Keep generation-quality changes separate from structure or schema changes unless the user explicitly asks for both
 - For backend prompt edits, verify the API test suite and then sync the API source to the VPS
-- For mobile footer layout changes, rebuild the prototype, sync `prototype/dist/` to the VPS, and verify the live page on a phone-sized viewport
+- For Deep Mode level tuning, keep Normal and Advanced distinct in the prompt itself and verify the prompt/test pair after edits
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
@@ -145,4 +144,4 @@ Deep Mode planned flow:
 - Shared contract or prompt changes may affect both Quick Mode and Deep Mode
 - Deep Mode schema, sequencing, and normalizer changes should stay in the Deep feature domain unless a shared boundary is intentionally being refactored
 - This prompt rebuild only changes Deep Mode generation quality, but shared AI tracing and contract boundaries still deserve a quick regression check whenever the prompt changes
-- The global mobile footer behavior affects Quick Mode, Deep Mode, error screens, and any other lesson screen that uses `lesson-footer`
+- Deep Mode level tuning affects only generation style, not the schema or the lesson-step structure

@@ -1,5 +1,28 @@
 import { deepCourseDefaultConfig, deepCourseDefaultFixedCopy } from "../config/course.js";
 
+function buildLevelRules(level) {
+  const normalizedLevel = String(level || "Normal").toLowerCase();
+
+  if (normalizedLevel === "advanced") {
+    return [
+      "Advanced tone:",
+      "- Aim for a more polished, natural expression that still feels immediately useful in everyday life.",
+      "- Use higher-level but common vocabulary and collocations, especially wording that a learner could realistically reuse in real conversation.",
+      "- Keep every idea grounded in the photo, but let the sentence feel a little more mature, smoother, or more expressive than Normal.",
+      "- A little extra detail is fine if it sounds natural, but do not make the lesson academic, literary, or essay-like.",
+      "- The goal is a clear upgrade in naturalness and usefulness, not rare vocabulary for its own sake.",
+    ];
+  }
+
+  return [
+    "Normal tone:",
+    "- Aim for the clearest, most direct wording for the scene.",
+    "- Keep the sentence short, simple, and easy to say out loud.",
+    "- Prefer everyday vocabulary and the most obvious reusable expression.",
+    "- If there is a choice, choose the more familiar and practical phrasing.",
+  ];
+}
+
 export function buildDeepCoursePrompt({
   level,
   repairNotes,
@@ -21,6 +44,9 @@ export function buildDeepCoursePrompt({
     "- Teach English from the photo, not a caption of the photo.",
     "- Use the scene as real-life context and choose expressions that are worth learning, reusable, and natural in speech.",
     "- Think like a teacher deciding what the learner should actually remember and reuse later.",
+    "",
+    "LEVEL TUNING:",
+    ...buildLevelRules(normalizedLevel),
     "",
     "WHAT GOOD OUTPUT LOOKS LIKE:",
     "- Each module should choose a small set of distinct teachable expressions from the same scene.",
