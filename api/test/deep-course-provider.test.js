@@ -40,7 +40,7 @@ function makeExpressionPack(id, coreExpression) {
     coreExpression,
     meaningChinese: `${coreExpression} 的中文意思`,
     baseExample: makeExample(`${coreExpression} base`),
-    variations: [makeExample(`${coreExpression} variation`)],
+    variations: [],
   };
 }
 
@@ -50,10 +50,12 @@ function buildExampleLevelQuickResponsePayload() {
   payload.modules.notice.expressionPacks = [
     makeExpressionPack("notice-1", "a coffee mug"),
     makeExpressionPack("notice-2", "a laptop"),
+    makeExpressionPack("notice-3", "on the desk"),
   ];
   payload.modules.interpret.expressionPacks = [
     makeExpressionPack("interpret-1", "a quiet work setup"),
     makeExpressionPack("interpret-2", "ready for work"),
+    makeExpressionPack("interpret-3", "feels calm"),
   ];
 
   return payload;
@@ -80,8 +82,12 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /You are the Deep Mode course generator for kaisensei/);
   assert.match(prompts[0], /COURSE CONFIG:/);
   assert.match(prompts[0], /"overviewKeywordCount": 3/);
-  assert.match(prompts[0], /Generate exactly 2 Notice Expression Packs\./);
+  assert.match(prompts[0], /Generate exactly 3 Notice Expression Packs\./);
   assert.match(prompts[0], /Generate exactly 2 Task Packs\./);
+  assert.match(prompts[0], /Generate exactly 0 variations per Notice Expression Pack\./);
+  assert.match(prompts[0], /Generate exactly 0 variations per Interpret Expression Pack\./);
+  assert.match(prompts[0], /Generate exactly 0 Need variations per Task Pack\./);
+  assert.match(prompts[0], /Generate exactly 0 Handle variations per Task Pack\./);
   assert.match(prompts[0], /Use the fixed Chinese start prompt: 点击开始这次学习之旅\./);
   assert.match(prompts[0], /scenePromptChinese/);
   assert.match(prompts[0], /interact_need/);
@@ -102,7 +108,8 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.equal(course.mode, "deep");
   assert.equal(course.level, "normal");
   assert.equal(course.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
-  assert.equal(course.modules.interpret.expressionPacks[1].variations[0].quickResponse.question, "ready for work variation question");
+  assert.equal(course.modules.notice.expressionPacks[2].baseExample.quickResponse.question, "on the desk base question");
+  assert.equal(course.modules.interpret.expressionPacks[1].baseExample.quickResponse.question, "ready for work base question");
   assert.equal(course.modules.stepIn.dialogue.turns.length, 8);
 });
 

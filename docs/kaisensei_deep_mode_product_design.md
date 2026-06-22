@@ -879,19 +879,19 @@ Notice | Interpret | Interact | Step In
   "imageContext": "<image or image description>",
   "config": {
     "notice": {
-      "coreExpressionCount": 2,
-      "variationsPerExpression": 1,
+      "coreExpressionCount": 3,
+      "variationsPerExpression": 0,
       "quickResponsePerExample": 1
     },
     "interpret": {
-      "coreExpressionCount": 2,
-      "variationsPerExpression": 1,
+      "coreExpressionCount": 3,
+      "variationsPerExpression": 0,
       "quickResponsePerExample": 1
     },
     "interact": {
       "taskPackCount": 2,
-      "variationsPerNeedExpression": 1,
-      "variationsPerHandleExpression": 1,
+      "variationsPerNeedExpression": 0,
+      "variationsPerHandleExpression": 0,
       "dialoguesPerTaskPack": 1
     },
     "stepIn": {

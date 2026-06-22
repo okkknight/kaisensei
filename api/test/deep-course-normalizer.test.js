@@ -39,7 +39,7 @@ function makeExpressionPack(id, coreExpression) {
     coreExpression,
     meaningChinese: `${coreExpression} 的中文意思`,
     baseExample: makeExample(`${coreExpression} base`),
-    variations: [makeExample(`${coreExpression} variation`)],
+    variations: [],
   };
 }
 
@@ -49,11 +49,13 @@ function buildExampleLevelQuickResponsePayload() {
   payload.modules.notice.expressionPacks = [
     makeExpressionPack("notice-1", "a coffee mug"),
     makeExpressionPack("notice-2", "a laptop"),
+    makeExpressionPack("notice-3", "on the desk"),
   ];
 
   payload.modules.interpret.expressionPacks = [
     makeExpressionPack("interpret-1", "a quiet work setup"),
     makeExpressionPack("interpret-2", "ready for work"),
+    makeExpressionPack("interpret-3", "feels calm"),
   ];
 
   return payload;
@@ -66,8 +68,8 @@ test("normalizeDeepCoursePayload accepts the canonical deep course shape", () =>
   assert.equal(normalized.overview.startPromptChinese, "点击开始这次学习之旅");
   assert.equal(normalized.overview.keywords.length, 3);
   assert.equal(normalized.modules.interact.taskPacks[0].scenePromptChinese, "task one 场景中文");
-  assert.equal(normalized.modules.notice.expressionPacks.length, 2);
-  assert.equal(normalized.modules.interpret.expressionPacks.length, 2);
+  assert.equal(normalized.modules.notice.expressionPacks.length, 3);
+  assert.equal(normalized.modules.interpret.expressionPacks.length, 3);
   assert.equal(normalized.modules.interact.taskPacks.length, 2);
   assert.equal(normalized.modules.stepIn.dialogue.turns.length, 8);
 });
@@ -97,8 +99,8 @@ test("normalizeDeepCoursePayload accepts quick responses on each example", () =>
   const normalized = normalizeDeepCoursePayload(buildExampleLevelQuickResponsePayload());
 
   assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
-  assert.equal(normalized.modules.notice.expressionPacks[0].variations[0].quickResponse.question, "a coffee mug variation question");
   assert.equal(normalized.modules.notice.expressionPacks[1].baseExample.quickResponse.question, "a laptop base question");
+  assert.equal(normalized.modules.notice.expressionPacks[2].baseExample.quickResponse.question, "on the desk base question");
 });
 
 test("normalizeDeepCoursePayload rejects base examples that do not visibly contain their core expression", () => {
@@ -110,6 +112,7 @@ test("normalizeDeepCoursePayload rejects base examples that do not visibly conta
 
 test("normalizeDeepCoursePayload rejects variations that do not visibly contain their core expression", () => {
   const payload = buildValidDeepCoursePayload();
+  payload.modules.interpret.expressionPacks[0].variations = [makeExample("interpret bad variation")];
   payload.modules.interpret.expressionPacks[0].variations[0].english = "The desk feels calm and focused.";
 
   assert.throws(() => normalizeDeepCoursePayload(payload), /visibly contain its coreExpression/i);

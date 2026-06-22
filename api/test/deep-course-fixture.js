@@ -50,7 +50,7 @@ function makeExpressionPack(id, coreExpression) {
     coreExpression,
     meaningChinese: `${coreExpression} 的中文意思`,
     baseExample: makeBaseExample(coreExpression),
-    variations: [makeBaseExample(`${coreExpression} variation`)],
+    variations: [],
   };
 }
 
@@ -82,13 +82,13 @@ function makeTaskPack(id, label) {
       coreExpression: `${label} need`,
       meaningChinese: `${label} 需求`,
       baseExample: makeBaseExample(`${label} need`),
-      variations: [makeBaseExample(`${label} need variation`)],
+      variations: [],
     },
     handle: {
       coreExpression: `${label} handle`,
       meaningChinese: `${label} 应对`,
       baseExample: makeBaseExample(`${label} handle`),
-      variations: [makeBaseExample(`${label} handle variation`)],
+      variations: [],
     },
     dialogues: [
       {
@@ -117,6 +117,7 @@ export function buildValidDeepCoursePayload() {
         expressionPacks: [
           makeExpressionPack("notice-1", "next to"),
           makeExpressionPack("notice-2", "on the desk"),
+          makeExpressionPack("notice-3", "near the laptop"),
         ],
       },
       interpret: {
@@ -125,6 +126,7 @@ export function buildValidDeepCoursePayload() {
         expressionPacks: [
           makeExpressionPack("interpret-1", "looks like work"),
           makeExpressionPack("interpret-2", "feels calm"),
+          makeExpressionPack("interpret-3", "ready for work"),
         ],
       },
       interact: {
