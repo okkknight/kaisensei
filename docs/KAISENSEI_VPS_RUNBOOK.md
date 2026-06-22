@@ -30,8 +30,8 @@ Current service settings:
 - `ExecStart=/usr/bin/node src/server.js`
 - `PORT=3001`
 - `CODEX_BINARY=/usr/bin/codex`
-- `CODEX_MODEL=gpt-5.4-mini`
-- `LESSON_PROVIDER=codex` or `gemini`
+- `CODEX_MODEL=gpt-5.5`
+- `LESSON_PROVIDER=codex`
 - `GEMINI_MODEL=gemini-2.5-flash`
 - `HOME=/var/lib/shipnow`
 - `CODEX_HOME=/var/lib/shipnow/.codex`
