@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-22
 
+- Refreshed the Deep Mode generation prompt so the model acts as an English teaching system, core expressions stay high-frequency and practical, same-module packs stay clearly differentiated, and chunk guidance is specific without being overly template-driven
+- Removed the extra Deep Mode template-prefix constraint from the prompt and kept the regression assertions aligned with the new quality rules
+- Verified the prompt refresh with `node --test api/test/deep-course-provider.test.js`, then synced the updated API source to the VPS and restarted `kaisensei.service`
+
 - Replaced the Deep Mode chunk-count hard gate with lighter prompt guidance for Understand chunk cuts, steering the model toward simple Chinese sentence parts and away from meaningless碎片词块 such as 的 / 了 / 什么
 - Relaxed the Deep Mode normalizer so Understand / Build / Quick Response no longer fail only because chunk counts fall outside a fixed range, while keeping structural and answer-coverage checks intact
 - Verified the prompt/normalizer refresh with `npm --prefix api test`, then synced the updated API files to the VPS and restarted `kaisensei.service`

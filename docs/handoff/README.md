@@ -16,6 +16,6 @@ Notes:
 - Keep `PROJECT_CONTEXT.md` authoritative and concise
 - Keep `CHANGELOG.md` append-only
 - Deep Mode is the active focus; Quick Mode should remain stable unless a shared boundary is being changed on purpose
-- The latest verified change is the light Deep Mode Understand chunk guidance update: chunk cuts should follow simple Chinese sentence parts, avoid碎片词块 like 的 / 了 / 什么, and stop trying to satisfy chunk counts with filler
+- The latest verified change is the Deep Mode prompt quality refresh: the generator is framed as an English teaching model, core expressions must be high-frequency and practical, packs must stay clearly differentiated, and chunk guidance stays specific without becoming overly rigid
 - The Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still enforces structure and answer coverage
 - If a future task touches the shared AI or lesson contract boundary, verify both Quick Mode and Deep Mode

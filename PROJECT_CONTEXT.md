@@ -30,11 +30,12 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Step In dialogue now reads as a continuous in-scene role-play instead of quiz-style turns
 - Deep Mode Understand chunk guidance is currently prompt-led: cut by simple Chinese sentence parts such as subject / predicate / object / modifier, avoid碎片词块 like 的 / 了 / 什么, and do not add filler chunks just to satisfy a count
 - Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still checks structure, answer coverage, and required arrays
+- Deep Mode prompt quality is being tightened so core expressions stay educational, useful, and differentiated across packs, with lighter but still specific chunk guidance
 
 ## Current latest task
 
-- Task: 轻量收紧 Deep Mode Understand chunk 切分提示，避免无意义碎片词块，同时不再强卡 chunk 数量
-- Status: 已执行待验收
+- Task: Refine the Deep Mode generation prompt so core expressions are high-frequency, practical, reusable teaching points with clearer pack differentiation and less template drift
+- Status: 验收通过
 
 ## Architecture or state flow
 
@@ -69,7 +70,7 @@ Deep Mode planned flow:
 - `npm --prefix prototype run build`
 - `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
-- Latest API verification after the prompt/normalizer refresh: `npm --prefix api test`
+- Latest API verification after the Deep Mode prompt quality refresh: `npm --prefix api test`
 
 ## Runtime notes
 
@@ -78,6 +79,7 @@ Deep Mode planned flow:
 - Local URLs are `http://127.0.0.1:5173/` for the prototype and `http://127.0.0.1:3001/` for the API
 - Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
+- VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 
 ## Key files
 
@@ -111,6 +113,8 @@ Deep Mode planned flow:
 - Keep Interact ordering task-pack-first
 - Treat Interact `systemReply` as a bridge sentence, not the learned Handle target
 - Treat Step In as a continuous role-play conversation in the same scene
+- Keep Deep Mode prompt and its test assertions in sync whenever generation rules change
+- For backend prompt edits, verify the API test suite and then sync the API source to the VPS
 - Prefer durable facts over speculative implementation details
 
 ## Open decisions
