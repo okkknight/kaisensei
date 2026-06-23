@@ -554,6 +554,7 @@ export function createDeepCourseViewModel({ lesson, photoPreviewUrl = "" } = {})
       title: lesson?.modules?.stepIn?.title ?? "Step In",
       goal: lesson?.modules?.stepIn?.goal ?? "",
       scene: lesson?.modules?.stepIn?.dialogue?.scene ?? "",
+      sceneChinese: lesson?.modules?.stepIn?.dialogue?.sceneChinese ?? "",
       turns: stepInTurns,
     },
     completionVM: {

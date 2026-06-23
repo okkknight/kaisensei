@@ -26,6 +26,7 @@ function makeBuildExercise(label) {
 
 function makeQuickResponse(label) {
   return {
+    questionChinese: `${label} 中文问题？`,
     question: `Quick response for ${label}?`,
     chunks: [`${label} reply A`, `${label} reply B`, `${label} reply C`],
     distractors: [`${label} reply extra`],
@@ -93,6 +94,7 @@ function makeTaskPack(id, label) {
     dialogues: [
       {
         scene: `${label} dialogue scene`,
+        sceneChinese: `${label} 对话场景中文`,
         need: makeBuildExercise(`${label} dialogue need`),
         systemReply: `${label} bridge reply`,
         handle: makeBuildExercise(`${label} dialogue handle`),
@@ -142,6 +144,7 @@ export function buildValidDeepCoursePayload() {
         goal: "Complete one full scene conversation.",
         dialogue: {
           scene: "A desk scene with a coworker nearby",
+          sceneChinese: "桌边有一位同事在旁边。",
           turns: [
             makeSystemTurn("notice 1 opener"),
             makeDialogueTurn("notice 1", "notice"),

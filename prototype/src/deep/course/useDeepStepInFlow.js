@@ -3,7 +3,7 @@ import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
 import { buildShuffledChunkBank } from "./deep-flow-utils.js";
 
-function buildStepInPages({ title, goal, scene, turns }) {
+function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
   const safeTurns = Array.isArray(turns) ? turns : [];
   const userTurns = safeTurns
     .map((turn, index) => ({ ...turn, turnIndex: index }))
@@ -16,6 +16,7 @@ function buildStepInPages({ title, goal, scene, turns }) {
       title,
       goal,
       scene,
+      sceneChinese,
     },
   ];
 
@@ -66,8 +67,8 @@ function buildStepInPages({ title, goal, scene, turns }) {
 
 export { buildStepInPages };
 
-export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", turns = [] } = {}) {
-  const pages = useMemo(() => buildStepInPages({ title, goal, scene, turns }), [goal, scene, title, turns]);
+export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", sceneChinese = "", turns = [] } = {}) {
+  const pages = useMemo(() => buildStepInPages({ title, goal, scene, sceneChinese, turns }), [goal, scene, sceneChinese, title, turns]);
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });

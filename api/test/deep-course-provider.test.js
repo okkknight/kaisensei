@@ -27,6 +27,7 @@ function makeExample(label) {
       answer: [`${label} build A`, `${label} build B`, `${label} build C`],
     },
     quickResponse: {
+      questionChinese: `${label} 中文 question`,
       question: `${label} question`,
       chunks: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
       distractors: [`${label} quick x`],
@@ -110,10 +111,13 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /systemReply inside each dialogue must be one short natural line of dialogue from the other person in the scene\./);
   assert.match(prompts[0], /It should move the scene forward and create a natural opening for the learner's next line\./);
   assert.match(prompts[0], /The dialogue should read like Need -> systemReply -> Handle in one continuous exchange\./);
+  assert.match(prompts[0], /Each Step In dialogue must include sceneChinese so the guide page can show one short Chinese explanation under the English scene line\./);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);
   assert.match(prompts[0], /Build and Quick Response both use sentence-level English chunks that reconstruct a complete natural reply\./i);
   assert.match(prompts[0], /Build uses the Chinese sentence as the source; Quick Response uses the scene question or dialogue situation as the source\./i);
+  assert.match(prompts[0], /Each quickResponse question must be organized around the same pack's baseExample or variation sentence so that sentence becomes the learner's answer\./i);
+  assert.match(prompts[0], /quickResponse\.questionChinese must be the Chinese translation of that question\./i);
   assert.doesNotMatch(prompts[0], /Quick Response chunks are English phrases only\./i);
   assert.match(prompts[0], /No碎片词块, no filler chunks, no equal-sized mechanical slicing\./i);
   assert.match(prompts[0], /Do not create a chunk just to satisfy count if a natural chunk would read better after re-segmentation\./i);
@@ -126,6 +130,8 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.equal(course.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
   assert.equal(course.modules.notice.expressionPacks[2].baseExample.quickResponse.question, "on the desk base question");
   assert.equal(course.modules.interpret.expressionPacks[1].baseExample.quickResponse.question, "ready for work base question");
+  assert.equal(course.modules.notice.expressionPacks[0].baseExample.quickResponse.questionChinese, "a coffee mug base 中文 question");
+  assert.equal(course.modules.stepIn.dialogue.sceneChinese, "桌边有一位同事在旁边。");
   assert.equal(course.modules.stepIn.dialogue.turns.length, 8);
 });
 

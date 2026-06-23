@@ -22,10 +22,11 @@ test("buildStepInPages shuffles turn banks instead of keeping source order", () 
     },
   ];
 
-  const pages = buildStepInPages({ title: "Step In", goal: "", scene: "scene", turns });
+  const pages = buildStepInPages({ title: "Step In", goal: "", scene: "scene", sceneChinese: "场景中文", turns });
   const rawBank = ["turn one chunk", "turn one chunk x", "turn one chunk y"];
   const expectedBank = buildShuffledChunkBank(rawBank, "step-in:1:user reply");
 
+  assert.equal(pages[0].sceneChinese, "场景中文");
   assert.deepEqual(pages[1].bank, expectedBank);
   assert.notDeepEqual(pages[1].bank, rawBank);
 });
@@ -64,7 +65,7 @@ test("buildStepInPages carries the next system line as a bridge reply", () => {
     },
   ];
 
-  const pages = buildStepInPages({ title: "Step In", goal: "", scene: "scene", turns });
+  const pages = buildStepInPages({ title: "Step In", goal: "", scene: "scene", sceneChinese: "场景中文", turns });
 
   assert.equal(pages[1].bridgeReply, "bridge reply");
   assert.equal(pages[2].bridgeReply, "");

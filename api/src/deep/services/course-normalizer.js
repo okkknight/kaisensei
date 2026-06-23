@@ -429,6 +429,7 @@ function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.step
   }
 
   const scene = ensureString(dialogue.scene, "modules.stepIn.dialogue.scene");
+  const sceneChinese = ensureString(dialogue.sceneChinese, "modules.stepIn.dialogue.sceneChinese");
   const turns = Array.isArray(dialogue.turns) ? dialogue.turns : [];
   const expectedTurns = (config.noticeExpressionCount + config.interpretExpressionCount + config.needExpressionCount + config.handleExpressionCount) * 2;
 
@@ -437,6 +438,7 @@ function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.step
   return {
     ...dialogue,
     scene,
+    sceneChinese,
     turns: turns.map((turn, index) => {
       if (!isPlainObject(turn)) {
         fail(`Missing or invalid object at modules.stepIn.dialogue.turns[${index}]`, {

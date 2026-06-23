@@ -25,6 +25,7 @@ const deepExampleContract = {
     answer: [],
   },
   quickResponse: {
+    questionChinese: "",
     question: "",
     chunks: [],
     distractors: [],
@@ -97,6 +98,7 @@ export const deepCourseContract = {
       goal: "Complete one full scene conversation.",
       dialogue: {
         scene: "",
+        sceneChinese: "",
         turns: [],
       },
     },
@@ -115,6 +117,7 @@ export const deepCourseContractShape = {
       ...deepCourseContract.modules.stepIn,
       dialogue: {
         scene: "",
+        sceneChinese: "",
         turns: [deepStepInTurnContract],
       },
     },

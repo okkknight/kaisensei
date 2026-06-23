@@ -10,6 +10,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
     title: stepInVM?.title ?? "Step In",
     goal: stepInVM?.goal ?? "",
     scene: stepInVM?.scene ?? "",
+    sceneChinese: stepInVM?.sceneChinese ?? "",
     turns: stepInVM?.turns ?? [],
   });
 
@@ -76,6 +77,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
             <span>{DEEP_COPY.challengeTitle}</span>
             <strong>{stepInVM?.goal ?? ""}</strong>
             <p>{stepInVM?.scene ?? ""}</p>
+            {stepInVM?.sceneChinese ? <small>{stepInVM.sceneChinese}</small> : null}
           </div>
         </div>
       ) : currentPage?.kind === "complete" ? (

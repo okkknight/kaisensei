@@ -25,6 +25,7 @@ function makeExample(label) {
       answer: [`${label} build A`, `${label} build B`, `${label} build C`],
     },
     quickResponse: {
+      questionChinese: `${label} 中文问题`,
       question: `${label} question`,
       chunks: [`${label} quick A`, `${label} quick B`, `${label} quick C`],
       distractors: [`${label} quick x`],
@@ -71,6 +72,7 @@ test("normalizeDeepCoursePayload accepts the canonical deep course shape", () =>
   assert.equal(normalized.modules.notice.expressionPacks.length, 3);
   assert.equal(normalized.modules.interpret.expressionPacks.length, 3);
   assert.equal(normalized.modules.interact.taskPacks.length, 2);
+  assert.equal(normalized.modules.stepIn.dialogue.sceneChinese, "桌边有一位同事在旁边。");
   assert.equal(normalized.modules.stepIn.dialogue.turns.length, 8);
 });
 
@@ -98,6 +100,7 @@ test("normalizeDeepCoursePayload accepts focus-style exercises", () => {
 test("normalizeDeepCoursePayload accepts quick responses on each example", () => {
   const normalized = normalizeDeepCoursePayload(buildExampleLevelQuickResponsePayload());
 
+  assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.quickResponse.questionChinese, "a coffee mug base 中文问题");
   assert.equal(normalized.modules.notice.expressionPacks[0].baseExample.quickResponse.question, "a coffee mug base question");
   assert.equal(normalized.modules.notice.expressionPacks[1].baseExample.quickResponse.question, "a laptop base question");
   assert.equal(normalized.modules.notice.expressionPacks[2].baseExample.quickResponse.question, "on the desk base question");

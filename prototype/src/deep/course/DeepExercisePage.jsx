@@ -4,6 +4,7 @@ import { DeepFeedbackCard } from "./DeepFeedbackCard.jsx";
 import { DEEP_COPY } from "../copy.js";
 import { VoiceButton } from "../../quick/lesson/VoiceButton.jsx";
 import { useDeepSpeech } from "../useDeepSpeech.js";
+import { findDeepTextMatchRange } from "./deep-text.js";
 import { isDeepSelectionLocked } from "./deep-flow-utils.js";
 
 function ChunkRow({ items, selectedChunks, selectionLimit, onToggleChunk }) {
@@ -96,15 +97,15 @@ function renderUnderstandSentence(sentence, highlight) {
     return <div className="deep-english-sentence">{sentence}</div>;
   }
 
-  const index = sentence.toLowerCase().indexOf(highlight.toLowerCase());
+  const range = findDeepTextMatchRange(sentence, highlight);
 
-  if (index === -1) {
+  if (!range) {
     return <div className="deep-english-sentence">{sentence}</div>;
   }
 
-  const before = sentence.slice(0, index);
-  const matched = sentence.slice(index, index + highlight.length);
-  const after = sentence.slice(index + highlight.length);
+  const before = sentence.slice(0, range.start);
+  const matched = sentence.slice(range.start, range.end);
+  const after = sentence.slice(range.end);
 
   return (
     <div className="deep-english-sentence" aria-label={sentence}>
