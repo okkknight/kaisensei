@@ -105,6 +105,7 @@ export function buildDeepCoursePrompt({
     `- Generate exactly ${promptConfig.interact.dialoguesPerTaskPack} Dialogue Practices per Task Pack.`,
     "- Interact is a three-step conversational flow: Need -> systemReply -> Handle.",
     "- Need is the learner's opening request or need.",
+    "- Need must be a natural request that emerges from the specific photo scene and the task pack's scenePrompt, not a generic or unrelated request.",
     "- systemReply is the other person's bridge line. It should respond naturally, keep the scene alive, and leave room for the learner's next line.",
     "- Handle is the learner's follow-up line after systemReply. It should continue the same exchange instead of answering Need directly.",
     "- Each Task Pack must teach one distinct real-life interaction goal.",

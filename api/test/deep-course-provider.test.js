@@ -92,6 +92,7 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /For Interact, each task pack should teach a different interaction goal or response pattern\./);
   assert.match(prompts[0], /Interact is a three-step conversational flow: Need -> systemReply -> Handle\./);
   assert.match(prompts[0], /Need is the learner's opening request or need\./);
+  assert.match(prompts[0], /Need must be a natural request that emerges from the specific photo scene and the task pack's scenePrompt, not a generic or unrelated request\./);
   assert.match(prompts[0], /systemReply is the other person's bridge line\. It should respond naturally, keep the scene alive, and leave room for the learner's next line\./);
   assert.match(prompts[0], /Handle is the learner's follow-up line after systemReply\. It should continue the same exchange instead of answering Need directly\./);
   assert.match(prompts[0], /Need and Handle should both be short, reusable, and easy to say aloud\./);
