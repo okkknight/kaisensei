@@ -12,7 +12,7 @@ import DeepModeApp from "../deep/DeepModeApp.jsx";
 
 export function AppShell() {
   const [mode, setMode] = useState(MODE_QUICK);
-  const [level, setLevel] = useState(COURSE_LEVEL_NORMAL);
+  const [level, setLevel] = useState(COURSE_LEVEL_ADVANCED);
   const [pendingCapture, setPendingCapture] = useState(null);
   const [route, setRoute] = useState(MODE_CAMERA);
 
