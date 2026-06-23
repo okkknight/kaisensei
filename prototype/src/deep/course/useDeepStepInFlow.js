@@ -20,6 +20,7 @@ function buildStepInPages({ title, goal, scene, turns }) {
   ];
 
   userTurns.forEach((turn) => {
+    const nextTurn = safeTurns[turn.turnIndex + 1];
     const history = safeTurns.slice(0, turn.turnIndex).map((entry) => ({
       speaker: entry.speaker,
       label: entry.speaker === "system" ? "System" : "You",
@@ -46,6 +47,7 @@ function buildStepInPages({ title, goal, scene, turns }) {
         `step-in:${turn.turnIndex}:${turn.text ?? ""}`
       ),
       answer: turn.answer ?? [],
+      bridgeReply: nextTurn?.speaker === "system" ? nextTurn.text : "",
     });
   });
 
@@ -70,7 +72,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [liveTurns, setLiveTurns] = useState([]);
-  const autoAdvanceTimerRef = useRef(null);
+  const timersRef = useRef([]);
 
   useEffect(() => {
     setPageIndex(0);
@@ -81,9 +83,10 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
 
   useEffect(
     () => () => {
-      if (autoAdvanceTimerRef.current) {
-        window.clearTimeout(autoAdvanceTimerRef.current);
-      }
+      timersRef.current.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      timersRef.current = [];
     },
     []
   );
@@ -101,10 +104,20 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
   const isPlaybackActive = liveTurns.length > 0;
 
   function clearPendingAdvance() {
-    if (autoAdvanceTimerRef.current) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
+    timersRef.current.forEach((timer) => {
+      window.clearTimeout(timer);
+    });
+    timersRef.current = [];
+  }
+
+  function scheduleTimer(callback, delay) {
+    const timer = window.setTimeout(() => {
+      timersRef.current = timersRef.current.filter((currentTimer) => currentTimer !== timer);
+      callback();
+    }, delay);
+
+    timersRef.current.push(timer);
+    return timer;
   }
 
   function reset() {
@@ -161,6 +174,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
 
     if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
       const answerText = selectedChunks.join(" ").trim();
+      const bridgeReply = currentPage.bridgeReply?.trim() ?? "";
 
       clearPendingAdvance();
       setSelectedChunks([]);
@@ -172,11 +186,43 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
           text: answerText,
           checked: true,
         },
+        ...(bridgeReply
+          ? [
+              {
+                speaker: "system",
+                label: "System",
+                text: "",
+                isTyping: true,
+              },
+            ]
+          : []),
       ]);
 
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        next();
-      }, 650);
+      if (bridgeReply) {
+        scheduleTimer(() => {
+          setLiveTurns([
+            {
+              speaker: "user",
+              label: "You",
+              text: answerText,
+              checked: true,
+            },
+            {
+              speaker: "system",
+              label: "System",
+              text: bridgeReply,
+            },
+          ]);
+        }, 1000);
+
+        scheduleTimer(() => {
+          next();
+        }, 1900);
+      } else {
+        scheduleTimer(() => {
+          next();
+        }, 650);
+      }
       return;
     }
 

@@ -2222,6 +2222,12 @@ img {
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
 
+  .deep-course-screen .lesson-content,
+  .deep-course-screen .deep-course-content {
+    padding-bottom: calc(148px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(148px + env(safe-area-inset-bottom));
+  }
+
   .lesson-footer {
     position: fixed;
     left: 16px;
@@ -2643,6 +2649,11 @@ img {
 
 .lesson-footer-spacer {
   min-height: 1px;
+}
+
+.deep-dialogue-scroll-anchor {
+  width: 1px;
+  height: 1px;
 }
 
 .deep-guide-task-card {

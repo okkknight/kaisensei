@@ -456,7 +456,7 @@ export function createDeepCourseLesson(level = "Normal") {
       },
       stepIn: {
         title: "Step In",
-        goal: "Complete one full scene conversation.",
+        goal: "Keep the conversation moving.",
         dialogue: {
           scene: "You are at a desk with your laptop, and a coworker is nearby.",
           turns: [

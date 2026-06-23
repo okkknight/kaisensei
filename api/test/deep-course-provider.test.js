@@ -91,6 +91,7 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /For Interact, each task pack should teach a different interaction goal or response pattern\./);
   assert.match(prompts[0], /Need and Handle should both be short, reusable, and easy to say aloud\./);
   assert.match(prompts[0], /Create one continuous role-play in the same scene\./);
+  assert.match(prompts[0], /Keep the Step In guide short: one short task prompt plus the scene\/role description\./);
   assert.match(prompts[0], /Each user turn must use a canonical sourceModule value from notice, interpret, interact_need, or interact_handle\./);
   assert.match(prompts[0], /COURSE CONFIG:/);
   assert.match(prompts[0], /"overviewKeywordCount": 3/);
@@ -111,7 +112,9 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /The dialogue should read like Need -> systemReply -> Handle in one continuous exchange\./);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);
-  assert.match(prompts[0], /Build and Quick Response chunks are English phrases only\./i);
+  assert.match(prompts[0], /Build and Quick Response both use sentence-level English chunks that reconstruct a complete natural reply\./i);
+  assert.match(prompts[0], /Build uses the Chinese sentence as the source; Quick Response uses the scene question or dialogue situation as the source\./i);
+  assert.doesNotMatch(prompts[0], /Quick Response chunks are English phrases only\./i);
   assert.match(prompts[0], /No碎片词块, no filler chunks, no equal-sized mechanical slicing\./i);
   assert.match(prompts[0], /Do not create a chunk just to satisfy count if a natural chunk would read better after re-segmentation\./i);
   assert.doesNotMatch(prompts[0], /short clause/i);

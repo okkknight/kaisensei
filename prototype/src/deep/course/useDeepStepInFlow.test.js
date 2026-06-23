@@ -29,3 +29,43 @@ test("buildStepInPages shuffles turn banks instead of keeping source order", () 
   assert.deepEqual(pages[1].bank, expectedBank);
   assert.notDeepEqual(pages[1].bank, rawBank);
 });
+
+test("buildStepInPages carries the next system line as a bridge reply", () => {
+  const turns = [
+    {
+      speaker: "system",
+      text: "system intro",
+      chunks: [],
+      distractors: [],
+      answer: [],
+    },
+    {
+      speaker: "user",
+      text: "user reply",
+      sourceModule: "notice",
+      chunks: ["turn one chunk"],
+      distractors: [],
+      answer: ["turn one chunk"],
+    },
+    {
+      speaker: "system",
+      text: "bridge reply",
+      chunks: [],
+      distractors: [],
+      answer: [],
+    },
+    {
+      speaker: "user",
+      text: "second reply",
+      sourceModule: "interpret",
+      chunks: ["turn two chunk"],
+      distractors: [],
+      answer: ["turn two chunk"],
+    },
+  ];
+
+  const pages = buildStepInPages({ title: "Step In", goal: "", scene: "scene", turns });
+
+  assert.equal(pages[1].bridgeReply, "bridge reply");
+  assert.equal(pages[2].bridgeReply, "");
+});

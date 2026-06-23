@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { DeepChunkChip } from "./DeepChunkChip.jsx";
 import { DeepFeedbackCard } from "./DeepFeedbackCard.jsx";
@@ -59,6 +59,25 @@ export function DeepDialogueFlowPage({
   const latestSystemTurn = [...history].reverse().find((turn) => turn.speaker === "system");
   const visibleHistory = showHistory ? history : [];
   const visibleTurns = [...visibleHistory, ...liveTurns];
+  const scrollAnchorRef = useRef(null);
+  const visibleTurnSignature = useMemo(
+    () =>
+      visibleTurns
+        .map((turn) => `${turn.speaker}:${turn.text ?? ""}:${turn.isTyping ? "typing" : ""}:${turn.checked ? "checked" : ""}`)
+        .join("|"),
+    [visibleTurns]
+  );
+
+  useEffect(() => {
+    if (!scrollAnchorRef.current) {
+      return;
+    }
+
+    scrollAnchorRef.current.scrollIntoView({
+      block: "end",
+      behavior: isPlaybackActive ? "auto" : "smooth",
+    });
+  }, [isPlaybackActive, visibleTurnSignature, feedback?.tone, selectedChunks.length, userPrompt]);
 
   return (
     <div className="deep-dialogue-flow-page">
@@ -120,6 +139,8 @@ export function DeepDialogueFlowPage({
           idleBody={DEEP_COPY.tapChunksThenSend}
         />
       ) : null}
+
+      <div ref={scrollAnchorRef} className="deep-dialogue-scroll-anchor" aria-hidden="true" />
     </div>
   );
 }

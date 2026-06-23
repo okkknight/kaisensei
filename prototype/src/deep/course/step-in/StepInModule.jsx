@@ -75,8 +75,6 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
           <div className="deep-stage-card deep-guide-task-card">
             <span>{DEEP_COPY.challengeTitle}</span>
             <strong>{stepInVM?.goal ?? ""}</strong>
-            <p>{DEEP_COPY.challengePrompt}</p>
-            <small>{DEEP_COPY.challengePromptChinese}</small>
             <p>{stepInVM?.scene ?? ""}</p>
           </div>
         </div>
