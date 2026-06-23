@@ -69,12 +69,14 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
+  const [liveTurns, setLiveTurns] = useState([]);
   const autoAdvanceTimerRef = useRef(null);
 
   useEffect(() => {
     setPageIndex(0);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
   }, [pages]);
 
   useEffect(
@@ -96,6 +98,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
   const isReadyToCheck = currentPage?.kind === "turn"
     ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length
     : false;
+  const isPlaybackActive = liveTurns.length > 0;
 
   function clearPendingAdvance() {
     if (autoAdvanceTimerRef.current) {
@@ -108,6 +111,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
     clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
   }
 
   function back() {
@@ -120,6 +124,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
     setPageIndex((current) => current - 1);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
     return true;
   }
 
@@ -127,6 +132,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
     clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
     setPageIndex((current) => current + 1);
   }
 
@@ -154,11 +160,20 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
     }
 
     if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
-      setFeedback({
-        tone: "success",
-        title: DEEP_COPY.correct,
-        body: "You kept the conversation moving.",
-      });
+      const answerText = selectedChunks.join(" ").trim();
+
+      clearPendingAdvance();
+      setSelectedChunks([]);
+      setFeedback({ tone: "idle", title: "", body: "" });
+      setLiveTurns([
+        {
+          speaker: "user",
+          label: "You",
+          text: answerText,
+          checked: true,
+        },
+      ]);
+
       autoAdvanceTimerRef.current = window.setTimeout(() => {
         next();
       }, 650);
@@ -177,6 +192,8 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", tu
     replayTurns,
     selectedChunks,
     feedback,
+    liveTurns,
+    isPlaybackActive,
     progressCurrent,
     progressTotal,
     isReadyToCheck,

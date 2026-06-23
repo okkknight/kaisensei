@@ -38,17 +38,11 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
   }
 
   const currentPage = flow.currentPage;
-  const primaryActionLabel =
-    currentPage.kind === "dialogue"
-      ? flow.feedback.tone === "success"
-        ? "Continue"
-        : DEEP_COPY.send
-      : flow.feedback.tone === "success"
-        ? "Continue"
-        : DEEP_COPY.check;
-  const handlePrimaryAction = flow.feedback.tone === "success" ? flow.next : flow.check;
+  const isDialoguePage = currentPage.kind === "dialogue";
+  const primaryActionLabel = isDialoguePage ? DEEP_COPY.send : flow.feedback.tone === "success" ? "Continue" : DEEP_COPY.check;
+  const handlePrimaryAction = isDialoguePage ? flow.check : flow.feedback.tone === "success" ? flow.next : flow.check;
   const primaryActionDisabled =
-    currentPage.kind === "guide" ? false : flow.feedback.tone === "success" ? false : !flow.canAttempt;
+    currentPage.kind === "guide" ? false : isDialoguePage ? !flow.canAttempt : flow.feedback.tone === "success" ? false : !flow.canAttempt;
 
   const body = (() => {
     if (currentPage.kind === "guide") {
@@ -71,7 +65,9 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
           scene={currentPage.scene}
           sceneChinese={currentPage.sceneChinese}
           history={currentPage.history}
+          liveTurns={flow.liveTurns}
           userPrompt={currentPage.userPrompt}
+          showHistory={currentPage.showHistory !== false}
           bank={currentPage.bank}
           selectedChunks={flow.selectedChunks}
           feedback={flow.feedback}
@@ -115,6 +111,8 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
           <button className="primary-button" type="button" onClick={flow.next}>
             {DEEP_COPY.startPractice} →
           </button>
+        ) : currentPage.kind === "dialogue" && flow.isPlaybackActive ? (
+          <div className="lesson-footer-spacer" />
         ) : (
           <div className="lesson-footer-actions">
             <button className="secondary-button" type="button" onClick={flow.reset}>

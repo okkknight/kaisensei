@@ -6,8 +6,22 @@ import { VoiceButton } from "../../quick/lesson/VoiceButton.jsx";
 import { useDeepSpeech } from "../useDeepSpeech.js";
 
 function DialogueTurn({ turn }) {
+  if (turn.isTyping) {
+    return (
+      <div className={`deep-dialogue-turn ${turn.speaker} deep-dialogue-turn-typing`}>
+        <span>{turn.label || "System"}</span>
+        <div className="loading-dots deep-dialogue-typing-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`deep-dialogue-turn ${turn.speaker}`}>
+    <div className={`deep-dialogue-turn ${turn.speaker}${turn.checked ? " checked" : ""}`}>
+      {turn.checked ? <span className="deep-dialogue-turn-check" aria-hidden="true">✓</span> : null}
       <span>{turn.label || (turn.speaker === "system" ? "System" : "You")}</span>
       <p>{turn.text}</p>
     </div>
@@ -18,13 +32,16 @@ export function DeepDialogueFlowPage({
   scene = "",
   sceneChinese = "",
   history = [],
+  liveTurns = [],
   userPrompt = "",
+  showHistory = true,
   bank = [],
   selectedChunks = [],
   feedback,
   onToggleChunk,
 }) {
   const speech = useDeepSpeech();
+  const isPlaybackActive = liveTurns.length > 0;
   const selectedChunkCounts = selectedChunks.reduce((counts, chunk) => {
     counts.set(chunk, (counts.get(chunk) ?? 0) + 1);
     return counts;
@@ -40,6 +57,8 @@ export function DeepDialogueFlowPage({
     return false;
   });
   const latestSystemTurn = [...history].reverse().find((turn) => turn.speaker === "system");
+  const visibleHistory = showHistory ? history : [];
+  const visibleTurns = [...visibleHistory, ...liveTurns];
 
   return (
     <div className="deep-dialogue-flow-page">
@@ -51,15 +70,15 @@ export function DeepDialogueFlowPage({
         </div>
       ) : null}
 
-      {history.length > 0 ? (
+      {visibleTurns.length > 0 ? (
         <div className="deep-dialogue-history">
-          {history.map((turn, index) => (
-            <DialogueTurn key={`${turn.speaker}-${index}-${turn.text}`} turn={turn} />
+          {visibleTurns.map((turn, index) => (
+            <DialogueTurn key={`${turn.speaker}-${index}-${turn.text ?? "typing"}`} turn={turn} />
           ))}
         </div>
       ) : null}
 
-      {userPrompt ? (
+      {!isPlaybackActive && userPrompt ? (
         <div className="deep-dialogue-user-prompt">
           <strong>{userPrompt}</strong>
           {latestSystemTurn?.text ? (
@@ -67,35 +86,40 @@ export function DeepDialogueFlowPage({
               onClick={() => speech.speak(latestSystemTurn.text, userPrompt)}
               active={speech.speakingKey === userPrompt}
               label={DEEP_COPY.playAudio}
+              className="deep-dialogue-user-prompt-audio"
             />
           ) : null}
         </div>
       ) : null}
 
-      <div className="deep-selection-stack">
-        <div className="deep-answer-stage">
-          {selectedChunks.length > 0 ? (
-            selectedChunks.map((chunk, index) => (
-              <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
-            ))
-          ) : (
-            <div className="deep-answer-empty">{DEEP_COPY.buildYourAnswerChinese}</div>
-          )}
-        </div>
+      {!isPlaybackActive ? (
+        <div className="deep-selection-stack">
+          <div className="deep-answer-stage">
+            {selectedChunks.length > 0 ? (
+              selectedChunks.map((chunk, index) => (
+                <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
+              ))
+            ) : (
+              <div className="deep-answer-empty">{DEEP_COPY.buildYourAnswerChinese}</div>
+            )}
+          </div>
 
-        <div className="deep-bank-row">
-          {availableBank.map((chunk, index) => (
-            <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
-          ))}
+          <div className="deep-bank-row">
+            {availableBank.map((chunk, index) => (
+              <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <DeepFeedbackCard
-        tone={feedback.tone}
-        title={feedback.title}
-        body={feedback.body}
-        idleBody={DEEP_COPY.tapChunksThenSend}
-      />
+      {!isPlaybackActive ? (
+        <DeepFeedbackCard
+          tone={feedback.tone}
+          title={feedback.title}
+          body={feedback.body}
+          idleBody={DEEP_COPY.tapChunksThenSend}
+        />
+      ) : null}
     </div>
   );
 }

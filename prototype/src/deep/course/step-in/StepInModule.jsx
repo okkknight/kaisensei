@@ -51,6 +51,8 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
           <button className="primary-button" type="button" onClick={flow.next}>
             {DEEP_COPY.startPractice} →
           </button>
+        ) : currentPage?.kind === "turn" && flow.isPlaybackActive ? (
+          <div className="lesson-footer-spacer" />
         ) : currentPage?.kind === "complete" ? (
           <div className="lesson-footer-spacer" />
         ) : (
@@ -84,6 +86,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
         <DeepDialogueFlowPage
           scene={stepInVM?.scene ?? ""}
           history={currentPage.history}
+          liveTurns={flow.liveTurns}
           userPrompt={currentPage.userPrompt}
           bank={currentPage.bank}
           selectedChunks={flow.selectedChunks}

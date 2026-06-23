@@ -26,8 +26,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
 - Deep Mode Notice / Interpret playback is locked to example-index-first ordering
 - Deep Mode Interact playback is locked to task-pack-first ordering
-- Interact dialogue practice now uses a bridge `systemReply` that advances the scene before the learner's Handle reply
-- Step In dialogue now reads as a continuous in-scene role-play instead of quiz-style turns
+- Interact dialogue practice now plays as a continuous chat flow: a successful Need answer becomes an in-scene user bubble, a short typing bridge appears, then the system reply lands before Handle continues the same conversation
+- Step In dialogue now uses the same live-turn playback pattern so successful replies enter the dialogue flow directly instead of showing a separate success card
 - The Deep Mode generator prompt has been rebuilt around a senior-English-teacher role, with `coreExpression` defined as a learnable high-frequency phrase, collocation, or practical expression rather than a sentence
 - Deep Mode generation now asks the model to learn from one photo through different expression angles on the same scene, instead of slicing one template across every pack
 - Deep Mode now mirrors Quick Mode's Normal / Advanced tuning, with Normal pushing for clearer and simpler phrasing and Advanced pushing for a more polished but still practical expression style
@@ -38,8 +38,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Refine Deep Mode Interact dialogue generation so Need, systemReply, and Handle read as one continuous scene exchange
-- Status: 已执行待验收
+- Task: Refine Deep Mode Interact / Step In dialogue flow so successful replies enter the chat stream directly with a typing bridge
+- Status: 验收通过
 
 ## Architecture or state flow
 
@@ -88,7 +88,7 @@ Deep Mode planned flow:
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
-- The latest Interact prompt rewrite has only been verified locally so far; if live parity matters, sync the API source and restart `kaisensei.service` before calling it done
+- The latest Interact / Step In dialogue-flow rewrite has been verified on the deployed site; if it changes again, re-sync `prototype/dist/` and re-check the live page before calling it done
 
 ## Key files
 
@@ -146,4 +146,4 @@ Deep Mode planned flow:
 - Deep Mode schema, sequencing, and normalizer changes should stay in the Deep feature domain unless a shared boundary is intentionally being refactored
 - This prompt rebuild only changes Deep Mode generation quality, but shared AI tracing and contract boundaries still deserve a quick regression check whenever the prompt changes
 - Deep Mode level tuning affects only generation style, not the schema or the lesson-step structure
-- The Interact dialogue-chain rewrite affects Deep Mode task-pack content and Step In flow feel, but it does not change the schema or the current task counts
+- The Interact / Step In dialogue-chain rewrite affects Deep Mode task-pack content and chat-style playback feel, but it does not change the schema or the current task counts

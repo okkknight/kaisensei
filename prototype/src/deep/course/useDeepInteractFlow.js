@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEEP_COPY } from "../copy.js";
 import { isDeepAnswerMatch } from "./deep-text.js";
 import { buildShuffledChunkBank, joinDeepChunks, toggleDeepChunkSelection } from "./deep-flow-utils.js";
@@ -107,9 +107,12 @@ function buildInteractPages(taskPacks) {
     pages.push({
       id: `${taskPack.id}-dialogue-need`,
       kind: "dialogue",
+      dialogueRole: "need",
       userPrompt: DEEP_COPY.dialogueNeedPrompt,
+      showHistory: false,
       scene: dialogue?.scene ?? taskPack.scenePrompt,
       sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
+      systemReply: dialogue?.systemReply ?? "",
       history: [
         {
           speaker: "system",
@@ -127,6 +130,7 @@ function buildInteractPages(taskPacks) {
     pages.push({
       id: `${taskPack.id}-dialogue-handle`,
       kind: "dialogue",
+      dialogueRole: "handle",
       userPrompt: DEEP_COPY.dialogueHandlePrompt,
       scene: dialogue?.scene ?? taskPack.scenePrompt,
       sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
@@ -181,12 +185,25 @@ export function useDeepInteractFlow(taskPacks = []) {
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
+  const [liveTurns, setLiveTurns] = useState([]);
+  const timersRef = useRef([]);
 
   useEffect(() => {
     setPageIndex(0);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
   }, [pages]);
+
+  useEffect(
+    () => () => {
+      timersRef.current.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      timersRef.current = [];
+    },
+    []
+  );
 
   const currentPage = pages[pageIndex] ?? null;
   const isMilestone = !currentPage;
@@ -197,14 +214,20 @@ export function useDeepInteractFlow(taskPacks = []) {
     : 0;
   const selectionLimit = currentPage?.kind === "exercise" && currentPage.pageType === "focus" ? currentPage.answer.length : 0;
   const canAttempt = currentPage && currentPage.kind !== "guide" ? selectedChunks.length > 0 : false;
+  const isPlaybackActive = liveTurns.length > 0;
 
   function clearPendingAdvance() {
+    timersRef.current.forEach((timer) => {
+      window.clearTimeout(timer);
+    });
+    timersRef.current = [];
   }
 
   function reset() {
     clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
   }
 
   function back() {
@@ -217,6 +240,7 @@ export function useDeepInteractFlow(taskPacks = []) {
     setPageIndex((current) => current - 1);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
     return true;
   }
 
@@ -243,6 +267,7 @@ export function useDeepInteractFlow(taskPacks = []) {
     clearPendingAdvance();
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
+    setLiveTurns([]);
     setPageIndex((current) => current + 1);
   }
 
@@ -252,6 +277,67 @@ export function useDeepInteractFlow(taskPacks = []) {
     }
 
     if (isDeepAnswerMatch(selectedChunks, currentPage.answer)) {
+      const answerText = joinDeepChunks(selectedChunks);
+
+      if (currentPage.kind === "dialogue") {
+        clearPendingAdvance();
+        setSelectedChunks([]);
+        setFeedback({ tone: "idle", title: "", body: "" });
+
+        if (currentPage.dialogueRole === "need") {
+          const userTurn = {
+            speaker: "user",
+            label: "You",
+            text: answerText,
+            checked: true,
+          };
+
+          setLiveTurns([
+            userTurn,
+            {
+              speaker: "system",
+              label: "System",
+              text: "",
+              isTyping: true,
+            },
+          ]);
+
+          const typingTimer = window.setTimeout(() => {
+            setLiveTurns([
+              userTurn,
+              {
+                speaker: "system",
+                label: "System",
+                text: currentPage.systemReply || "",
+              },
+            ]);
+          }, 1000);
+
+          const advanceTimer = window.setTimeout(() => {
+            next();
+          }, 1800);
+
+          timersRef.current = [typingTimer, advanceTimer];
+          return;
+        }
+
+        setLiveTurns([
+          {
+            speaker: "user",
+            label: "You",
+            text: answerText,
+            checked: true,
+          },
+        ]);
+
+        const advanceTimer = window.setTimeout(() => {
+          next();
+        }, 650);
+
+        timersRef.current = [advanceTimer];
+        return;
+      }
+
       setFeedback({
         tone: "success",
         title: DEEP_COPY.correct,
@@ -272,6 +358,8 @@ export function useDeepInteractFlow(taskPacks = []) {
     isMilestone,
     selectedChunks,
     feedback,
+    liveTurns,
+    isPlaybackActive,
     progressCurrent,
     progressTotal,
     canAttempt,
