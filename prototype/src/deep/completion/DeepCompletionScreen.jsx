@@ -24,7 +24,6 @@ export function DeepCompletionScreen({ completionVM, onBack, onExitToCamera }) {
   const noticeItems = completionVM?.noticeItems ?? [];
   const interpretItems = completionVM?.interpretItems ?? [];
   const interactItems = completionVM?.interactItems ?? [];
-  const stepInTurns = completionVM?.turns ?? [];
 
   return (
     <div className="screen lesson-screen deep-completion-screen">
@@ -46,20 +45,6 @@ export function DeepCompletionScreen({ completionVM, onBack, onExitToCamera }) {
           <SummaryGroup title="Notice" items={noticeItems} />
           <SummaryGroup title="Interpret" items={interpretItems} />
           <SummaryGroup title="Interact" items={interactItems} />
-
-          <section className="deep-summary-group">
-            <div className="deep-summary-group-head">
-              <span>{DEEP_COPY.completionReplayTitle}</span>
-            </div>
-            <div className="deep-dialogue-replay">
-              {stepInTurns.map((turn, index) => (
-                <div key={`${turn.speaker}-${index}`} className={`deep-dialogue-turn ${turn.speaker}`}>
-                  <span>{turn.speaker === "system" ? "System" : "You"}</span>
-                  <p>{turn.text}</p>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
       </div>
 
