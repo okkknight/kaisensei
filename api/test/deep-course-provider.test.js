@@ -107,6 +107,8 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /interact_need/);
   assert.match(prompts[0], /interact_handle/);
   assert.match(prompts[0], /systemReply inside each dialogue must be one short natural line of dialogue from the other person in the scene\./);
+  assert.match(prompts[0], /It should move the scene forward and create a natural opening for the learner's next line\./);
+  assert.match(prompts[0], /The dialogue should read like Need -> systemReply -> Handle in one continuous exchange\./);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);
   assert.match(prompts[0], /Build and Quick Response chunks are English phrases only\./i);

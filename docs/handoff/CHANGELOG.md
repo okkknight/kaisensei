@@ -2,6 +2,12 @@
 
 Append-only resume log.
 
+## 2026-06-23
+
+- Reworked the Deep Mode Interact prompt so Need is the opening line, systemReply is the in-scene bridge, and Handle becomes the learner's follow-up line in one continuous exchange
+- Updated the Deep Mode normalizer wording and regression coverage to keep the new bridge-line rule explicit without changing the schema or task counts
+- Verified the prompt rewrite locally with `npm --prefix api test`
+
 ## 2026-06-22
 
 - Brought Quick Mode's Normal / Advanced tuning into the Deep prompt so Normal stays clearer and more direct while Advanced stays more polished but still practical, and added a regression test for the new level-specific prompt wording

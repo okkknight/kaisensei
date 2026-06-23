@@ -395,7 +395,7 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
         normalizedSystemReply.includes(normalizedHandleCoreExpression) ||
         (normalizedDialogueHandleAnswer && normalizedSystemReply.includes(normalizedDialogueHandleAnswer))
       ) {
-        fail(`Dialogue systemReply must be a bridge sentence, not the learned handle expression`, {
+        fail(`Dialogue systemReply must be a bridge line that keeps the exchange moving`, {
           path: `${path}.dialogues[${index}].systemReply`,
         });
       }

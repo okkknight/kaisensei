@@ -161,5 +161,5 @@ test("normalizeDeepCoursePayload rejects dialogue system replies that expose the
   const handleCoreExpression = payload.modules.interact.taskPacks[0].handle.coreExpression;
   payload.modules.interact.taskPacks[0].dialogues[0].systemReply = `Please ${handleCoreExpression}.`;
 
-  assert.throws(() => normalizeDeepCoursePayload(payload), /bridge sentence/i);
+  assert.throws(() => normalizeDeepCoursePayload(payload), /bridge line/i);
 });
