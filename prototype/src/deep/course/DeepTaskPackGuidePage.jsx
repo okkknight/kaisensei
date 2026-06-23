@@ -28,8 +28,8 @@ export function DeepTaskPackGuidePage({
       </div>
 
       <div className="deep-stage-stack">
-        <PreviewCard label="Need Expression" title={needExpression} body={needMeaning} tone="soft" />
-        <PreviewCard label="Handle Expression" title={handleExpression} body={handleMeaning} tone="soft" />
+        <PreviewCard label="需要表达" title={needExpression} body={needMeaning} tone="soft" />
+        <PreviewCard label="回应表达" title={handleExpression} body={handleMeaning} tone="soft" />
       </div>
     </div>
   );

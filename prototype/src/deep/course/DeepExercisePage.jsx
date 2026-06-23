@@ -186,7 +186,6 @@ export function DeepExercisePage({
           <div className="deep-card-head">
             <p>{instruction}</p>
             <div className="deep-build-example">{chineseReference}</div>
-            <div className="deep-build-prompt">{promptChinese}</div>
           </div>
         </section>
       ) : null}

@@ -108,7 +108,7 @@ function buildInteractPages(taskPacks) {
       id: `${taskPack.id}-dialogue-need`,
       kind: "dialogue",
       dialogueRole: "need",
-      userPrompt: DEEP_COPY.dialogueNeedPrompt,
+      userPrompt: "先说你的需要",
       showHistory: false,
       scene: dialogue?.scene ?? taskPack.scenePrompt,
       sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
@@ -131,7 +131,7 @@ function buildInteractPages(taskPacks) {
       id: `${taskPack.id}-dialogue-handle`,
       kind: "dialogue",
       dialogueRole: "handle",
-      userPrompt: DEEP_COPY.dialogueHandlePrompt,
+      userPrompt: "自然接一句",
       scene: dialogue?.scene ?? taskPack.scenePrompt,
       sceneChinese: dialogue?.scenePromptChinese ?? taskPack.scenePromptChinese ?? "",
       history: [

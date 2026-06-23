@@ -33,13 +33,13 @@ function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
       kind: "turn",
       userPrompt:
         turn.sourceModule === "notice"
-          ? "Stay in character: notice the scene"
+          ? "留在场景里：先看细节"
           : turn.sourceModule === "interpret"
-            ? "Stay in character: share what it feels like"
+            ? "留在场景里：说说你的感觉"
             : turn.sourceModule === "interact_need"
-              ? "Stay in character: say what you need"
+              ? "留在场景里：先说你的需要"
               : turn.sourceModule === "interact_handle"
-                ? "Stay in character: answer naturally"
+                ? "留在场景里：自然接一句"
                 : "",
       scene,
       history,
