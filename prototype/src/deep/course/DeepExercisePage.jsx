@@ -137,25 +137,6 @@ export function DeepExercisePage({
 }) {
   const speech = useDeepSpeech();
 
-  function renderSentenceBlock(text, key) {
-    if (!text) {
-      return null;
-    }
-
-    return (
-      <div className="deep-sentence-block">
-        <div className="deep-english-sentence">{text}</div>
-        {speakText ? (
-          <VoiceButton
-            onClick={() => speech.speak(speakText, key)}
-            active={speech.speakingKey === key}
-            label={DEEP_COPY.playAudio}
-          />
-        ) : null}
-      </div>
-    );
-  }
-
   return (
     <div className="deep-exercise-page">
       {kind === "understand" ? (
@@ -164,7 +145,16 @@ export function DeepExercisePage({
             <p>{instruction}</p>
           </div>
           <div className="deep-card-copy">
-            {renderUnderstandSentence(englishSentence, englishHighlight)}
+            <div className="deep-sentence-block">
+              {renderUnderstandSentence(englishSentence, englishHighlight)}
+              {speakText ? (
+                <VoiceButton
+                  onClick={() => speech.speak(speakText, `${kind}-${label}`)}
+                  active={speech.speakingKey === `${kind}-${label}`}
+                  label={DEEP_COPY.playAudio}
+                />
+              ) : null}
+            </div>
           </div>
         </section>
       ) : null}
@@ -196,8 +186,17 @@ export function DeepExercisePage({
             <p>{DEEP_COPY.buildYourAnswer}</p>
           </div>
           <div className="deep-card-copy">
-            {renderSentenceBlock(question, `${kind}-${label}`)}
-            <div className="deep-reference-copy">{questionChinese}</div>
+            <div className="deep-sentence-block">
+              <div className="deep-english-sentence">{question}</div>
+              <div className="deep-reference-copy">{questionChinese}</div>
+              {speakText ? (
+                <VoiceButton
+                  onClick={() => speech.speak(speakText, `${kind}-${label}`)}
+                  active={speech.speakingKey === `${kind}-${label}`}
+                  label={DEEP_COPY.playAudio}
+                />
+              ) : null}
+            </div>
           </div>
         </section>
       ) : null}

@@ -90,6 +90,10 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /For Notice, cover different visible aspects such as objects, positions, actions, states, or spatial relations\./);
   assert.match(prompts[0], /For Interpret, cover different inference angles such as situation, mood, purpose, reason, or readiness\./);
   assert.match(prompts[0], /For Interact, each task pack should teach a different interaction goal or response pattern\./);
+  assert.match(prompts[0], /Interact is a three-step conversational flow: Need -> systemReply -> Handle\./);
+  assert.match(prompts[0], /Need is the learner's opening request or need\./);
+  assert.match(prompts[0], /systemReply is the other person's bridge line\. It should respond naturally, keep the scene alive, and leave room for the learner's next line\./);
+  assert.match(prompts[0], /Handle is the learner's follow-up line after systemReply\. It should continue the same exchange instead of answering Need directly\./);
   assert.match(prompts[0], /Need and Handle should both be short, reusable, and easy to say aloud\./);
   assert.match(prompts[0], /Create one continuous role-play in the same scene\./);
   assert.match(prompts[0], /Keep the Step In guide short: one short task prompt plus the scene\/role description\./);
@@ -108,9 +112,7 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /scenePromptChinese/);
   assert.match(prompts[0], /interact_need/);
   assert.match(prompts[0], /interact_handle/);
-  assert.match(prompts[0], /systemReply inside each dialogue must be one short natural line of dialogue from the other person in the scene\./);
-  assert.match(prompts[0], /It should move the scene forward and create a natural opening for the learner's next line\./);
-  assert.match(prompts[0], /The dialogue should read like Need -> systemReply -> Handle in one continuous exchange\./);
+  assert.match(prompts[0], /Each dialogue must read like Need -> systemReply -> Handle in one continuous exchange\./);
   assert.match(prompts[0], /Each Step In dialogue must include sceneChinese so the guide page can show one short Chinese explanation under the English scene line\./);
   assert.match(prompts[0], /continuous role-play in the same scene/);
   assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);

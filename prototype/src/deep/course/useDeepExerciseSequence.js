@@ -96,7 +96,8 @@ function buildExercisePages(packs, moduleKey) {
       question: response.question,
       speakText: response.question,
       questionChinese:
-        moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese,
+        response.questionChinese ??
+        (moduleKey === "notice" ? DEEP_COPY.noticeQuickResponseChinese : DEEP_COPY.interpretQuickResponseChinese),
       bank: buildShuffledChunkBank(
         [...(response.chunks ?? []), ...(response.distractors ?? [])],
         `${pack.id}:${example.english}:quickResponse`
