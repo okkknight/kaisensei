@@ -21,6 +21,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current implementation status
 
+- Deep Mode staged generation is now the active direction: `overview + notice` is the fixed first playable unit, later stages run serially with frozen prior context, and waiting pages only appear when the next stage is not ready
 - Quick Mode remains the implemented lesson flow in `prototype/` and should stay unchanged unless explicitly requested
 - Deep Mode is now split into its own feature domain with separate overview, Notice, Interpret, Interact, Step In, and completion surfaces
 - Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
@@ -40,8 +41,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Align the Deep Mode Understand prompt with the old product design doc so the chunking rule starts from one complete natural Chinese sentence
-- Status: 验收通过
+- Task: Add the staged-generation envelope to the Deep Mode job contract
+- Status: developed, pending independent review
 
 ## Architecture or state flow
 
@@ -98,6 +99,7 @@ Deep Mode planned flow:
 
 - `docs/kaisensei_deep_mode_product_design.md` - Deep Mode product facts
 - `docs/superpowers/specs/2026-06-19-kaisensei-deepmode-spec.md` - Deep Mode implementation boundary
+- `docs/superpowers/specs/2026-06-24-kaisensei-deepmode-staged-generation-spec.md` - Deep Mode staged generation strategy
 - `docs/superpowers/specs/2026-06-22-kaisensei-deepmode-integration-spec.md` - current backend/frontend integration decisions
 - `docs/superpowers/plans/2026-06-22-kaisensei-deepmode-integration-plan.md` - current integration execution plan
 - `prototype/src/App.jsx` - thin app wrapper

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { createDeepGenerationState, cloneDeepGenerationState } from "../deep/services/staged-generation/deep-generation-state.js";
 
 function createJobId() {
   return `job_${randomUUID().replaceAll("-", "")}`;
@@ -23,15 +24,24 @@ export function createLessonJobStore() {
         updatedAt: nowIso(),
         lesson: null,
         error: null,
+        generation: createDeepGenerationState(),
       };
 
       jobs.set(job.jobId, job);
-      return { ...job };
+      return {
+        ...job,
+        generation: cloneDeepGenerationState(job.generation),
+      };
     },
 
     get(jobId) {
       const job = jobs.get(jobId);
-      return job ? { ...job } : null;
+      if (!job) return null;
+
+      return {
+        ...job,
+        generation: cloneDeepGenerationState(job.generation),
+      };
     },
 
     update(jobId, patch) {
@@ -45,7 +55,10 @@ export function createLessonJobStore() {
       };
 
       jobs.set(jobId, updated);
-      return { ...updated };
+      return {
+        ...updated,
+        generation: cloneDeepGenerationState(updated.generation),
+      };
     },
   };
 }

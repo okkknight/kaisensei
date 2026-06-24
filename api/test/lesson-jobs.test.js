@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { lessonJobGenerationActiveStages, lessonJobGenerationStages } from "../src/contracts/job.js";
 import { lessonContract } from "../src/contracts/lesson.js";
 import { createLessonJobStore } from "../src/stores/in-memory-job-store.js";
 
@@ -20,10 +21,18 @@ test("job store creates and updates a job", () => {
   assert.equal(created.status, "queued");
   assert.equal(created.lesson, null);
   assert.equal(created.error, null);
+  assert.equal(created.generation.activeStage, lessonJobGenerationActiveStages[0]);
+  assert.deepEqual(Object.keys(created.generation.stageStates).sort(), lessonJobGenerationStages.slice().sort());
+  assert.equal(created.generation.stageStates.overview_notice, "pending");
+  assert.equal(created.generation.stageStates.interpret, "pending");
+  assert.equal(created.generation.stageStates.interact, "pending");
+  assert.equal(created.generation.stageStates.step_in, "pending");
 
   const running = store.update(created.jobId, { status: "running" });
   assert.equal(running.status, "running");
   assert.equal(store.get(created.jobId).status, "running");
+  assert.equal(store.get(created.jobId).generation.activeStage, lessonJobGenerationActiveStages[0]);
+  assert.equal(store.get(created.jobId).generation.stageStates.interpret, "pending");
 
   const missing = store.get("job_missing");
   assert.equal(missing, null);

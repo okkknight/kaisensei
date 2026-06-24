@@ -132,6 +132,7 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         jobId: job.jobId,
         status: job.status,
         traceId: job.traceId || traceId || "",
+        generation: job.generation,
       });
     });
 

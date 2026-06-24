@@ -92,6 +92,9 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
   const created = createRes.json();
   assert.equal(created.status, "queued");
   assert.match(created.jobId, /^job_/);
+  assert.equal(created.generation.activeStage, "overview_notice");
+  assert.equal(created.generation.stageStates.overview_notice, "pending");
+  assert.equal(created.generation.stageStates.interpret, "pending");
 
   await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -104,6 +107,8 @@ test("POST /v1/lesson-jobs creates a queued job and GET returns the stored job",
   const fetched = getRes.json();
   assert.equal(fetched.status, "succeeded");
   assert.equal(fetched.lesson.see.sentence, lesson.see.sentence);
+  assert.equal(fetched.generation.activeStage, "overview_notice");
+  assert.equal(fetched.generation.stageStates.step_in, "pending");
 
   const gatewayStyleRes = await app.inject({
     method: "GET",

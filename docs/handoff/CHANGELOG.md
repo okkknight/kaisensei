@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-24
 
+- Implemented Task 1 of the staged Deep Mode generation plan: added a `generation` envelope to the job contract, persisted it in the in-memory job store, and returned it from lesson job create / poll responses
+- Added API coverage so job-store and route tests now lock the staged-generation envelope shape instead of assuming only `status` and `lesson`
+- Drafted the staged Deep Mode generation spec so `overview + notice` becomes the fixed first playable unit, `interpret -> interact -> step in` stay serial, and waiting pages only appear when the next stage is not ready
 - Aligned the old Deep Mode product design doc with the current Understand wording so the Chinese chunking rule starts from one complete natural sentence before reordering
 - Kept the Deep Mode prompt wording consistent with that rule and trimmed the duplicated Understand guidance
 - Refreshed the handoff pack so the current task points at the Understand wording cleanup rather than the earlier Interact / Step In wording pass
