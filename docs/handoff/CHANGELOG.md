@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Fixed the production camera-page white screen by rebuilding the public site with the correct `/kaisensei/` Vite base path so the deployed HTML points at `/kaisensei/assets/*` instead of `/assets/*`
+- Shortened the synthetic Deep Mode loading progress bar from about 30 seconds to about 25 seconds so the first-response expectation feels faster
+- Verified the rebuilt frontend with `VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm --prefix prototype run build` and `npm --prefix prototype run test:deepmode`
 - Added a synthetic Deep Mode loading progress bar that fills over about 30 seconds, stalls near 29 seconds with a moving sheen if the first snapshot still has not arrived, and then completes to 100% once the first visible snapshot is ready
 - Wired the loading bar into the Deep Mode flow so the overview only appears after the first snapshot has had a short reveal delay, while still keeping the staged generation and retry paths intact
 - Extended the Deep Mode smoke test to assert the loading progress bar is rendered during the loading phase

@@ -44,7 +44,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Add a fake progress bar to the Deep Mode loading screen so users get a 30-second first-response expectation before the overview appears
+- Task: Fix the production camera-page white screen and shorten the Deep Mode synthetic loading bar to 25 seconds
 - Status: 已执行待验收
 
 ## Architecture or state flow
@@ -78,6 +78,7 @@ Deep Mode planned flow:
 - `npm --prefix api test`
 - `npm --prefix prototype run test:deepmode`
 - `npm --prefix prototype run build`
+- `VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm --prefix prototype run build`
 - `cd prototype && VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm run build`
 - `rsync -a --delete prototype/dist/ root@89.208.242.44:/opt/boringmax/site/kaisensei/`
 - `npm run dev` from the repo root starts the local API and prototype together
@@ -95,7 +96,8 @@ Deep Mode planned flow:
 - Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - Deep Mode generation logs now also include per-stage completion timings and a first-snapshot visibility timestamp, so real-provider smoke runs can be measured directly
-- Deep Mode loading now includes a synthetic progress bar that advances to 97% over about 29 seconds, stalls with a moving sheen, then finishes to 100% once the first snapshot is ready
+- Deep Mode loading now includes a synthetic progress bar that advances to 97% over about 25 seconds, stalls with a moving sheen, then finishes to 100% once the first snapshot is ready
+- The production `/kaisensei/` deployment must be built with `VITE_KAISENSEI_BASE_PATH=/kaisensei/` or the browser will 404 `/assets/*` and the app will look blank
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
 - The latest Deep Mode Understand wording cleanup has been synced to the VPS API source and `kaisensei.service` was restarted; if the generated output changes again, re-run the API test and restart the service after syncing before calling it done
@@ -152,6 +154,7 @@ Deep Mode planned flow:
 - Prompt-only quality improvements are lightweight, but they still depend on model behavior; if the output keeps drifting, a stronger generation pipeline may be needed
 - If prompt guidance changes without regression tests, the UI can silently diverge from the contract again
 - The synthetic loading bar is intentionally not a real progress measure, so it must stay visually convincing without being treated as a backend guarantee
+- The production build path matters for the public VPS site because the deployed app lives under `/kaisensei/`
 
 ## Cross-feature impact
 

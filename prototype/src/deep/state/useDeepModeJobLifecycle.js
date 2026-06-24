@@ -7,7 +7,7 @@ import { createDeepCourseLessonSnapshot } from "./staged-generation/deep-generat
 const loadingMessages = DEEP_COPY.loading;
 const loadingTickMs = 850;
 const loadingProgressTickMs = 120;
-const loadingProgressMaxVisibleMs = 29000;
+const loadingProgressMaxVisibleMs = 25000;
 const loadingProgressMaxPercent = 97;
 const loadingRevealDelayMs = 240;
 const pollDelayMs = 900;
