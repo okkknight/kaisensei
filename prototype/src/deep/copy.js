@@ -43,6 +43,7 @@ export const DEEP_COPY = {
   completionDescription: "You've completed the Deep Mode course.",
   completionChinese: "你已完成 Deep Mode 课程！",
   completionReplayTitle: "对话回顾",
+  stepInGuideGoal: "完成一段完整的场景对话",
   interactSummary: "You can now ask for what you need and respond naturally.",
   stepInSummary: "You can finish the full scene conversation.",
   dialogueNeedPrompt: "先说你的需要",

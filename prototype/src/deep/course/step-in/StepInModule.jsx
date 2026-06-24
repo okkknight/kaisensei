@@ -4,8 +4,11 @@ import { DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepStepInCompletePage } from "../DeepStepInCompletePage.jsx";
 import { DEEP_COPY } from "../../copy.js";
 import { useDeepStepInFlow } from "../useDeepStepInFlow.js";
+import { VoiceButton } from "../../../quick/lesson/VoiceButton.jsx";
+import { useDeepSpeech } from "../../useDeepSpeech.js";
 
 export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBack, onRestart, onExitToCamera }) {
+  const speech = useDeepSpeech();
   const flow = useDeepStepInFlow({
     title: stepInVM?.title ?? "Step In",
     goal: stepInVM?.goal ?? "",
@@ -73,11 +76,20 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
     >
       {currentPage?.kind === "guide" ? (
         <div className="deep-guide-page">
-          <div className="deep-stage-card deep-guide-task-card">
+          <div className="deep-stage-card deep-guide-task-card deep-guide-task-card-stepin">
             <span>{DEEP_COPY.challengeTitle}</span>
-            <strong>{stepInVM?.goal ?? ""}</strong>
+            <p className="deep-guide-task-note">{DEEP_COPY.stepInGuideGoal}</p>
             <p>{stepInVM?.scene ?? ""}</p>
             {stepInVM?.sceneChinese ? <small>{stepInVM.sceneChinese}</small> : null}
+            {stepInVM?.scene ? (
+              <div className="sentence-actions deep-guide-task-audio">
+                <VoiceButton
+                  onClick={() => speech.speak(stepInVM.scene, "step-in-guide-scene")}
+                  active={speech.speakingKey === "step-in-guide-scene"}
+                  label="Play sentence"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       ) : currentPage?.kind === "complete" ? (

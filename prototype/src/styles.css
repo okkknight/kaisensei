@@ -2660,6 +2660,39 @@ img {
   background: linear-gradient(180deg, rgba(255, 249, 233, 0.98), rgba(255, 255, 255, 0.98));
 }
 
+.deep-guide-task-card-stepin {
+  gap: 8px;
+}
+
+.deep-guide-task-card-stepin .deep-guide-task-note {
+  margin: -2px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.deep-guide-task-card-stepin p:not(.deep-guide-task-note) {
+  color: var(--text);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.deep-guide-task-card-stepin small {
+  margin-top: -2px;
+}
+
+.deep-guide-task-audio {
+  justify-content: flex-start;
+  padding-top: 4px;
+}
+
+.deep-guide-task-audio .voice-button {
+  margin: 0;
+}
+
 .deep-stage-card {
   display: grid;
   gap: 6px;
