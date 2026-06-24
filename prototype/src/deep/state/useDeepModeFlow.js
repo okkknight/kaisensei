@@ -19,22 +19,15 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
   });
 
   useEffect(() => {
-    if (lessonSnapshot) {
-      if (phase === "loading") {
-        setPhase("overview");
-      }
-      return;
-    }
-
-    if (job.screen === "loading") {
+    if (job.screen === "loading" && !job.loadingRevealReady) {
       setPhase("loading");
       return;
     }
 
-    if (job.lesson && phase === "loading") {
+    if (job.loadingRevealReady && phase === "loading") {
       setPhase("overview");
     }
-  }, [job.lesson, job.screen, lessonSnapshot, phase]);
+  }, [job.loadingRevealReady, job.screen, phase]);
 
   const viewModel = useMemo(
     () =>
@@ -111,6 +104,9 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
     state,
     photoPreviewUrl: job.photoPreviewUrl,
     loadingMessage: job.loadingMessage,
+    loadingProgress: job.loadingProgress,
+    loadingProgressState: job.loadingProgressState,
+    loadingRevealReady: job.loadingRevealReady,
     errorState: job.errorState,
     goNext,
     goBack,

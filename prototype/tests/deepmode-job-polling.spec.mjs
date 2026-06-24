@@ -188,6 +188,7 @@ test("deep mode renders the overview before later stages finish", async ({ page 
     buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
   });
 
+  await expect(page.getByRole("progressbar")).toBeVisible();
   await expect(page.getByText("coffee · table · laptop")).toBeVisible();
   await page.getByRole("button", { name: "Start Deep Mode →" }).click();
   await page.getByRole("button", { name: "Continue to Interpret →" }).click();

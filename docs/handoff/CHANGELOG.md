@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Added a synthetic Deep Mode loading progress bar that fills over about 30 seconds, stalls near 29 seconds with a moving sheen if the first snapshot still has not arrived, and then completes to 100% once the first visible snapshot is ready
+- Wired the loading bar into the Deep Mode flow so the overview only appears after the first snapshot has had a short reveal delay, while still keeping the staged generation and retry paths intact
+- Extended the Deep Mode smoke test to assert the loading progress bar is rendered during the loading phase
+- Verified the updated frontend with `npm --prefix prototype run build` and `npm --prefix prototype run test:deepmode`
 - Added timing logs for Deep staged generation so the backend now records each stage's completion time, the cumulative elapsed time, and the first playable `overview_notice` response time
 - Added a client-side `first_snapshot_visible` log so the first time the running Deep lesson becomes visible can be measured directly from the browser flow
 - Ran a real-provider Deep Mode smoke against `WechatIMG395.jpg` with `CODEX_MODEL=gpt-5.5`, and confirmed the staged course completed successfully with a first visible snapshot at about 26s and total completion at about 116s

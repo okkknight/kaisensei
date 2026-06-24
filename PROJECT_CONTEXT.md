@@ -44,8 +44,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Collect stage timing stats and verify real-provider Deep Mode output quality on a real photo
-- Status: developed, pending independent review
+- Task: Add a fake progress bar to the Deep Mode loading screen so users get a 30-second first-response expectation before the overview appears
+- Status: 已执行待验收
 
 ## Architecture or state flow
 
@@ -95,6 +95,7 @@ Deep Mode planned flow:
 - Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - Deep Mode generation logs now also include per-stage completion timings and a first-snapshot visibility timestamp, so real-provider smoke runs can be measured directly
+- Deep Mode loading now includes a synthetic progress bar that advances to 97% over about 29 seconds, stalls with a moving sheen, then finishes to 100% once the first snapshot is ready
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
 - The latest Deep Mode Understand wording cleanup has been synced to the VPS API source and `kaisensei.service` was restarted; if the generated output changes again, re-run the API test and restart the service after syncing before calling it done
@@ -150,6 +151,7 @@ Deep Mode planned flow:
 - Shared AI / contract changes can still affect both modes, so prompt and normalizer edits need a quick regression check
 - Prompt-only quality improvements are lightweight, but they still depend on model behavior; if the output keeps drifting, a stronger generation pipeline may be needed
 - If prompt guidance changes without regression tests, the UI can silently diverge from the contract again
+- The synthetic loading bar is intentionally not a real progress measure, so it must stay visually convincing without being treated as a backend guarantee
 
 ## Cross-feature impact
 
@@ -158,3 +160,4 @@ Deep Mode planned flow:
 - This prompt rebuild only changes Deep Mode generation quality, but shared AI tracing and contract boundaries still deserve a quick regression check whenever the prompt changes
 - Deep Mode level tuning affects only generation style, not the schema or the lesson-step structure
 - The Interact / Step In dialogue-chain rewrite affects Deep Mode task-pack content and chat-style playback feel, but it does not change the schema or the current task counts
+- The loading progress bar only changes Deep Mode loading UX and the flow handoff timing; it does not affect lesson schema or later-stage generation logic

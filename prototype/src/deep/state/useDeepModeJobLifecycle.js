@@ -6,6 +6,10 @@ import { createDeepCourseLessonSnapshot } from "./staged-generation/deep-generat
 
 const loadingMessages = DEEP_COPY.loading;
 const loadingTickMs = 850;
+const loadingProgressTickMs = 120;
+const loadingProgressMaxVisibleMs = 29000;
+const loadingProgressMaxPercent = 97;
+const loadingRevealDelayMs = 240;
 const pollDelayMs = 900;
 
 export function useDeepModeJobLifecycle({
@@ -19,6 +23,9 @@ export function useDeepModeJobLifecycle({
   const [generation, setGeneration] = useState(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingProgressState, setLoadingProgressState] = useState("running");
+  const [loadingRevealReady, setLoadingRevealReady] = useState(false);
   const [errorState, setErrorState] = useState(null);
   const [jobId, setJobId] = useState("");
 
@@ -27,9 +34,12 @@ export function useDeepModeJobLifecycle({
   const requestIdRef = useRef(0);
   const pollTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
+  const loadingProgressTimerRef = useRef(null);
+  const loadingRevealTimerRef = useRef(null);
   const flowStartedAtRef = useRef(0);
   const traceIdRef = useRef("");
   const firstSnapshotLoggedRef = useRef(false);
+  const firstSnapshotReadyRef = useRef(false);
 
   function stopPolling() {
     if (pollTimerRef.current) {
@@ -42,6 +52,20 @@ export function useDeepModeJobLifecycle({
     if (loadingTimerRef.current) {
       window.clearInterval(loadingTimerRef.current);
       loadingTimerRef.current = null;
+    }
+  }
+
+  function stopLoadingProgressTicker() {
+    if (loadingProgressTimerRef.current) {
+      window.clearInterval(loadingProgressTimerRef.current);
+      loadingProgressTimerRef.current = null;
+    }
+  }
+
+  function stopLoadingRevealTimer() {
+    if (loadingRevealTimerRef.current) {
+      window.clearTimeout(loadingRevealTimerRef.current);
+      loadingRevealTimerRef.current = null;
     }
   }
 
@@ -68,6 +92,45 @@ export function useDeepModeJobLifecycle({
     }, loadingTickMs);
   }
 
+  function startLoadingProgressTicker(flowStartedAt) {
+    stopLoadingProgressTicker();
+    setLoadingProgressState("running");
+    const updateProgress = () => {
+      if (firstSnapshotReadyRef.current) {
+        return;
+      }
+
+      const elapsedMs = performance.now() - flowStartedAt;
+      const visibleElapsedMs = Math.min(loadingProgressMaxVisibleMs, Math.max(0, elapsedMs));
+      const nextProgress = Math.min(
+        loadingProgressMaxPercent,
+        Math.round((visibleElapsedMs / loadingProgressMaxVisibleMs) * loadingProgressMaxPercent),
+      );
+
+      setLoadingProgress(nextProgress);
+      setLoadingProgressState(visibleElapsedMs >= loadingProgressMaxVisibleMs ? "stalled" : "running");
+    };
+
+    updateProgress();
+    loadingProgressTimerRef.current = window.setInterval(updateProgress, loadingProgressTickMs);
+  }
+
+  function beginLoadingReveal() {
+    if (firstSnapshotReadyRef.current) {
+      return;
+    }
+
+    firstSnapshotReadyRef.current = true;
+    stopLoadingProgressTicker();
+    stopLoadingRevealTimer();
+    setLoadingProgressState("finishing");
+    setLoadingProgress(100);
+    loadingRevealTimerRef.current = window.setTimeout(() => {
+      setLoadingRevealReady(true);
+      loadingRevealTimerRef.current = null;
+    }, loadingRevealDelayMs);
+  }
+
   function createTraceId() {
     return createDeepLessonTraceId();
   }
@@ -76,6 +139,8 @@ export function useDeepModeJobLifecycle({
     requestIdRef.current += 1;
     stopPolling();
     stopLoadingTicker();
+    stopLoadingProgressTicker();
+    stopLoadingRevealTimer();
   }
 
   function showError(message) {
@@ -96,6 +161,7 @@ export function useDeepModeJobLifecycle({
 
         if (snapshot && !firstSnapshotLoggedRef.current) {
           firstSnapshotLoggedRef.current = true;
+          beginLoadingReveal();
           logDeepLessonTrace("first_snapshot_visible", {
             traceId,
             jobId,
@@ -121,6 +187,8 @@ export function useDeepModeJobLifecycle({
         }
 
         stopLoadingTicker();
+        stopLoadingProgressTicker();
+        stopLoadingRevealTimer();
 
         if (job.status === "succeeded") {
           logDeepLessonTrace("flow_done", {
@@ -182,6 +250,10 @@ export function useDeepModeJobLifecycle({
     traceIdRef.current = traceId;
     flowStartedAtRef.current = flowStartedAt;
     firstSnapshotLoggedRef.current = false;
+    firstSnapshotReadyRef.current = false;
+    setLoadingProgress(0);
+    setLoadingProgressState("running");
+    setLoadingRevealReady(false);
     setErrorState(null);
     setScreen("loading");
     setLesson(null);
@@ -191,6 +263,7 @@ export function useDeepModeJobLifecycle({
     selectedFileRef.current = file;
     setJobId("");
     startLoadingTicker();
+    startLoadingProgressTicker(flowStartedAt);
 
     logDeepLessonTrace("flow_start", {
       traceId,
@@ -232,6 +305,8 @@ export function useDeepModeJobLifecycle({
     } catch (error) {
       if (requestIdRef.current !== requestId) return;
       stopLoadingTicker();
+      stopLoadingProgressTicker();
+      stopLoadingRevealTimer();
       const message = error instanceof LessonApiError ? error.message : DEEP_COPY.retryAction;
       logDeepLessonTrace("flow_failed", {
         traceId,
@@ -254,6 +329,9 @@ export function useDeepModeJobLifecycle({
       setErrorState(null);
       setScreen("empty");
       setLevel(initialLevel);
+      setLoadingProgress(0);
+      setLoadingProgressState("running");
+      setLoadingRevealReady(false);
       clearPreview();
       return undefined;
     }
@@ -280,6 +358,9 @@ export function useDeepModeJobLifecycle({
     setJobId("");
     setErrorState(null);
     setScreen("empty");
+    setLoadingProgress(0);
+    setLoadingProgressState("running");
+    setLoadingRevealReady(false);
     clearPreview();
     onExitToCamera?.();
   }
@@ -287,6 +368,9 @@ export function useDeepModeJobLifecycle({
   function handleRetry() {
     if (selectedFileRef.current) {
       setScreen("loading");
+      setLoadingProgress(0);
+      setLoadingProgressState("running");
+      setLoadingRevealReady(false);
       void generateLessonFromFile(selectedFileRef.current, level, "retry");
       return;
     }
@@ -308,6 +392,10 @@ export function useDeepModeJobLifecycle({
       }
 
       firstSnapshotLoggedRef.current = false;
+      firstSnapshotReadyRef.current = false;
+      setLoadingProgress(0);
+      setLoadingProgressState("running");
+      setLoadingRevealReady(false);
       setGeneration(retryJob.generation ?? null);
       setScreen("lesson");
       await pollJob(jobId, requestIdRef.current, traceIdRef.current, flowStartedAtRef.current);
@@ -330,6 +418,9 @@ export function useDeepModeJobLifecycle({
     photoPreviewUrl,
     loadingMessage: loadingMessages[loadingMessageIndex],
     loadingMessageIndex,
+    loadingProgress,
+    loadingProgressState,
+    loadingRevealReady,
     errorState,
     handleRetakePhoto,
     handleRetry,

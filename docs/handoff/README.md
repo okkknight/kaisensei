@@ -23,6 +23,7 @@ Notes:
 - Task 2 is now underway and the backend can already run staged Deep generation through a serial orchestrator with stage-specific prompt and normalizer helpers
 - Task 3 is now implemented: the frontend can read partial Deep snapshots from frozen stage data and render the overview before the later stages are finished
 - Task 4 is now implemented: the milestone pages can gate into a small waiting page, the wait page can retry a failed staged segment, and success auto-continues once the next stage is ready
+- The Deep Mode loading page now shows a synthetic first-response progress bar that stalls near 29 seconds if the first snapshot is still not ready, then finishes once the overview can appear
 - The Playwright smoke config is aligned with the real prototype dev port, so the deepmode polling test now runs against `127.0.0.1:5173`
 - The prompt still keeps the senior-English-teacher framing, `coreExpression` as a learnable phrase or collocation, and same-scene pack differentiation
 - The Deep Mode normalizer still only enforces structure, answer coverage, and the bridge-line rule for Interact system replies
