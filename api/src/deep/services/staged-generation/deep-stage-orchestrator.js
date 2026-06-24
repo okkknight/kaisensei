@@ -1,4 +1,5 @@
 import { LessonValidationError } from "../../../shared/ai/errors.js";
+import { traceLog } from "../../../services/trace-log.js";
 import { normalizeDeepCoursePayload } from "../course-normalizer.js";
 import { deepCourseDefaultConfig } from "../../config/course.js";
 import { lessonJobGenerationStages } from "../../../contracts/job.js";
@@ -56,6 +57,7 @@ export function createDeepStageOrchestrator({ jobStore, provider, config = deepC
 
   return {
     async run(jobId, payload) {
+      const startedAt = Date.now();
       let job = jobStore.get(jobId);
       if (!job) {
         throw new Error(`Job not found: ${jobId}`);
@@ -68,6 +70,7 @@ export function createDeepStageOrchestrator({ jobStore, provider, config = deepC
       const startIndex = resumeIndex >= 0 ? resumeIndex : 0;
 
       for (const stage of lessonJobGenerationStages.slice(startIndex)) {
+        const stageStartedAt = Date.now();
         generation = setDeepGenerationStageState(generation, stage, "running", {
           activeStage: stage,
           errorStage: null,
@@ -120,8 +123,23 @@ export function createDeepStageOrchestrator({ jobStore, provider, config = deepC
         }
 
         frozenLesson = mergeDeepStageResult(frozenLesson, stage, stageResult);
+        const stageMs = Date.now() - stageStartedAt;
+        const elapsedMs = Date.now() - startedAt;
+        const nextStage = getDeepGenerationNextStage(stage);
+
+        traceLog("runner", "stage_completed", {
+          traceId: payload.traceId || "",
+          jobId,
+          stage,
+          stageMs,
+          elapsedMs,
+          nextStage,
+          firstResponseMs: stage === "overview_notice" ? elapsedMs : undefined,
+          mode: payload.mode || "quick",
+        });
+
         generation = setDeepGenerationStageState(generation, stage, "ready", {
-          activeStage: getDeepGenerationNextStage(stage),
+          activeStage: nextStage,
           frozenLesson,
         });
         jobStore.update(jobId, { generation: cloneDeepGenerationState(generation) });
@@ -150,6 +168,13 @@ export function createDeepStageOrchestrator({ jobStore, provider, config = deepC
         lesson: finalLesson,
         status: "succeeded",
         error: null,
+      });
+
+      traceLog("runner", "stage_pipeline_done", {
+        traceId: payload.traceId || "",
+        jobId,
+        mode: payload.mode || "quick",
+        totalMs: Date.now() - startedAt,
       });
 
       return finalLesson;

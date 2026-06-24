@@ -2,6 +2,13 @@
 
 Append-only resume log.
 
+## 2026-06-25
+
+- Added timing logs for Deep staged generation so the backend now records each stage's completion time, the cumulative elapsed time, and the first playable `overview_notice` response time
+- Added a client-side `first_snapshot_visible` log so the first time the running Deep lesson becomes visible can be measured directly from the browser flow
+- Ran a real-provider Deep Mode smoke against `WechatIMG395.jpg` with `CODEX_MODEL=gpt-5.5`, and confirmed the staged course completed successfully with a first visible snapshot at about 26s and total completion at about 116s
+- Inspected the generated lesson content against the staged prompt design and confirmed the output still follows the expected photo anchor, same-scene progression, and conversational Step In structure
+
 ## 2026-06-24
 
 - Implemented Task 4 of the staged Deep Mode generation plan: Notice, Interpret, and Interact can now open a small waiting page after their milestone screens when the next stage is still pending or failed

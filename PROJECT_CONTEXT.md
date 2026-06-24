@@ -24,6 +24,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode staged generation is now the active direction: `overview + notice` is the fixed first playable unit, later stages run serially with frozen prior context, and waiting pages only appear when the next stage is not ready
 - The Deep frontend now consumes partial frozen snapshots while the job is still running, so `overview + notice` can render before later stages complete
 - The Deep frontend now shows a tiny waiting page after module milestones when the next stage is still pending or failed, and a staged retry route can resume from the failed stage with frozen background
+- The Deep backend and frontend now emit timing logs for per-stage completion and first visible snapshot appearance, which makes real-provider long-run timing stats easier to read
 - Quick Mode remains the implemented lesson flow in `prototype/` and should stay unchanged unless explicitly requested
 - Deep Mode is now split into its own feature domain with separate overview, Notice, Interpret, Interact, Step In, and completion surfaces
 - Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
@@ -43,7 +44,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Preserve the current course prompt quality while minimizing drift
+- Task: Collect stage timing stats and verify real-provider Deep Mode output quality on a real photo
 - Status: developed, pending independent review
 
 ## Architecture or state flow
@@ -93,6 +94,7 @@ Deep Mode planned flow:
 - Local URLs are `http://127.0.0.1:5173/` for the prototype and `http://127.0.0.1:3001/` for the API
 - Playwright smoke runs may leave `prototype/test-results/`; it can be removed after verification
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
+- Deep Mode generation logs now also include per-stage completion timings and a first-snapshot visibility timestamp, so real-provider smoke runs can be measured directly
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
 - The latest Deep Mode Understand wording cleanup has been synced to the VPS API source and `kaisensei.service` was restarted; if the generated output changes again, re-run the API test and restart the service after syncing before calling it done

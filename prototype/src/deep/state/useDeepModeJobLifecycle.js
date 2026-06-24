@@ -29,6 +29,7 @@ export function useDeepModeJobLifecycle({
   const loadingTimerRef = useRef(null);
   const flowStartedAtRef = useRef(0);
   const traceIdRef = useRef("");
+  const firstSnapshotLoggedRef = useRef(false);
 
   function stopPolling() {
     if (pollTimerRef.current) {
@@ -92,6 +93,18 @@ export function useDeepModeJobLifecycle({
         const job = await getLessonJob(jobId);
         if (requestIdRef.current !== requestId) return;
         const snapshot = createDeepCourseLessonSnapshot(job);
+
+        if (snapshot && !firstSnapshotLoggedRef.current) {
+          firstSnapshotLoggedRef.current = true;
+          logDeepLessonTrace("first_snapshot_visible", {
+            traceId,
+            jobId,
+            readyStage: snapshot.readyStage,
+            isComplete: snapshot.isComplete,
+            status: job.status,
+            elapsedMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+          });
+        }
 
         logDeepLessonTrace("poll_status", {
           traceId,
@@ -168,6 +181,7 @@ export function useDeepModeJobLifecycle({
     const flowStartedAt = performance.now();
     traceIdRef.current = traceId;
     flowStartedAtRef.current = flowStartedAt;
+    firstSnapshotLoggedRef.current = false;
     setErrorState(null);
     setScreen("loading");
     setLesson(null);
@@ -293,6 +307,7 @@ export function useDeepModeJobLifecycle({
         return false;
       }
 
+      firstSnapshotLoggedRef.current = false;
       setGeneration(retryJob.generation ?? null);
       setScreen("lesson");
       await pollJob(jobId, requestIdRef.current, traceIdRef.current, flowStartedAtRef.current);
