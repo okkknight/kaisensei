@@ -2,6 +2,12 @@
 
 Append-only resume log.
 
+## 2026-06-24
+
+- Reworked the Deep Mode Interact prompt so Need, systemReply, and Handle read as one learner-system-learner exchange in the same scene instead of a vocabulary drill
+- Reworked the Deep Mode Step In prompt so it reads as a natural role-play conversation, allows light system scene-setting when needed, and keeps the sourceModule wording descriptive rather than overly canonical
+- Updated the prompt regression assertions to match the new wording and verified the result locally with `node --test api/test/deep-course-provider.test.js`
+
 ## 2026-06-23
 
 - Reworked the Deep Mode Interact prompt so Need is the opening line, systemReply is the in-scene bridge, and Handle becomes the learner's follow-up line in one continuous exchange

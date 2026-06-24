@@ -16,7 +16,7 @@ Notes:
 - Keep `PROJECT_CONTEXT.md` authoritative and concise
 - Keep `CHANGELOG.md` append-only
 - Deep Mode is the active focus; Quick Mode should remain stable unless a shared boundary is being changed on purpose
-- The latest verified change is the Deep Mode Interact dialogue-chain rewrite: Need now reads as the opening line, systemReply as the in-scene bridge, and Handle as the learner's follow-up line
-- The Deep Mode prompt also keeps the senior-English-teacher framing, `coreExpression` as a learnable phrase or collocation, and same-scene pack differentiation
+- The latest prompt wording rewrite frames Deep Mode Interact as a single learner-system-learner exchange and Step In as a natural same-scene role-play
+- The prompt still keeps the senior-English-teacher framing, `coreExpression` as a learnable phrase or collocation, and same-scene pack differentiation
 - The Deep Mode normalizer still only enforces structure, answer coverage, and the bridge-line rule for Interact system replies
 - If a future task touches the shared AI or lesson contract boundary, verify both Quick Mode and Deep Mode

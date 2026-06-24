@@ -35,11 +35,13 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - Deep Mode normalizer no longer hard-rejects chunk counts for Understand / Build / Quick Response; it still checks structure, answer coverage, and required arrays
 - Deep Mode normalizer and JSON structure were not changed in this prompt pass, so the contract remains stable while generation quality improves
 - Mobile lesson screens now keep their bottom action bars floating above the viewport on small screens, so long lesson pages do not trap the next-step buttons below the scroll area
+- The current Deep Mode prompt wording now frames Interact as one learner-system-learner exchange in the same scene and frames Step In as a natural role-play conversation rather than a vocabulary review list
+- The latest prompt wording tweak keeps the Step In system line free to do short scene-setting when needed, and softens the `sourceModule` wording so it reads like a tag instead of a strict canonical requirement
 
 ## Current latest task
 
-- Task: Refine Deep Mode Interact / Step In dialogue flow so successful replies enter the chat stream directly with a typing bridge
-- Status: 验收通过
+- Task: Refine Deep Mode Interact / Step In prompt wording so the dialogue reads like a natural role-play exchange instead of a vocabulary review list
+- Status: 已执行待验收
 
 ## Architecture or state flow
 
@@ -77,6 +79,7 @@ Deep Mode planned flow:
 - `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 - Latest API verification after the Deep Mode prompt quality rebuild: `npm --prefix api test`
+- Latest prompt wording verification after the Interact / Step In rewrite: `node --test api/test/deep-course-provider.test.js`
 - Latest frontend deployment verification: `curl -fsS https://boringmax.com/kaisensei/` and `curl -fsS https://boringmax.com/kaisensei/assets/index-D6csJCFz.css`
 
 ## Runtime notes
@@ -88,7 +91,7 @@ Deep Mode planned flow:
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
-- The latest Interact / Step In dialogue-flow rewrite has been verified on the deployed site; if it changes again, re-sync `prototype/dist/` and re-check the live page before calling it done
+- The latest Interact / Step In prompt wording rewrite has only been verified locally so far; if the generated output changes again, re-run the API test, sync the API source to the VPS, and restart `kaisensei.service` before calling it done
 
 ## Key files
 
@@ -124,6 +127,7 @@ Deep Mode planned flow:
 - Treat Step In as a continuous role-play conversation in the same scene
 - Keep Deep Mode prompt and its regression assertions in sync whenever generation rules change
 - Keep generation-quality changes separate from structure or schema changes unless the user explicitly asks for both
+- Keep Interact / Step In wording focused on a natural role-play exchange first, and only then refine the bridge-line or source-tag details
 - For backend prompt edits, verify the API test suite and then sync the API source to the VPS
 - For Deep Mode level tuning, keep Normal and Advanced distinct in the prompt itself and verify the prompt/test pair after edits
 - Prefer durable facts over speculative implementation details
