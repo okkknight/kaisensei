@@ -27,7 +27,13 @@ export function getPreviousDeepPhase(phase) {
   return DEEP_PHASE_ORDER[Math.max(currentIndex - 1, 0)];
 }
 
-export function createDeepCourseState({ level = "Normal", photoPreviewUrl = "", phase = "loading", loadingMessageIndex = 0 } = {}) {
+export function createDeepCourseState({
+  level = "Normal",
+  photoPreviewUrl = "",
+  phase = "loading",
+  loadingMessageIndex = 0,
+  lessonReadyStage = null,
+} = {}) {
   const moduleIndex = isDeepModulePhase(phase) ? getDeepModuleIndex(phase) : -1;
 
   return {
@@ -35,6 +41,7 @@ export function createDeepCourseState({ level = "Normal", photoPreviewUrl = "", 
     level,
     photoPreviewUrl,
     phase,
+    lessonReadyStage,
     moduleIndex,
     completedPhases: getCompletedPhases(phase),
     phases: DEEP_PHASE_ORDER,

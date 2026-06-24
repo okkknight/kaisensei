@@ -15,6 +15,7 @@ export function useDeepModeJobLifecycle({
   const [level, setLevel] = useState(initialLevel);
   const [screen, setScreen] = useState(initialFile ? "loading" : "empty");
   const [lesson, setLesson] = useState(null);
+  const [generation, setGeneration] = useState(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [errorState, setErrorState] = useState(null);
@@ -96,6 +97,7 @@ export function useDeepModeJobLifecycle({
         });
 
         if (job.status === "queued" || job.status === "running") {
+          setGeneration(job.generation ?? null);
           await pollJob(jobId, requestId, traceId, flowStartedAt);
           return;
         }
@@ -108,6 +110,7 @@ export function useDeepModeJobLifecycle({
             jobId,
             totalMs: roundDeepLessonMs(performance.now() - flowStartedAt),
           });
+          setGeneration(job.generation ?? null);
           setLesson(job.lesson);
           setLevel(job.lesson.level);
           setScreen("lesson");
@@ -147,6 +150,7 @@ export function useDeepModeJobLifecycle({
     setErrorState(null);
     setScreen("loading");
     setLesson(null);
+    setGeneration(null);
     setLevel(nextLevel);
     setPreviewFromFile(file);
     selectedFileRef.current = file;
@@ -207,6 +211,7 @@ export function useDeepModeJobLifecycle({
       cancelPendingWork();
       selectedFileRef.current = null;
       setLesson(null);
+      setGeneration(null);
       setErrorState(null);
       setScreen("empty");
       setLevel(initialLevel);
@@ -232,6 +237,7 @@ export function useDeepModeJobLifecycle({
     cancelPendingWork();
     selectedFileRef.current = null;
     setLesson(null);
+    setGeneration(null);
     setErrorState(null);
     setScreen("empty");
     clearPreview();
@@ -252,6 +258,7 @@ export function useDeepModeJobLifecycle({
     level,
     screen,
     lesson,
+    generation,
     photoPreviewUrl,
     loadingMessage: loadingMessages[loadingMessageIndex],
     loadingMessageIndex,

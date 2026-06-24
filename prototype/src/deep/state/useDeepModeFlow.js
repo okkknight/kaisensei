@@ -3,6 +3,7 @@ import { DEEP_COPY } from "../copy.js";
 import { createDeepCourseState, getNextDeepPhase, getPreviousDeepPhase } from "./deep-course-state.js";
 import { createDeepCourseViewModel } from "../schema/deep-course-schema.js";
 import { useDeepModeJobLifecycle } from "./useDeepModeJobLifecycle.js";
+import { useDeepGenerationSnapshot } from "./staged-generation/useDeepGenerationSnapshot.js";
 
 export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", onExitToCamera } = {}) {
   const job = useDeepModeJobLifecycle({
@@ -11,8 +12,20 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
     onExitToCamera,
   });
   const [phase, setPhase] = useState(initialFile ? "loading" : "overview");
+  const lessonSnapshot = useDeepGenerationSnapshot({
+    lesson: job.lesson,
+    generation: job.generation,
+    level: job.level,
+  });
 
   useEffect(() => {
+    if (lessonSnapshot) {
+      if (phase === "loading") {
+        setPhase("overview");
+      }
+      return;
+    }
+
     if (job.screen === "loading") {
       setPhase("loading");
       return;
@@ -21,11 +34,18 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
     if (job.lesson && phase === "loading") {
       setPhase("overview");
     }
-  }, [job.lesson, job.screen, phase]);
+  }, [job.lesson, job.screen, lessonSnapshot, phase]);
 
   const viewModel = useMemo(
-    () => (job.lesson ? createDeepCourseViewModel({ lesson: job.lesson, photoPreviewUrl: job.photoPreviewUrl }) : null),
-    [job.lesson, job.photoPreviewUrl]
+    () =>
+      lessonSnapshot
+        ? createDeepCourseViewModel({
+            lesson: lessonSnapshot.lesson,
+            photoPreviewUrl: job.photoPreviewUrl,
+            lessonReadyStage: lessonSnapshot.readyStage,
+          })
+        : null,
+    [job.photoPreviewUrl, lessonSnapshot]
   );
 
   const state = useMemo(() => {
@@ -34,8 +54,9 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
       photoPreviewUrl: job.photoPreviewUrl,
       phase,
       loadingMessageIndex: job.loadingMessageIndex,
+      lessonReadyStage: lessonSnapshot?.readyStage ?? null,
     });
-  }, [job.level, job.loadingMessageIndex, job.photoPreviewUrl, phase]);
+  }, [job.level, job.loadingMessageIndex, job.photoPreviewUrl, lessonSnapshot?.readyStage, phase]);
 
   function goNext() {
     setPhase((current) => getNextDeepPhase(current));
@@ -82,7 +103,9 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
 
   return {
     phase,
-    lesson: job.lesson,
+    lesson: lessonSnapshot?.lesson ?? job.lesson,
+    lessonReadyStage: lessonSnapshot?.readyStage ?? null,
+    lessonSnapshot,
     viewModel,
     state,
     photoPreviewUrl: job.photoPreviewUrl,

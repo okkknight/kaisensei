@@ -20,7 +20,9 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
     return <DeepErrorScreen onRetry={flow.retryFromError} onBackToCamera={flow.exitToCamera} />;
   }
 
-  if (flow.phase === "loading") {
+  const showOverview = flow.phase === "overview" || (flow.phase === "loading" && Boolean(flow.lessonReadyStage));
+
+  if (flow.phase === "loading" && !showOverview) {
     return <DeepLoadingScreen message={flow.loadingMessage} stageIndex={flow.state.loadingMessageIndex} />;
   }
 
@@ -28,7 +30,7 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
     return <DeepErrorScreen onRetry={flow.retryFromError} onBackToCamera={flow.exitToCamera} />;
   }
 
-  if (flow.phase === "overview") {
+  if (showOverview) {
     return <DeepOverviewScreen overviewVM={flow.viewModel.overviewVM} onStart={flow.goNext} onBack={flow.goBack} />;
   }
 

@@ -517,7 +517,7 @@ export function createDeepCourseLesson(level = "Normal") {
 
 export const DEEP_COURSE_SCHEMA = createDeepCourseLesson("Normal");
 
-export function createDeepCourseViewModel({ lesson, photoPreviewUrl = "" } = {}) {
+export function createDeepCourseViewModel({ lesson, photoPreviewUrl = "", lessonReadyStage = "complete" } = {}) {
   if (!lesson) {
     return null;
   }
@@ -604,5 +604,6 @@ export function createDeepCourseViewModel({ lesson, photoPreviewUrl = "" } = {})
         })),
       },
     },
+    lessonReadyStage,
   };
 }

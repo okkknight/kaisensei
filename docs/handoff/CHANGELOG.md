@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-24
 
+- Implemented Task 3 of the staged Deep Mode generation plan: the frontend now derives a partial lesson snapshot from frozen stage data, renders the overview as soon as `overview + notice` is ready, and carries the ready-stage marker through the Deep flow state
+- Added the staged snapshot helper and flow hook under `prototype/src/deep/state/staged-generation/` so the running job can be consumed in one normalized shape before and after success
+- Taught the Deep Mode app shell to prefer the partial snapshot while loading, and extended the course schema / state objects so the ready stage is visible to the rest of the flow
+- Updated the Deep smoke test to prove the overview appears from the staged snapshot before the final lesson response arrives, and aligned the Playwright dev-server URL with the prototype's real `5173` port
 - Implemented the staged Deep Mode backend orchestration: added stage context, stage prompt, stage normalizer, and a serial stage runner that freezes each stage into `job.generation`
 - Added stage-aware deep provider methods and tests so `overview_notice` can be generated and normalized independently of the full-course path
 - Expanded API coverage for staged generation so the runner test now verifies the full `overview_notice -> interpret -> interact -> step_in` sequence and the frozen background passed to later stages

@@ -27,6 +27,7 @@ export const DEEP_COPY = {
       description: "Setting up Interact and Step In.",
     },
   ],
+  nextStageWaiting: "正在生成下一阶段",
   overviewPrompt: "Ready to explore this scene?",
   overviewTitle: "Overview",
   overviewModeLabel: "Deep Mode",

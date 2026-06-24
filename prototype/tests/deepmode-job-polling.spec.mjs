@@ -2,6 +2,10 @@ import { test, expect } from "playwright/test";
 
 test("deep mode polls lesson jobs before rendering the overview", async ({ page }) => {
   let pollCount = 0;
+  let releaseFinalPoll = () => {};
+  const finalPollGate = new Promise((resolve) => {
+    releaseFinalPoll = resolve;
+  });
 
   await page.route("**/v1/lesson-jobs", async (route) => {
     await route.fulfill({
@@ -15,7 +19,38 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
     pollCount += 1;
     const body =
       pollCount < 2
-        ? { jobId: "job_123", status: "running", lesson: null, error: null }
+        ? {
+            jobId: "job_123",
+            status: "running",
+            lesson: null,
+            generation: {
+              activeStage: "interpret",
+              stageStates: {
+                overview_notice: "ready",
+                interpret: "running",
+                interact: "pending",
+                step_in: "pending",
+              },
+              frozenLesson: {
+                overview: {
+                  keywords: ["coffee", "table", "laptop"],
+                  sceneDescriptionChinese: "安静的桌面工作场景",
+                  startPromptChinese: "点击开始这次学习之旅",
+                },
+                notice: {
+                  title: "Notice",
+                  goal: "Describe what is visible in the photo.",
+                  expressionPacks: [],
+                },
+                interpret: null,
+                interact: null,
+                stepIn: null,
+              },
+              errorStage: null,
+              errorMessage: null,
+            },
+            error: null,
+          }
         : {
             jobId: "job_123",
             status: "succeeded",
@@ -53,8 +88,53 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
                 },
               },
             },
+            generation: {
+              activeStage: "complete",
+              stageStates: {
+                overview_notice: "ready",
+                interpret: "ready",
+                interact: "ready",
+                step_in: "ready",
+              },
+              frozenLesson: {
+                overview: {
+                  keywords: ["coffee", "table", "laptop"],
+                  sceneDescriptionChinese: "安静的桌面工作场景",
+                  startPromptChinese: "点击开始这次学习之旅",
+                },
+                notice: {
+                  title: "Notice",
+                  goal: "Describe what is visible in the photo.",
+                  expressionPacks: [],
+                },
+                interpret: {
+                  title: "Interpret",
+                  goal: "Infer what may be happening in the scene.",
+                  expressionPacks: [],
+                },
+                interact: {
+                  title: "Interact",
+                  goal: "Express a need and respond naturally.",
+                  taskPacks: [],
+                },
+                stepIn: {
+                  title: "Step In",
+                  goal: "Complete one full scene conversation.",
+                  dialogue: {
+                    scene: "You are at a desk with your laptop, and a coworker is nearby.",
+                    turns: [],
+                  },
+                },
+              },
+              errorStage: null,
+              errorMessage: null,
+            },
             error: null,
           };
+
+    if (pollCount > 1) {
+      await finalPollGate;
+    }
 
     await route.fulfill({
       status: 200,
@@ -72,5 +152,6 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
   });
 
   await expect(page.getByText("coffee · table · laptop")).toBeVisible();
+  releaseFinalPoll();
   await expect.poll(() => pollCount).toBeGreaterThan(1);
 });
