@@ -41,7 +41,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Add the staged-generation envelope to the Deep Mode job contract
+- Task: Implement the staged Deep Mode backend orchestration
 - Status: developed, pending independent review
 
 ## Architecture or state flow

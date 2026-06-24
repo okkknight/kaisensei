@@ -316,7 +316,7 @@ function normalizeSourceModule(sourceModule, path) {
   return mappedSourceModule;
 }
 
-function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.notice, exerciseConfig = deepCourseDefaultConfig.exercise) {
+export function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.notice, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(pack)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -341,7 +341,7 @@ function normalizeExpressionPack(pack, path, config = deepCourseDefaultConfig.no
   };
 }
 
-function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact, exerciseConfig = deepCourseDefaultConfig.exercise) {
+export function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(pack)) {
     fail(`Missing or invalid object at ${path}`, { path });
   }
@@ -417,7 +417,7 @@ function normalizeTaskPack(pack, path, config = deepCourseDefaultConfig.interact
   return normalized;
 }
 
-function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.stepIn, exerciseConfig = deepCourseDefaultConfig.exercise) {
+export function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.stepIn, exerciseConfig = deepCourseDefaultConfig.exercise) {
   if (!isPlainObject(dialogue)) {
     fail("Missing or invalid object at modules.stepIn.dialogue", {
       path: "modules.stepIn.dialogue",
@@ -485,7 +485,7 @@ function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConfig.step
   };
 }
 
-function normalizeOverview(overview, config = deepCourseDefaultConfig) {
+export function normalizeOverview(overview, config = deepCourseDefaultConfig) {
   if (!isPlainObject(overview)) {
     fail("Missing or invalid object at overview", { path: "overview" });
   }
@@ -501,7 +501,7 @@ function normalizeOverview(overview, config = deepCourseDefaultConfig) {
   };
 }
 
-function normalizeLevel(level) {
+export function normalizeLevel(level) {
   const normalized = ensureString(level, "level").toLowerCase();
   if (normalized !== "normal" && normalized !== "advanced") {
     fail("Invalid lesson level", { path: "level" });

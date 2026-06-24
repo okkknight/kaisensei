@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLessonJobRunner } from "../src/services/job-runner.js";
 import { LessonValidationError } from "../src/shared/ai/errors.js";
+import { createLessonJobStore } from "../src/stores/in-memory-job-store.js";
+import { buildValidDeepCoursePayload } from "./deep-course-fixture.js";
 
 async function waitFor(condition, timeoutMs = 1000) {
   const startedAt = Date.now();
@@ -140,4 +142,94 @@ test("quick jobs keep using the quick provider from the registry", async () => {
   assert.equal(deepCalls.length, 0);
   assert.equal(quickCalls[0].payload.mode, "quick");
   assert.equal(calls.find((entry) => entry.type === "store" && entry.patch.status === "succeeded").jobId, "job_quick");
+});
+
+test("deep jobs run staged generation serially and freeze each stage", async () => {
+  const jobStore = createLessonJobStore();
+  const fullPayload = buildValidDeepCoursePayload();
+  const calls = [];
+  const provider = {
+    async generateStage({ stage, background, repairNotes }) {
+      calls.push({ stage, background, repairNotes });
+
+      if (stage === "overview_notice") {
+        return {
+          mode: "deep",
+          level: "normal",
+          overview: fullPayload.overview,
+          modules: {
+            notice: fullPayload.modules.notice,
+          },
+        };
+      }
+
+      if (stage === "interpret") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            interpret: fullPayload.modules.interpret,
+          },
+        };
+      }
+
+      if (stage === "interact") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            interact: fullPayload.modules.interact,
+          },
+        };
+      }
+
+      if (stage === "step_in") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            stepIn: fullPayload.modules.stepIn,
+          },
+        };
+      }
+
+      throw new Error(`Unexpected stage ${stage}`);
+    },
+  };
+
+  const runner = createLessonJobRunner({
+    jobStore,
+    providers: { deep: provider },
+  });
+
+  const job = jobStore.create({
+    level: "Normal",
+    mode: "deep",
+    traceId: "trace-stage",
+  });
+
+  runner.enqueue(job.jobId, {
+    mode: "deep",
+    level: "Normal",
+    imageBuffer: Buffer.from("fake-image"),
+    mimeType: "image/jpeg",
+    traceId: "trace-stage",
+  });
+
+  await waitFor(() => jobStore.get(job.jobId).status === "succeeded");
+
+  const stageOrder = calls.map((entry) => entry.stage);
+  assert.deepEqual(stageOrder, ["overview_notice", "interpret", "interact", "step_in"]);
+  assert.equal(calls[1].background.notice.expressionPacks.length, 3);
+  assert.equal(calls[2].background.interpret.expressionPacks.length, 3);
+  assert.equal(calls[3].background.interact.taskPacks.length, 2);
+
+  const stored = jobStore.get(job.jobId);
+  assert.equal(stored.status, "succeeded");
+  assert.equal(stored.generation.activeStage, "complete");
+  assert.equal(stored.generation.stageStates.overview_notice, "ready");
+  assert.equal(stored.generation.stageStates.step_in, "ready");
+  assert.equal(stored.generation.frozenLesson.notice.expressionPacks.length, 3);
+  assert.equal(stored.generation.frozenLesson.stepIn.dialogue.turns.length, 8);
+  assert.equal(stored.lesson.modules.stepIn.dialogue.turns.length, 8);
 });

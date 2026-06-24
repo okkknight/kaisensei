@@ -3,6 +3,8 @@ import { LessonValidationError } from "../../shared/ai/errors.js";
 import { deepCourseDefaultConfig, deepCourseDefaultFixedCopy } from "../config/course.js";
 import { normalizeDeepCoursePayload } from "./course-normalizer.js";
 import { buildDeepCoursePrompt } from "./course-prompt.js";
+import { buildDeepStagePrompt } from "./staged-generation/deep-stage-prompt.js";
+import { normalizeDeepStagePayload } from "./staged-generation/deep-stage-normalizer.js";
 
 function extractJsonText(raw) {
   const startIndex = raw.search(/[\[{]/);
@@ -217,6 +219,147 @@ export function createDeepGeminiApiProvider({
 
         traceLog("provider", "lesson_ready", {
           traceId: traceId || "",
+          totalMs: Date.now() - startedAt,
+          mode: "deep",
+        });
+
+        return lesson;
+      } catch (error) {
+        if (error instanceof LessonValidationError) {
+          throw error;
+        }
+
+        throw toRuntimeError("The lesson got lost on the way.", error instanceof Error ? error.message : String(error));
+      }
+    },
+    async generateStage({ stage, imageBuffer, mimeType, level, traceId, repairNotes, background }) {
+      const startedAt = Date.now();
+      const promptStartedAt = Date.now();
+      const prompt = buildDeepStagePrompt({
+        stage,
+        level,
+        repairNotes,
+        background,
+        config: deepCourseDefaultConfig,
+        fixedCopy: deepCourseDefaultFixedCopy,
+      });
+      const promptMs = Date.now() - promptStartedAt;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const imagePart = {
+        inline_data: {
+          mime_type: mimeTypeToGeminiName(mimeType),
+          data: imageBuffer.toString("base64"),
+        },
+      };
+
+      traceLog("provider", "lesson_prepare", {
+        traceId: traceId || "",
+        stage,
+        level,
+        mimeType,
+        imageBytes: imageBuffer.length,
+        model,
+        mode: "deep",
+        promptMs,
+      });
+
+      try {
+        const requestStartedAt = Date.now();
+        traceLog("provider", "gemini_start", {
+          traceId: traceId || "",
+          stage,
+          level,
+          model,
+          imageBytes: imageBuffer.length,
+          mode: "deep",
+        });
+
+        const response = await fetchImpl(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  imagePart,
+                  {
+                    text: prompt,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.35,
+              responseMimeType: "application/json",
+            },
+          }),
+        });
+
+        const responseText = await response.text();
+        traceLog("provider", "gemini_done", {
+          traceId: traceId || "",
+          stage,
+          ms: Date.now() - requestStartedAt,
+          status: response.status,
+          rawBytes: responseText.length,
+        });
+
+        if (!response.ok) {
+          throw toRuntimeError("The lesson got lost on the way.", responseText || `Gemini request failed with status ${response.status}`);
+        }
+
+        let parsedResponse;
+        try {
+          parsedResponse = JSON.parse(responseText);
+        } catch {
+          throw toRuntimeError("The lesson got lost on the way.", "Gemini response was not valid JSON");
+        }
+
+        const raw = extractTextFromResponse(parsedResponse);
+        if (!raw) {
+          throw toRuntimeError("The lesson got lost on the way.", "Gemini response did not include any text");
+        }
+
+        const extractStartedAt = Date.now();
+        const jsonText = extractJsonText(raw);
+        traceLog("provider", "json_extracted", {
+          traceId: traceId || "",
+          stage,
+          mode: "deep",
+          ms: Date.now() - extractStartedAt,
+          rawBytes: raw.length,
+          jsonBytes: jsonText.length,
+        });
+
+        const parseStartedAt = Date.now();
+        let parsed;
+        try {
+          parsed = JSON.parse(jsonText);
+        } catch {
+          throw toRuntimeError("The lesson got lost on the way.", "Gemini output was not valid JSON");
+        }
+        traceLog("provider", "json_parsed", {
+          traceId: traceId || "",
+          stage,
+          mode: "deep",
+          ms: Date.now() - parseStartedAt,
+        });
+
+        const normalizeStartedAt = Date.now();
+        const lesson = normalizeDeepStagePayload({ stage, payload: parsed, config: deepCourseDefaultConfig });
+        traceLog("provider", "lesson_normalized", {
+          traceId: traceId || "",
+          stage,
+          ms: Date.now() - normalizeStartedAt,
+          mode: "deep",
+        });
+
+        traceLog("provider", "lesson_ready", {
+          traceId: traceId || "",
+          stage,
           totalMs: Date.now() - startedAt,
           mode: "deep",
         });

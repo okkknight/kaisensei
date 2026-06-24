@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-24
 
+- Implemented the staged Deep Mode backend orchestration: added stage context, stage prompt, stage normalizer, and a serial stage runner that freezes each stage into `job.generation`
+- Added stage-aware deep provider methods and tests so `overview_notice` can be generated and normalized independently of the full-course path
+- Expanded API coverage for staged generation so the runner test now verifies the full `overview_notice -> interpret -> interact -> step_in` sequence and the frozen background passed to later stages
 - Implemented Task 1 of the staged Deep Mode generation plan: added a `generation` envelope to the job contract, persisted it in the in-memory job store, and returned it from lesson job create / poll responses
 - Added API coverage so job-store and route tests now lock the staged-generation envelope shape instead of assuming only `status` and `lesson`
 - Drafted the staged Deep Mode generation spec so `overview + notice` becomes the fixed first playable unit, `interpret -> interact -> step in` stay serial, and waiting pages only appear when the next stage is not ready

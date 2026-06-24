@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { normalizeDeepCoursePayload } from "../src/deep/services/course-normalizer.js";
+import { normalizeDeepStagePayload } from "../src/deep/services/staged-generation/deep-stage-normalizer.js";
 import { buildValidDeepCoursePayload } from "./deep-course-fixture.js";
 
 function makeExample(label) {
@@ -165,4 +166,45 @@ test("normalizeDeepCoursePayload rejects dialogue system replies that expose the
   payload.modules.interact.taskPacks[0].dialogues[0].systemReply = `Please ${handleCoreExpression}.`;
 
   assert.throws(() => normalizeDeepCoursePayload(payload), /bridge line/i);
+});
+
+test("normalizeDeepStagePayload accepts overview_notice fragments", () => {
+  const payload = buildValidDeepCoursePayload();
+
+  const normalized = normalizeDeepStagePayload({
+    stage: "overview_notice",
+    payload: {
+      mode: "deep",
+      level: "Normal",
+      overview: payload.overview,
+      modules: {
+        notice: payload.modules.notice,
+      },
+    },
+  });
+
+  assert.equal(normalized.mode, "deep");
+  assert.equal(normalized.level, "normal");
+  assert.equal(normalized.overview.keywords.length, 3);
+  assert.equal(normalized.modules.notice.expressionPacks.length, 3);
+});
+
+test("normalizeDeepStagePayload accepts step_in fragments", () => {
+  const payload = buildValidDeepCoursePayload();
+
+  const normalized = normalizeDeepStagePayload({
+    stage: "step_in",
+    payload: {
+      mode: "deep",
+      level: "Advanced",
+      modules: {
+        stepIn: payload.modules.stepIn,
+      },
+    },
+  });
+
+  assert.equal(normalized.mode, "deep");
+  assert.equal(normalized.level, "advanced");
+  assert.equal(normalized.modules.stepIn.dialogue.turns.length, 8);
+  assert.equal(normalized.modules.stepIn.dialogue.turns[0].speaker, "system");
 });

@@ -173,3 +173,48 @@ test("deep prompt uses different level tuning for normal and advanced lessons", 
   assert.match(advancedPrompt, /more polished, natural expression/i);
   assert.doesNotMatch(advancedPrompt, /Normal tone:/);
 });
+
+test("deep codex provider generates staged overview_notice payloads", async () => {
+  const prompts = [];
+  const fullPayload = buildValidDeepCoursePayload();
+  const provider = createDeepCodexCliProvider({
+    model: "test-model",
+    runCliPrompt: async ({ prompt }) => {
+      prompts.push(prompt);
+
+      if (prompt.includes("STAGE MODE: overview_notice")) {
+        return JSON.stringify({
+          mode: "deep",
+          level: "Normal",
+          overview: fullPayload.overview,
+          modules: {
+            notice: fullPayload.modules.notice,
+          },
+        });
+      }
+
+      throw new Error("Unexpected prompt in staged provider test");
+    },
+  });
+
+  const stageLesson = await provider.generateStage({
+    stage: "overview_notice",
+    imageBuffer: Buffer.from("fake-image"),
+    mimeType: "image/jpeg",
+    level: "Normal",
+    traceId: "trace-stage",
+    background: {
+      overview: fullPayload.overview,
+    },
+  });
+
+  assert.equal(prompts.length, 1);
+  assert.match(prompts[0], /STAGE MODE: overview_notice/);
+  assert.match(prompts[0], /FROZEN BACKGROUND:/);
+  assert.match(prompts[0], /RETURN ONLY THIS STAGE SHAPE:/);
+  assert.equal(stageLesson.mode, "deep");
+  assert.equal(stageLesson.level, "normal");
+  assert.equal(stageLesson.overview.keywords.length, 3);
+  assert.equal(stageLesson.modules.notice.expressionPacks.length, 3);
+  assert.equal(stageLesson.modules.notice.title, "Notice");
+});

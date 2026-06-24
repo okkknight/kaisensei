@@ -1,5 +1,6 @@
 import { traceLog } from "./trace-log.js";
 import { LessonValidationError } from "../shared/ai/errors.js";
+import { createDeepStageOrchestrator } from "../deep/services/staged-generation/deep-stage-orchestrator.js";
 
 function toJobError(error) {
   if (error instanceof LessonValidationError) {
@@ -91,6 +92,59 @@ export function createLessonJobRunner({ jobStore, provider, providers }) {
           providers,
           mode: payload.mode,
         });
+
+        if (String(payload.mode || "quick").toLowerCase() === "deep" && typeof activeProvider.generateStage === "function") {
+          const deepOrchestrator = createDeepStageOrchestrator({
+            jobStore,
+            provider: activeProvider,
+          });
+
+          try {
+            traceLog("runner", "provider_start", {
+              traceId: payload.traceId || "",
+              jobId,
+              mode: payload.mode || "quick",
+            });
+
+            await deepOrchestrator.run(jobId, payload);
+
+            traceLog("runner", "provider_done", {
+              traceId: payload.traceId || "",
+              jobId,
+              mode: payload.mode || "quick",
+            });
+
+            traceLog("runner", "job_succeeded", {
+              traceId: payload.traceId || "",
+              jobId,
+              totalMs: Date.now() - startedAt,
+              mode: payload.mode || "quick",
+            });
+            return;
+          } catch (error) {
+            traceLog("runner", "provider_error", {
+              traceId: payload.traceId || "",
+              jobId,
+              mode: payload.mode || "quick",
+              ...describeJobError(error),
+            });
+
+            traceLog("runner", "job_failed", {
+              traceId: payload.traceId || "",
+              jobId,
+              totalMs: Date.now() - startedAt,
+              ...describeJobError(error),
+              mode: payload.mode || "quick",
+            });
+
+            jobStore.update(jobId, {
+              status: "failed",
+              lesson: null,
+              error: toJobError(error),
+            });
+            return;
+          }
+        }
 
         let attempt = 0;
         let lastError = null;

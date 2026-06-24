@@ -5,6 +5,8 @@ import { LessonValidationError } from "../../shared/ai/errors.js";
 import { deepCourseDefaultConfig, deepCourseDefaultFixedCopy } from "../config/course.js";
 import { buildDeepCoursePrompt } from "./course-prompt.js";
 import { normalizeDeepCoursePayload } from "./course-normalizer.js";
+import { buildDeepStagePrompt } from "./staged-generation/deep-stage-prompt.js";
+import { normalizeDeepStagePayload } from "./staged-generation/deep-stage-normalizer.js";
 
 function extractJsonText(raw) {
   const startIndex = raw.search(/[\[{]/);
@@ -148,6 +150,117 @@ export function createDeepCodexCliProvider({ model, runCliPrompt: runCliPromptIm
 
         traceLog("provider", "lesson_ready", {
           traceId: traceId || "",
+          totalMs: Date.now() - startedAt,
+          mode: "deep",
+        });
+
+        return lesson;
+      } finally {
+        await workspace.cleanup();
+      }
+    },
+    async generateStage({ stage, imageBuffer, mimeType, level, traceId, repairNotes, background }) {
+      const startedAt = Date.now();
+      const workspaceStartedAt = Date.now();
+      const workspace = await createImageWorkspace({
+        imageBuffer,
+        mimeType,
+        prefix: "kaisensei-deep-stage-",
+      });
+      const workspaceMs = Date.now() - workspaceStartedAt;
+
+      const promptStartedAt = Date.now();
+      const prompt = buildDeepStagePrompt({
+        stage,
+        level,
+        repairNotes,
+        background,
+        config: deepCourseDefaultConfig,
+        fixedCopy: deepCourseDefaultFixedCopy,
+      });
+      const promptMs = Date.now() - promptStartedAt;
+
+      traceLog("provider", "lesson_prepare", {
+        traceId: traceId || "",
+        level,
+        stage,
+        mimeType,
+        imageBytes: imageBuffer.length,
+        mode: "deep",
+        workspaceMs,
+        promptMs,
+      });
+
+      try {
+        const codexStartedAt = Date.now();
+        traceLog("provider", "codex_start", {
+          traceId: traceId || "",
+          level,
+          stage,
+          imageBytes: imageBuffer.length,
+          mode: "deep",
+        });
+
+        const raw = await runCliPromptImpl({
+          binary,
+          model,
+          imagePath: workspace.imagePath,
+          prompt,
+          cwd: workspace.tempDir,
+        });
+
+        traceLog("provider", "codex_done", {
+          traceId: traceId || "",
+          stage,
+          ms: Date.now() - codexStartedAt,
+          rawBytes: raw.length,
+        });
+
+        if (!raw) {
+          throw new LessonValidationError("The lesson got lost on the way.", {
+            code: "provider_empty_output",
+          });
+        }
+
+        const extractStartedAt = Date.now();
+        const jsonText = extractJsonText(raw);
+        traceLog("provider", "json_extracted", {
+          traceId: traceId || "",
+          stage,
+          mode: "deep",
+          ms: Date.now() - extractStartedAt,
+          rawBytes: raw.length,
+          jsonBytes: jsonText.length,
+        });
+
+        const parseStartedAt = Date.now();
+        let parsed;
+        try {
+          parsed = JSON.parse(jsonText);
+        } catch {
+          throw new LessonValidationError("The lesson got lost on the way.", {
+            code: "provider_parse_error",
+          });
+        }
+        traceLog("provider", "json_parsed", {
+          traceId: traceId || "",
+          stage,
+          mode: "deep",
+          ms: Date.now() - parseStartedAt,
+        });
+
+        const normalizeStartedAt = Date.now();
+        const lesson = normalizeDeepStagePayload({ stage, payload: parsed, config: deepCourseDefaultConfig });
+        traceLog("provider", "lesson_normalized", {
+          traceId: traceId || "",
+          stage,
+          mode: "deep",
+          ms: Date.now() - normalizeStartedAt,
+        });
+
+        traceLog("provider", "lesson_ready", {
+          traceId: traceId || "",
+          stage,
           totalMs: Date.now() - startedAt,
           mode: "deep",
         });
