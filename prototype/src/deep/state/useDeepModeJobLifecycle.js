@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { createLessonJob, getLessonJob, LessonApiError } from "../../lib/lesson-api.js";
+import { createLessonJob, getLessonJob, retryLessonJob, LessonApiError } from "../../lib/lesson-api.js";
 import { DEEP_COPY } from "../copy.js";
 import { createDeepLessonTraceId, logDeepLessonTrace, roundDeepLessonMs } from "./deep-lesson-trace.js";
+import { createDeepCourseLessonSnapshot } from "./staged-generation/deep-generation-state.js";
 
 const loadingMessages = DEEP_COPY.loading;
 const loadingTickMs = 850;
@@ -19,12 +20,15 @@ export function useDeepModeJobLifecycle({
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [errorState, setErrorState] = useState(null);
+  const [jobId, setJobId] = useState("");
 
   const selectedFileRef = useRef(null);
   const previewUrlRef = useRef("");
   const requestIdRef = useRef(0);
   const pollTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
+  const flowStartedAtRef = useRef(0);
+  const traceIdRef = useRef("");
 
   function stopPolling() {
     if (pollTimerRef.current) {
@@ -87,6 +91,7 @@ export function useDeepModeJobLifecycle({
         const pollStartedAt = performance.now();
         const job = await getLessonJob(jobId);
         if (requestIdRef.current !== requestId) return;
+        const snapshot = createDeepCourseLessonSnapshot(job);
 
         logDeepLessonTrace("poll_status", {
           traceId,
@@ -113,6 +118,20 @@ export function useDeepModeJobLifecycle({
           setGeneration(job.generation ?? null);
           setLesson(job.lesson);
           setLevel(job.lesson.level);
+          setScreen("lesson");
+          setErrorState(null);
+          return;
+        }
+
+        if (job.status === "failed" && snapshot) {
+          logDeepLessonTrace("flow_staged_failed", {
+            traceId,
+            jobId,
+            totalMs: roundDeepLessonMs(performance.now() - flowStartedAt),
+            failedStage: job.generation?.errorStage || "",
+          });
+          setGeneration(job.generation ?? null);
+          setLevel(job.level);
           setScreen("lesson");
           setErrorState(null);
           return;
@@ -147,6 +166,8 @@ export function useDeepModeJobLifecycle({
     const requestId = requestIdRef.current;
     const traceId = createTraceId();
     const flowStartedAt = performance.now();
+    traceIdRef.current = traceId;
+    flowStartedAtRef.current = flowStartedAt;
     setErrorState(null);
     setScreen("loading");
     setLesson(null);
@@ -154,6 +175,7 @@ export function useDeepModeJobLifecycle({
     setLevel(nextLevel);
     setPreviewFromFile(file);
     selectedFileRef.current = file;
+    setJobId("");
     startLoadingTicker();
 
     logDeepLessonTrace("flow_start", {
@@ -190,6 +212,8 @@ export function useDeepModeJobLifecycle({
         elapsedMs: roundDeepLessonMs(performance.now() - uploadStartedAt),
       });
 
+      setJobId(created.jobId);
+
       await pollJob(created.jobId, requestId, traceId, flowStartedAt);
     } catch (error) {
       if (requestIdRef.current !== requestId) return;
@@ -212,6 +236,7 @@ export function useDeepModeJobLifecycle({
       selectedFileRef.current = null;
       setLesson(null);
       setGeneration(null);
+      setJobId("");
       setErrorState(null);
       setScreen("empty");
       setLevel(initialLevel);
@@ -238,6 +263,7 @@ export function useDeepModeJobLifecycle({
     selectedFileRef.current = null;
     setLesson(null);
     setGeneration(null);
+    setJobId("");
     setErrorState(null);
     setScreen("empty");
     clearPreview();
@@ -254,6 +280,33 @@ export function useDeepModeJobLifecycle({
     onExitToCamera?.();
   }
 
+  async function handleRetryStage() {
+    if (!jobId) {
+      return false;
+    }
+
+    setErrorState(null);
+
+    try {
+      const retryJob = await retryLessonJob(jobId);
+      if (!retryJob) {
+        return false;
+      }
+
+      setGeneration(retryJob.generation ?? null);
+      setScreen("lesson");
+      await pollJob(jobId, requestIdRef.current, traceIdRef.current, flowStartedAtRef.current);
+      return true;
+    } catch (error) {
+      const message = error instanceof LessonApiError ? error.message : DEEP_COPY.retryAction;
+      logDeepLessonTrace("retry_stage_failed", {
+        jobId,
+        message,
+      });
+      return false;
+    }
+  }
+
   return {
     level,
     screen,
@@ -265,6 +318,7 @@ export function useDeepModeJobLifecycle({
     errorState,
     handleRetakePhoto,
     handleRetry,
+    handleRetryStage,
     generateLessonFromFile,
   };
 }

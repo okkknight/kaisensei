@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-24
 
+- Implemented Task 4 of the staged Deep Mode generation plan: Notice, Interpret, and Interact can now open a small waiting page after their milestone screens when the next stage is still pending or failed
+- Added a staged retry route and lifecycle plumbing so a failed Deep stage can resume from its frozen background, then auto-continue once the retried stage becomes ready
+- Updated the Deep Mode smoke test to verify the overview appears from the partial snapshot, the Notice milestone opens a waiting page when Interpret is not ready, and the app auto-advances once the next stage becomes ready
+- Verified the waiting-page flow and staged retry path with `npm --prefix api test`, `npm --prefix prototype run build`, and `npm --prefix prototype run test:deepmode`
 - Implemented Task 3 of the staged Deep Mode generation plan: the frontend now derives a partial lesson snapshot from frozen stage data, renders the overview as soon as `overview + notice` is ready, and carries the ready-stage marker through the Deep flow state
 - Added the staged snapshot helper and flow hook under `prototype/src/deep/state/staged-generation/` so the running job can be consumed in one normalized shape before and after success
 - Taught the Deep Mode app shell to prefer the partial snapshot while loading, and extended the course schema / state objects so the ready stage is visible to the rest of the flow

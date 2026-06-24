@@ -163,3 +163,64 @@ test("POST /v1/lesson-jobs persists mode and keeps the legacy quick default", as
   const quickCreated = quickRes.json();
   assert.equal(jobStore.get(quickCreated.jobId).mode, "quick");
 });
+
+test("POST /v1/lesson-jobs/:jobId/retry resumes a failed deep job from the failed stage", async () => {
+  const jobStore = createLessonJobStore();
+  const calls = [];
+  const jobRunner = {
+    enqueue(jobId, payload) {
+      calls.push({ jobId, payload });
+    },
+  };
+  const app = createApp({ jobStore, jobRunner });
+  const created = jobStore.create({
+    level: "Normal",
+    mode: "deep",
+    traceId: "trace-deep",
+    imageBuffer: Buffer.from("photo"),
+    mimeType: "image/jpeg",
+  });
+  jobStore.update(created.jobId, {
+    status: "failed",
+    error: { code: "provider_runtime_error", message: "failed interpret" },
+    generation: {
+      activeStage: "interpret",
+      stageStates: {
+        overview_notice: "ready",
+        interpret: "failed",
+        interact: "pending",
+        step_in: "pending",
+      },
+      frozenLesson: {
+        overview: {
+          keywords: ["coffee"],
+          sceneDescriptionChinese: "桌面工作场景",
+          startPromptChinese: "开始",
+        },
+        notice: {
+          title: "Notice",
+          goal: "Describe what is visible in the photo.",
+          expressionPacks: [],
+        },
+        interpret: null,
+        interact: null,
+        stepIn: null,
+      },
+      errorStage: "interpret",
+      errorMessage: "failed interpret",
+    },
+  });
+
+  const res = await app.inject({
+    method: "POST",
+    url: `/v1/lesson-jobs/${created.jobId}/retry`,
+  });
+
+  assert.equal(res.statusCode, 200);
+  const body = res.json();
+  assert.equal(body.status, "queued");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].payload.resumeFromStage, "interpret");
+  assert.equal(calls[0].payload.imageBuffer.toString(), "photo");
+  assert.equal(calls[0].payload.mimeType, "image/jpeg");
+});

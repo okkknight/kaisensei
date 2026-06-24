@@ -1,4 +1,16 @@
 const deepGenerationStageOrder = ["overview_notice", "interpret", "interact", "step_in"];
+const deepGenerationStageNextMap = {
+  overview_notice: "interpret",
+  interpret: "interact",
+  interact: "step_in",
+  step_in: null,
+};
+const deepModulePhaseToStageMap = {
+  notice: "interpret",
+  interpret: "interact",
+  interact: "step_in",
+  stepIn: null,
+};
 
 function normalizeLevel(level) {
   return String(level || "Normal").toLowerCase() === "advanced" ? "advanced" : "normal";
@@ -75,4 +87,33 @@ export function hasDeepLessonSnapshot(job) {
 
 export function getDeepGenerationStageOrder() {
   return [...deepGenerationStageOrder];
+}
+
+export function getDeepGenerationStageStatus(generation, stage) {
+  if (!generation || !stage) {
+    return null;
+  }
+
+  return generation.stageStates?.[stage] ?? null;
+}
+
+export function getDeepGenerationNextStage(stage) {
+  return deepGenerationStageNextMap[stage] ?? null;
+}
+
+export function getDeepGenerationNextStageForModule(modulePhase) {
+  return deepModulePhaseToStageMap[modulePhase] ?? null;
+}
+
+export function getDeepGenerationGateState(generation, modulePhase) {
+  const nextStage = getDeepGenerationNextStageForModule(modulePhase);
+  const nextStageState = nextStage ? getDeepGenerationStageStatus(generation, nextStage) : null;
+
+  return {
+    nextStage,
+    nextStageState,
+    isReady: nextStageState === "ready",
+    isFailed: nextStageState === "failed",
+    isRunning: nextStageState === "running" || nextStageState === "pending",
+  };
 }

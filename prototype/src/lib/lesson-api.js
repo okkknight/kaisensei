@@ -58,3 +58,16 @@ export async function getLessonJob(jobId, signal) {
 
   return response.json();
 }
+
+export async function retryLessonJob(jobId, signal) {
+  const response = await fetch(resolveUrl(`/v1/lesson-jobs/${jobId}/retry`), {
+    method: "POST",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new LessonApiError(await readErrorMessage(response), response.status);
+  }
+
+  return response.json();
+}

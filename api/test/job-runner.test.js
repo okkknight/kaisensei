@@ -233,3 +233,98 @@ test("deep jobs run staged generation serially and freeze each stage", async () 
   assert.equal(stored.generation.frozenLesson.stepIn.dialogue.turns.length, 8);
   assert.equal(stored.lesson.modules.stepIn.dialogue.turns.length, 8);
 });
+
+test("deep jobs can resume from the failed stage with frozen background", async () => {
+  const jobStore = createLessonJobStore();
+  const fullPayload = buildValidDeepCoursePayload();
+  const calls = [];
+  const provider = {
+    async generateStage({ stage, background }) {
+      calls.push({ stage, background });
+
+      if (stage === "interpret") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            interpret: fullPayload.modules.interpret,
+          },
+        };
+      }
+
+      if (stage === "interact") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            interact: fullPayload.modules.interact,
+          },
+        };
+      }
+
+      if (stage === "step_in") {
+        return {
+          mode: "deep",
+          level: "normal",
+          modules: {
+            stepIn: fullPayload.modules.stepIn,
+          },
+        };
+      }
+
+      throw new Error(`Unexpected stage ${stage}`);
+    },
+  };
+
+  const runner = createLessonJobRunner({
+    jobStore,
+    providers: { deep: provider },
+  });
+
+  const job = jobStore.create({
+    level: "Normal",
+    mode: "deep",
+    traceId: "trace-resume",
+    imageBuffer: Buffer.from("fake-image"),
+    mimeType: "image/jpeg",
+  });
+  jobStore.update(job.jobId, {
+    status: "failed",
+    generation: {
+      activeStage: "interpret",
+      stageStates: {
+        overview_notice: "ready",
+        interpret: "failed",
+        interact: "pending",
+        step_in: "pending",
+      },
+      frozenLesson: {
+        overview: fullPayload.overview,
+        notice: fullPayload.modules.notice,
+        interpret: null,
+        interact: null,
+        stepIn: null,
+      },
+      errorStage: "interpret",
+      errorMessage: "failed interpret",
+    },
+  });
+
+  runner.enqueue(job.jobId, {
+    mode: "deep",
+    level: "Normal",
+    imageBuffer: Buffer.from("fake-image"),
+    mimeType: "image/jpeg",
+    traceId: "trace-resume",
+    resumeFromStage: "interpret",
+  });
+
+  await waitFor(() => jobStore.get(job.jobId).status === "succeeded");
+
+  const stageOrder = calls.map((entry) => entry.stage);
+  assert.deepEqual(stageOrder, ["interpret", "interact", "step_in"]);
+  assert.equal(calls[0].background.overview.keywords.length, 3);
+  assert.equal(calls[0].background.notice.expressionPacks.length, 3);
+  assert.equal(jobStore.get(job.jobId).generation.activeStage, "complete");
+  assert.equal(jobStore.get(job.jobId).generation.stageStates.interpret, "ready");
+});

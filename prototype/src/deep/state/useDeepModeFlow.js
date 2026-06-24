@@ -106,6 +106,7 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
     lesson: lessonSnapshot?.lesson ?? job.lesson,
     lessonReadyStage: lessonSnapshot?.readyStage ?? null,
     lessonSnapshot,
+    generation: job.generation,
     viewModel,
     state,
     photoPreviewUrl: job.photoPreviewUrl,
@@ -116,6 +117,7 @@ export function useDeepModeFlow({ initialFile = null, initialLevel = "Normal", o
     restartCourse,
     exitToCamera,
     retryFromError,
+    retryFailedStage: job.handleRetryStage,
   };
 }
 

@@ -11,9 +11,10 @@ function nowIso() {
 
 export function createLessonJobStore() {
   const jobs = new Map();
+  const jobArtifacts = new Map();
 
   return {
-    create({ level, mode = "quick", traceId = "" }) {
+    create({ level, mode = "quick", traceId = "", imageBuffer = null, mimeType = "" }) {
       const job = {
         jobId: createJobId(),
         level,
@@ -28,6 +29,10 @@ export function createLessonJobStore() {
       };
 
       jobs.set(job.jobId, job);
+      jobArtifacts.set(job.jobId, {
+        imageBuffer,
+        mimeType,
+      });
       return {
         ...job,
         generation: cloneDeepGenerationState(job.generation),
@@ -41,6 +46,15 @@ export function createLessonJobStore() {
       return {
         ...job,
         generation: cloneDeepGenerationState(job.generation),
+      };
+    },
+
+    getArtifacts(jobId) {
+      const artifacts = jobArtifacts.get(jobId);
+      if (!artifacts) return null;
+      return {
+        imageBuffer: artifacts.imageBuffer,
+        mimeType: artifacts.mimeType,
       };
     },
 

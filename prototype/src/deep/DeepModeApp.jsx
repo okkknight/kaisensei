@@ -45,9 +45,42 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
   }
 
   const phaseContent = {
-    notice: <NoticeModule noticeVM={flow.viewModel.noticeVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
-    interpret: <InterpretModule interpretVM={flow.viewModel.interpretVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
-    interact: <InteractModule interactVM={flow.viewModel.interactVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
+    notice: (
+      <NoticeModule
+        noticeVM={flow.viewModel.noticeVM}
+        state={flow.state}
+        photoPreviewUrl={flow.photoPreviewUrl}
+        generation={flow.generation}
+        onAdvance={flow.goNext}
+        onBack={flow.goBack}
+        onRetryStage={flow.retryFailedStage}
+        onBackToCamera={flow.exitToCamera}
+      />
+    ),
+    interpret: (
+      <InterpretModule
+        interpretVM={flow.viewModel.interpretVM}
+        state={flow.state}
+        photoPreviewUrl={flow.photoPreviewUrl}
+        generation={flow.generation}
+        onAdvance={flow.goNext}
+        onBack={flow.goBack}
+        onRetryStage={flow.retryFailedStage}
+        onBackToCamera={flow.exitToCamera}
+      />
+    ),
+    interact: (
+      <InteractModule
+        interactVM={flow.viewModel.interactVM}
+        state={flow.state}
+        photoPreviewUrl={flow.photoPreviewUrl}
+        generation={flow.generation}
+        onAdvance={flow.goNext}
+        onBack={flow.goBack}
+        onRetryStage={flow.retryFailedStage}
+        onBackToCamera={flow.exitToCamera}
+      />
+    ),
     stepIn: <StepInModule stepInVM={flow.viewModel.stepInVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} onRestart={flow.restartCourse} onExitToCamera={flow.exitToCamera} />,
   }[flow.phase];
 

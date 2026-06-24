@@ -14,7 +14,7 @@ test("lesson contract exposes the required top-level keys", () => {
 
 test("job store creates and updates a job", () => {
   const store = createLessonJobStore();
-  const created = store.create({ level: "Normal" });
+  const created = store.create({ level: "Normal", imageBuffer: Buffer.from("photo"), mimeType: "image/jpeg" });
 
   assert.ok(created.jobId.startsWith("job_"));
   assert.equal(created.level, "Normal");
@@ -27,6 +27,8 @@ test("job store creates and updates a job", () => {
   assert.equal(created.generation.stageStates.interpret, "pending");
   assert.equal(created.generation.stageStates.interact, "pending");
   assert.equal(created.generation.stageStates.step_in, "pending");
+  assert.equal(store.getArtifacts(created.jobId).mimeType, "image/jpeg");
+  assert.equal(store.getArtifacts(created.jobId).imageBuffer.toString(), "photo");
 
   const running = store.update(created.jobId, { status: "running" });
   assert.equal(running.status, "running");

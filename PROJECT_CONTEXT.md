@@ -23,6 +23,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 - Deep Mode staged generation is now the active direction: `overview + notice` is the fixed first playable unit, later stages run serially with frozen prior context, and waiting pages only appear when the next stage is not ready
 - The Deep frontend now consumes partial frozen snapshots while the job is still running, so `overview + notice` can render before later stages complete
+- The Deep frontend now shows a tiny waiting page after module milestones when the next stage is still pending or failed, and a staged retry route can resume from the failed stage with frozen background
 - Quick Mode remains the implemented lesson flow in `prototype/` and should stay unchanged unless explicitly requested
 - Deep Mode is now split into its own feature domain with separate overview, Notice, Interpret, Interact, Step In, and completion surfaces
 - Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
@@ -42,7 +43,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Teach the frontend to consume partial Deep snapshots
+- Task: Preserve the current course prompt quality while minimizing drift
 - Status: developed, pending independent review
 
 ## Architecture or state flow

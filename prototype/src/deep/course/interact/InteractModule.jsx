@@ -1,17 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepInteractMilestonePage } from "../DeepInteractMilestonePage.jsx";
 import { DeepTaskPackGuidePage } from "../DeepTaskPackGuidePage.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
+import DeepStageWaitingPage from "../DeepStageWaitingPage.jsx";
 import { DEEP_COPY } from "../../copy.js";
 import { useDeepInteractFlow } from "../useDeepInteractFlow.js";
+import { useDeepStageWaitGate } from "../useDeepStageWaitGate.js";
 
-export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, onBack }) {
+export function InteractModule({ interactVM, state, photoPreviewUrl, generation, onAdvance, onBack, onRetryStage, onBackToCamera }) {
   const taskPacks = interactVM?.taskPacks ?? [];
   const flow = useDeepInteractFlow(taskPacks);
+  const waitGate = useDeepStageWaitGate({
+    generation,
+    modulePhase: "interact",
+    onAdvance,
+  });
+
+  useEffect(() => {
+    if (!flow.isMilestone) {
+      waitGate.resetWait();
+    }
+  }, [flow.isMilestone, waitGate.resetWait]);
 
   function handleBack() {
+    if (waitGate.isWaiting) {
+      waitGate.resetWait();
+    }
+
     const movedWithinModule = flow.back();
 
     if (!movedWithinModule) {
@@ -20,15 +37,28 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, onAdvance, 
   }
 
   if (flow.isMilestone) {
+    if (waitGate.isWaiting) {
       return (
-        <DeepCourseShell
+        <DeepStageWaitingPage
           state={state}
           photoPreviewUrl={photoPreviewUrl}
           onBack={handleBack}
-          onAdvance={onAdvance}
-          footerActions={
-            <button className="primary-button" type="button" onClick={onAdvance}>
-              {DEEP_COPY.continueToStepIn}
+          onRetry={onRetryStage}
+          onBackToCamera={onBackToCamera}
+          isFailed={waitGate.gateState.isFailed}
+        />
+      );
+    }
+
+    return (
+      <DeepCourseShell
+        state={state}
+        photoPreviewUrl={photoPreviewUrl}
+        onBack={handleBack}
+        onAdvance={onAdvance}
+        footerActions={
+          <button className="primary-button" type="button" onClick={waitGate.continueOrWait}>
+            {DEEP_COPY.continueToStepIn}
           </button>
         }
       >

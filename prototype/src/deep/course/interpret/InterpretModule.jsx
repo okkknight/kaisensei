@@ -1,18 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IconSparkles } from "@tabler/icons-react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
+import DeepStageWaitingPage from "../DeepStageWaitingPage.jsx";
 import { useDeepExerciseSequence } from "../useDeepExerciseSequence.js";
+import { useDeepStageWaitGate } from "../useDeepStageWaitGate.js";
 import { DEEP_COPY } from "../../copy.js";
 
-export function InterpretModule({ interpretVM, state, photoPreviewUrl, onAdvance, onBack }) {
+export function InterpretModule({ interpretVM, state, photoPreviewUrl, generation, onAdvance, onBack, onRetryStage, onBackToCamera }) {
   const packs = interpretVM?.expressionPacks ?? [];
   const sequence = useDeepExerciseSequence({
     packs,
     moduleKey: "interpret",
   });
+  const waitGate = useDeepStageWaitGate({
+    generation,
+    modulePhase: "interpret",
+    onAdvance,
+  });
+
+  useEffect(() => {
+    if (!sequence.isMilestone) {
+      waitGate.resetWait();
+    }
+  }, [sequence.isMilestone, waitGate.resetWait]);
 
   function handleBack() {
+    if (waitGate.isWaiting) {
+      waitGate.resetWait();
+    }
+
     const movedWithinModule = sequence.back();
 
     if (!movedWithinModule) {
@@ -21,6 +38,19 @@ export function InterpretModule({ interpretVM, state, photoPreviewUrl, onAdvance
   }
 
   if (sequence.isMilestone) {
+    if (waitGate.isWaiting) {
+      return (
+        <DeepStageWaitingPage
+          state={state}
+          photoPreviewUrl={photoPreviewUrl}
+          onBack={handleBack}
+          onRetry={onRetryStage}
+          onBackToCamera={onBackToCamera}
+          isFailed={waitGate.gateState.isFailed}
+        />
+      );
+    }
+
     return (
       <DeepCourseShell
         state={state}
@@ -28,7 +58,7 @@ export function InterpretModule({ interpretVM, state, photoPreviewUrl, onAdvance
         onBack={handleBack}
         onAdvance={onAdvance}
         footerActions={
-          <button className="primary-button" type="button" onClick={onAdvance}>
+          <button className="primary-button" type="button" onClick={waitGate.continueOrWait}>
             {DEEP_COPY.continueToInteract}
           </button>
         }

@@ -107,7 +107,7 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         });
       }
 
-      const job = jobStore.create({ level, mode, traceId });
+      const job = jobStore.create({ level, mode, traceId, imageBuffer, mimeType });
       traceLog("route", "job_received", {
         traceId,
         jobId: job.jobId,
@@ -134,6 +134,78 @@ export function registerLessonJobRoutes(app, { jobStore, jobRunner }) {
         traceId: job.traceId || traceId || "",
         generation: job.generation,
       });
+    });
+
+    app.post(`${prefix}/lesson-jobs/:jobId/retry`, async (request, reply) => {
+      const requestStartedAt = Date.now();
+      const job = jobStore.get(request.params.jobId);
+
+      if (!job) {
+        traceLog("route", "job_retry_not_found", {
+          jobId: request.params.jobId,
+          totalMs: Date.now() - requestStartedAt,
+        });
+        return reply.status(404).send({
+          error: {
+            code: "job_not_found",
+            message: "Job not found.",
+          },
+        });
+      }
+
+      if (String(job.mode || "quick").toLowerCase() !== "deep") {
+        return reply.status(409).send({
+          error: {
+            code: "unsupported_retry_mode",
+            message: "Retry is only available for Deep jobs.",
+          },
+        });
+      }
+
+      if (job.status !== "failed" || !job.generation?.errorStage) {
+        return reply.status(409).send({
+          error: {
+            code: "retry_not_available",
+            message: "Retry is only available after a staged failure.",
+          },
+        });
+      }
+
+      const artifacts = jobStore.getArtifacts(job.jobId);
+      if (!artifacts?.imageBuffer) {
+        return reply.status(409).send({
+          error: {
+            code: "missing_retry_artifact",
+            message: "Retry payload is missing.",
+          },
+        });
+      }
+
+      const retryStage = job.generation.errorStage;
+
+      jobStore.update(job.jobId, {
+        status: "queued",
+        error: null,
+      });
+
+      traceLog("route", "job_retry_received", {
+        traceId: job.traceId || "",
+        jobId: job.jobId,
+        retryStage,
+        totalMs: Date.now() - requestStartedAt,
+      });
+
+      jobRunner.enqueue(job.jobId, {
+        imageBuffer: artifacts.imageBuffer,
+        mimeType: artifacts.mimeType,
+        level: job.level,
+        mode: job.mode,
+        traceId: job.traceId || "",
+        jobCreatedAt: job.createdAt,
+        resumeFromStage: retryStage,
+      });
+
+      return reply.send(jobStore.get(job.jobId));
     });
 
     app.get(`${prefix}/lesson-jobs/:jobId`, async (request, reply) => {

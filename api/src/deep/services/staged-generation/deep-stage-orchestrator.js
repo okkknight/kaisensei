@@ -63,8 +63,11 @@ export function createDeepStageOrchestrator({ jobStore, provider, config = deepC
 
       let generation = cloneDeepGenerationState(job.generation);
       let frozenLesson = generation.frozenLesson || {};
+      const resumeFromStage = payload.resumeFromStage;
+      const resumeIndex = resumeFromStage ? lessonJobGenerationStages.indexOf(resumeFromStage) : 0;
+      const startIndex = resumeIndex >= 0 ? resumeIndex : 0;
 
-      for (const stage of lessonJobGenerationStages) {
+      for (const stage of lessonJobGenerationStages.slice(startIndex)) {
         generation = setDeepGenerationStageState(generation, stage, "running", {
           activeStage: stage,
           errorStage: null,

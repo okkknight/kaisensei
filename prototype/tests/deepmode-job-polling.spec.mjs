@@ -1,10 +1,10 @@
 import { test, expect } from "playwright/test";
 
-test("deep mode polls lesson jobs before rendering the overview", async ({ page }) => {
+test("deep mode renders the overview before later stages finish", async ({ page }) => {
   let pollCount = 0;
-  let releaseFinalPoll = () => {};
-  const finalPollGate = new Promise((resolve) => {
-    releaseFinalPoll = resolve;
+  let releaseInterpretPoll = () => {};
+  const interpretPollGate = new Promise((resolve) => {
+    releaseInterpretPoll = resolve;
   });
 
   await page.route("**/v1/lesson-jobs", async (route) => {
@@ -18,7 +18,7 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
   await page.route("**/v1/lesson-jobs/job_123", async (route) => {
     pollCount += 1;
     const body =
-      pollCount < 2
+      pollCount < 3
         ? {
             jobId: "job_123",
             status: "running",
@@ -51,7 +51,44 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
             },
             error: null,
           }
-        : {
+        : pollCount === 3
+          ? {
+              jobId: "job_123",
+              status: "running",
+              lesson: null,
+              generation: {
+                activeStage: "interact",
+                stageStates: {
+                  overview_notice: "ready",
+                  interpret: "ready",
+                  interact: "running",
+                  step_in: "pending",
+                },
+                frozenLesson: {
+                  overview: {
+                    keywords: ["coffee", "table", "laptop"],
+                    sceneDescriptionChinese: "安静的桌面工作场景",
+                    startPromptChinese: "点击开始这次学习之旅",
+                  },
+                  notice: {
+                    title: "Notice",
+                    goal: "Describe what is visible in the photo.",
+                    expressionPacks: [],
+                  },
+                  interpret: {
+                    title: "Interpret",
+                    goal: "Infer what may be happening in the scene.",
+                    expressionPacks: [],
+                  },
+                  interact: null,
+                  stepIn: null,
+                },
+                errorStage: null,
+                errorMessage: null,
+              },
+              error: null,
+            }
+          : {
             jobId: "job_123",
             status: "succeeded",
             lesson: {
@@ -132,8 +169,8 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
             error: null,
           };
 
-    if (pollCount > 1) {
-      await finalPollGate;
+    if (pollCount === 3) {
+      await interpretPollGate;
     }
 
     await route.fulfill({
@@ -152,6 +189,10 @@ test("deep mode polls lesson jobs before rendering the overview", async ({ page 
   });
 
   await expect(page.getByText("coffee · table · laptop")).toBeVisible();
-  releaseFinalPoll();
-  await expect.poll(() => pollCount).toBeGreaterThan(1);
+  await page.getByRole("button", { name: "Start Deep Mode →" }).click();
+  await page.getByRole("button", { name: "Continue to Interpret →" }).click();
+  await expect(page.getByText("正在生成下一阶段")).toBeVisible();
+  releaseInterpretPoll();
+  await expect(page.getByText("Continue to Interact →")).toBeVisible();
+  await expect.poll(() => pollCount).toBeGreaterThanOrEqual(3);
 });
