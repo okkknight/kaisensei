@@ -117,13 +117,14 @@ test("deep codex provider builds the deep prompt and normalizes the result", asy
   assert.match(prompts[0], /Each dialogue must read like Need -> systemReply -> Handle in one continuous exchange\./);
   assert.match(prompts[0], /Each Step In dialogue must include sceneChinese so the guide page can show one short Chinese explanation under the English scene line\./);
   assert.match(prompts[0], /The dialogue should feel like two real roles speaking back and forth, not like a vocabulary review list\./);
-  assert.match(prompts[0], /Understand uses Chinese-only chunks\./i);
+  assert.match(prompts[0], /Start from one complete natural Chinese sentence for Understand, then split that sentence into reorderable Chinese chunks\./i);
+  assert.match(prompts[0], /The joined Understand chunks must reconstruct one complete natural Chinese sentence, so keep necessary function words and structural words such as 的, 在, 是, and 了 when they are needed\./i);
   assert.match(prompts[0], /Build and Quick Response both use sentence-level English chunks that reconstruct a complete natural reply\./i);
   assert.match(prompts[0], /Build uses the Chinese sentence as the source; Quick Response uses the scene question or dialogue situation as the source\./i);
   assert.match(prompts[0], /Each quickResponse question must be organized around the same pack's baseExample or variation sentence so that sentence becomes the learner's answer\./i);
   assert.match(prompts[0], /quickResponse\.questionChinese must be the Chinese translation of that question\./i);
   assert.doesNotMatch(prompts[0], /Quick Response chunks are English phrases only\./i);
-  assert.match(prompts[0], /No碎片词块, no filler chunks, no equal-sized mechanical slicing\./i);
+  assert.match(prompts[0], /No fragment chunks, no filler chunks, and no forced equal-length slicing\./i);
   assert.match(prompts[0], /Do not create a chunk just to satisfy count if a natural chunk would read better after re-segmentation\./i);
   assert.doesNotMatch(prompts[0], /short clause/i);
   assert.match(prompts[0], /REQUIRED INNER SHAPES:/);

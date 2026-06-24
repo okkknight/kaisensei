@@ -40,8 +40,8 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Refine Deep Mode Interact / Step In prompt wording so the dialogue reads like a natural role-play exchange instead of a vocabulary review list
-- Status: 已执行待验收
+- Task: Align the Deep Mode Understand prompt with the old product design doc so the chunking rule starts from one complete natural Chinese sentence
+- Status: 验收通过
 
 ## Architecture or state flow
 
@@ -80,6 +80,7 @@ Deep Mode planned flow:
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 - Latest API verification after the Deep Mode prompt quality rebuild: `npm --prefix api test`
 - Latest prompt wording verification after the Interact / Step In rewrite: `node --test api/test/deep-course-provider.test.js`
+- Latest VPS sync for the Understand wording cleanup: `rsync -a api/src/deep/services/course-prompt.js root@89.208.242.44:/opt/boringmax/kaisensei/api/src/deep/services/course-prompt.js && ssh root@89.208.242.44 'systemctl restart kaisensei.service'`
 - Latest frontend deployment verification: `curl -fsS https://boringmax.com/kaisensei/` and `curl -fsS https://boringmax.com/kaisensei/assets/index-D6csJCFz.css`
 
 ## Runtime notes
@@ -91,7 +92,7 @@ Deep Mode planned flow:
 - Deep Mode generation logs now include job-level and provider-level trace events, plus structured retry reasons with `name / code / details`
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
-- The latest Interact / Step In prompt wording rewrite has only been verified locally so far; if the generated output changes again, re-run the API test, sync the API source to the VPS, and restart `kaisensei.service` before calling it done
+- The latest Deep Mode Understand wording cleanup has been synced to the VPS API source and `kaisensei.service` was restarted; if the generated output changes again, re-run the API test and restart the service after syncing before calling it done
 
 ## Key files
 

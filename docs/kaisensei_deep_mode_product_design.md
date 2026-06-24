@@ -327,7 +327,7 @@ Understand → Focus → Build
 
 - 上方内容卡片展示英文例句
 - 当前核心表达使用强调色
-- 下方展示若干自然分词的中文词块
+- 下方先展示一句完整自然中文句，再把这句拆成可重排的中文词块
 - 可加入 1 个无用中文干扰词块
 
 用户操作：
@@ -1400,7 +1400,8 @@ EXERCISE GENERATION:
 
 Understand:
 - show the English sentence,
-- split the natural Chinese meaning into reorderable chunks,
+- start from one complete natural Chinese sentence, then split it into reorderable chunks,
+- keep necessary function words and structural words when they are needed for a natural full sentence,
 - add exactly {{exercise.understandDistractorCount}} distractors.
 
 Focus:
