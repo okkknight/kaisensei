@@ -4,6 +4,8 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Updated the shared Deep dialogue scene card so the Interact mock now shows the Chinese scene description as the primary line and removes the secondary Chinese caption underneath
+- Verified the scene-card copy change on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7` after rebuilding the prototype
 - Extended the docked Deep dialogue layout to Interact dialogue pages so the answer composer now lives in the separate dock layer there as well, matching Step In
 - Added a DEV-only `deepMockInteractIndex` query param so the Interact mock can jump straight to a chosen page, which made direct dialogue-page verification easier
 - Verified the updated Interact dialogue layout with `npm --prefix prototype run build` and a live browser check on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7`

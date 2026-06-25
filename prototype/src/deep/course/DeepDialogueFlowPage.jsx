@@ -132,8 +132,7 @@ export function DeepDialogueFlowPage({
       {scene ? (
         <div className="deep-dialogue-scene-card">
           <span>{DEEP_COPY.sceneLabel}</span>
-          <strong>{scene}</strong>
-          {sceneChinese ? <p>{sceneChinese}</p> : null}
+          <strong>{sceneChinese || scene}</strong>
         </div>
       ) : null}
 

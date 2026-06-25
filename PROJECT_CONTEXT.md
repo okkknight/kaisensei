@@ -45,7 +45,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Keep the Deep Mode dialogue composer docked consistently across Interact and Step In
+- Task: Make the Interact scene card show the Chinese description only, without the secondary Chinese caption
 - Status: 已执行待验收
 
 ## Architecture or state flow
