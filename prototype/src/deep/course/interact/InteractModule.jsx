@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepDialogueComposer, DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
+import { DeepFeedbackCard } from "../DeepFeedbackCard.jsx";
 import { DeepInteractMilestonePage } from "../DeepInteractMilestonePage.jsx";
 import { DeepTaskPackGuidePage } from "../DeepTaskPackGuidePage.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
@@ -72,21 +73,26 @@ export function InteractModule({
           </button>
         }
       >
-        <DeepInteractMilestonePage taskPacks={taskPacks} />
+        <DeepInteractMilestonePage taskPacks={taskPacks} photoPreviewUrl={photoPreviewUrl} />
       </DeepCourseShell>
     );
   }
 
   const currentPage = flow.currentPage;
   const isDialoguePage = currentPage.kind === "dialogue";
+  const isSuccessState = flow.feedback.tone === "success";
   const dialogueTaskPrompt = currentPage.dialogueRole === "need"
     ? DEEP_COPY.dialogueTaskPrompt
     : DEEP_COPY.dialogueTaskClosePrompt;
   const dialogueTaskPlacement = currentPage.dialogueRole === "handle" ? "bottom" : "top";
-  const primaryActionLabel = isDialoguePage ? DEEP_COPY.send : flow.feedback.tone === "success" ? "Continue" : DEEP_COPY.check;
-  const handlePrimaryAction = isDialoguePage ? flow.check : flow.feedback.tone === "success" ? flow.next : flow.check;
+  const primaryActionLabel = isDialoguePage ? (isSuccessState ? "Continue" : DEEP_COPY.send) : isSuccessState ? "Continue" : DEEP_COPY.check;
+  const handlePrimaryAction = isDialoguePage ? (isSuccessState ? flow.next : flow.check) : isSuccessState ? flow.next : flow.check;
   const primaryActionDisabled =
-    currentPage.kind === "guide" ? false : isDialoguePage ? !flow.canAttempt : flow.feedback.tone === "success" ? false : !flow.canAttempt;
+    currentPage.kind === "guide" ? false : isSuccessState ? false : isDialoguePage ? !flow.canAttempt : !flow.canAttempt;
+  const footerNotice =
+    currentPage.kind !== "guide" && !(isDialoguePage && flow.isPlaybackActive) && flow.feedback.tone !== "idle" ? (
+      <DeepFeedbackCard tone={flow.feedback.tone} title={flow.feedback.title} body={flow.feedback.body} />
+    ) : null;
 
   const body = (() => {
     if (currentPage.kind === "guide") {
@@ -112,6 +118,7 @@ export function InteractModule({
           taskPromptPlacement={dialogueTaskPlacement}
           history={currentPage.history}
           liveTurns={flow.liveTurns}
+          feedback={flow.feedback}
           showHistory={currentPage.showHistory !== false}
           showComposer={false}
         />
@@ -134,6 +141,7 @@ export function InteractModule({
         selectedChunks={flow.selectedChunks}
         selectionLimit={flow.selectionLimit}
         feedback={flow.feedback}
+        activeFeedbackPlacement="footer"
         onToggleChunk={flow.toggleChunk}
       />
     );
@@ -148,6 +156,7 @@ export function InteractModule({
       pageProgressTotal={currentPage.kind === "guide" ? 0 : flow.progressTotal}
       onBack={handleBack}
       onAdvance={onAdvance}
+      footerNotice={footerNotice}
       dock={
         currentPage.kind === "dialogue" ? (
           <DeepDialogueComposer
@@ -158,6 +167,8 @@ export function InteractModule({
             bank={currentPage.bank}
             selectedChunks={flow.selectedChunks}
             feedback={flow.feedback}
+            hideSelectionOnSuccess
+            activeFeedbackPlacement="footer"
             onToggleChunk={flow.toggleChunk}
           />
         ) : null
@@ -167,17 +178,20 @@ export function InteractModule({
           <button className="primary-button" type="button" onClick={flow.next}>
             {DEEP_COPY.startPractice} →
           </button>
-        ) : currentPage.kind === "dialogue" && flow.isPlaybackActive ? (
-          <div className="lesson-footer-spacer" />
         ) : (
           <div className="lesson-footer-actions">
-            <button className="secondary-button" type="button" onClick={flow.reset}>
+            <button className="secondary-button" type="button" onClick={flow.reset} disabled={currentPage.kind === "dialogue" && flow.isPlaybackActive}>
               {DEEP_COPY.reset}
             </button>
-            <button className="secondary-button" type="button" onClick={flow.hint}>
+            <button className="secondary-button" type="button" onClick={flow.hint} disabled={currentPage.kind === "dialogue" && flow.isPlaybackActive}>
               {DEEP_COPY.hint}
             </button>
-            <button className="primary-button" type="button" onClick={handlePrimaryAction} disabled={primaryActionDisabled}>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={handlePrimaryAction}
+              disabled={currentPage.kind === "dialogue" && flow.isPlaybackActive ? true : primaryActionDisabled}
+            >
               {primaryActionLabel}
             </button>
           </div>

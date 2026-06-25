@@ -42,9 +42,11 @@ export function DeepDialogueFlowPage({
   feedback,
   onToggleChunk,
   showComposer = true,
+  hideSelectionOnSuccess = false,
 }) {
   const speech = useDeepSpeech();
-  const isPlaybackActive = liveTurns.length > 0;
+  const isPlaybackActive = liveTurns.some((turn) => turn.isTyping || turn.speaker === "system");
+  const isSuccessState = feedback?.tone === "success";
   const selectedChunkCounts = selectedChunks.reduce((counts, chunk) => {
     counts.set(chunk, (counts.get(chunk) ?? 0) + 1);
     return counts;
@@ -138,7 +140,7 @@ export function DeepDialogueFlowPage({
         </div>
       ) : null}
 
-      {!showComposer && taskPrompt && taskPromptPlacement !== "bottom" ? (
+      {!showComposer && taskPrompt && taskPromptPlacement !== "bottom" && !isSuccessState && !isPlaybackActive ? (
         <p className="deep-dialogue-task-line">{taskPrompt}</p>
       ) : null}
 
@@ -150,7 +152,7 @@ export function DeepDialogueFlowPage({
         </div>
       ) : null}
 
-      {!showComposer && taskPrompt && taskPromptPlacement === "bottom" ? (
+      {!showComposer && taskPrompt && taskPromptPlacement === "bottom" && !isSuccessState && !isPlaybackActive ? (
         <p className="deep-dialogue-task-line">{taskPrompt}</p>
       ) : null}
 
@@ -170,9 +172,15 @@ export function DeepDialogueComposer({
   selectedChunks = [],
   feedback,
   onToggleChunk,
+  hideSelectionOnSuccess = false,
+  activeFeedbackPlacement = "inline",
 }) {
   const speech = useDeepSpeech();
-  const isPlaybackActive = liveTurns.length > 0;
+  const isPlaybackActive = liveTurns.some((turn) => turn.isTyping || turn.speaker === "system");
+  const shouldHideSelection = hideSelectionOnSuccess && feedback?.tone === "success";
+  const idleBody = DEEP_COPY.tapChunksThenSend;
+  const shouldRenderInlineFeedback = activeFeedbackPlacement === "inline" && feedback?.tone !== "idle";
+  const shouldShowComposerBody = !isPlaybackActive && !shouldHideSelection;
   const selectedChunkCounts = selectedChunks.reduce((counts, chunk) => {
     counts.set(chunk, (counts.get(chunk) ?? 0) + 1);
     return counts;
@@ -191,7 +199,7 @@ export function DeepDialogueComposer({
 
   return (
     <div className="deep-dialogue-composer">
-      {!isPlaybackActive && showPrompt && userPrompt ? (
+      {!isPlaybackActive && showPrompt && userPrompt && !shouldHideSelection ? (
         <div className="deep-dialogue-user-prompt">
           <strong>{userPrompt}</strong>
           {latestSystemTurn?.text ? (
@@ -205,34 +213,36 @@ export function DeepDialogueComposer({
         </div>
       ) : null}
 
-      {!isPlaybackActive ? (
-        <div className="deep-selection-stack">
-          <div className="deep-answer-stage">
-            {selectedChunks.length > 0 ? (
-              selectedChunks.map((chunk, index) => (
-                <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
-              ))
-            ) : (
-              <div className="deep-answer-empty">{DEEP_COPY.buildYourAnswerChinese}</div>
-            )}
+      <div className={`deep-dialogue-composer-panel${shouldShowComposerBody ? " is-visible" : ""}`} aria-hidden={!shouldShowComposerBody}>
+        <div className="deep-dialogue-composer-panel-body">
+          <div className="deep-selection-stack">
+            <div className="deep-answer-stage">
+              {selectedChunks.length > 0 ? (
+                selectedChunks.map((chunk, index) => (
+                  <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} selected onClick={() => onToggleChunk(chunk)} />
+                ))
+              ) : (
+                <div className="deep-answer-empty">{idleBody}</div>
+              )}
+            </div>
+
+            <div className="deep-bank-row">
+              {availableBank.map((chunk, index) => (
+                <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
+              ))}
+            </div>
           </div>
 
-          <div className="deep-bank-row">
-            {availableBank.map((chunk, index) => (
-              <DeepChunkChip key={`${chunk}-${index}`} chunk={chunk} onClick={() => onToggleChunk(chunk)} />
-            ))}
-          </div>
+          {shouldRenderInlineFeedback ? (
+            <DeepFeedbackCard
+              tone={feedback.tone}
+              title={feedback.title}
+              body={feedback.body}
+              idleBody={idleBody}
+            />
+          ) : null}
         </div>
-      ) : null}
-
-      {!isPlaybackActive ? (
-        <DeepFeedbackCard
-          tone={feedback.tone}
-          title={feedback.title}
-          body={feedback.body}
-          idleBody={DEEP_COPY.tapChunksThenSend}
-        />
-      ) : null}
+      </div>
     </div>
   );
 }

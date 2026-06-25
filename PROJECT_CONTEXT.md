@@ -45,7 +45,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Center the Interact opening prompt and switch to a closing prompt after the first reply succeeds
+- Task: Tune the Deep success celebration so only edge-near confetti remains, without shockwave rings or long-range bursts
 - Status: 已执行待验收
 
 ## Architecture or state flow

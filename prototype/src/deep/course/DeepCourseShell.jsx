@@ -11,15 +11,17 @@ export function DeepCourseShell({
   pageProgressCurrent = 0,
   pageProgressTotal = 0,
   dock = null,
+  footerNotice = null,
   footerActions,
   children,
 }) {
   const currentPhaseMeta = DEEP_PHASE_META[state.phase] ?? DEEP_PHASE_META.notice;
   const showPageProgress = pageProgressTotal > 0;
+  const screenClassName = `screen lesson-screen deep-course-screen${dock ? " deep-course-screen-docked" : ""}${footerNotice ? " has-footer-notice" : ""}`;
 
   if (dock) {
     return (
-      <div className="screen lesson-screen deep-course-screen deep-course-screen-docked">
+      <div className={screenClassName}>
         <div className="deep-course-body">
           <div className="lesson-content deep-course-content">
             <div className="screen-header deep-course-header">
@@ -52,6 +54,7 @@ export function DeepCourseShell({
         </div>
 
         <div className="lesson-footer deep-course-footer">
+          {footerNotice ? <div className="lesson-footer-feedback-slot">{footerNotice}</div> : null}
           {footerActions ?? (
             <button className="primary-button" type="button" onClick={onAdvance}>
               Continue
@@ -64,7 +67,7 @@ export function DeepCourseShell({
   }
 
   return (
-    <div className="screen lesson-screen deep-course-screen">
+    <div className={screenClassName}>
       <div className="lesson-content deep-course-content">
         <div className="screen-header deep-course-header">
           <button className="back-button" type="button" aria-label="Back" onClick={onBack}>
@@ -93,6 +96,7 @@ export function DeepCourseShell({
       </div>
 
       <div className="lesson-footer">
+        {footerNotice ? <div className="lesson-footer-feedback-slot">{footerNotice}</div> : null}
         {footerActions ?? (
           <button className="primary-button" type="button" onClick={onAdvance}>
             Continue

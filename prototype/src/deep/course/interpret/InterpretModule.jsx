@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { IconSparkles } from "@tabler/icons-react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
+import { DeepFeedbackCard } from "../DeepFeedbackCard.jsx";
 import DeepStageWaitingPage from "../DeepStageWaitingPage.jsx";
 import { useDeepExerciseSequence } from "../useDeepExerciseSequence.js";
 import { useDeepStageWaitGate } from "../useDeepStageWaitGate.js";
@@ -90,6 +91,8 @@ export function InterpretModule({ interpretVM, state, photoPreviewUrl, generatio
   const primaryActionLabel = sequence.feedback.tone === "success" ? "Continue" : DEEP_COPY.check;
   const handlePrimaryAction = sequence.feedback.tone === "success" ? sequence.next : sequence.check;
   const primaryActionDisabled = sequence.feedback.tone === "success" ? false : !sequence.canAttempt;
+  const footerNotice =
+    sequence.feedback.tone !== "idle" ? <DeepFeedbackCard tone={sequence.feedback.tone} title={sequence.feedback.title} body={sequence.feedback.body} /> : null;
 
   return (
     <DeepCourseShell
@@ -100,6 +103,7 @@ export function InterpretModule({ interpretVM, state, photoPreviewUrl, generatio
       pageProgressTotal={sequence.progressTotal}
       onBack={handleBack}
       onAdvance={sequence.next}
+      footerNotice={footerNotice}
       footerActions={
         <div className="lesson-footer-actions">
           <button className="secondary-button" type="button" onClick={sequence.reset}>
@@ -132,6 +136,7 @@ export function InterpretModule({ interpretVM, state, photoPreviewUrl, generatio
         selectionLimit={sequence.selectionLimit}
         feedback={sequence.feedback}
         onToggleChunk={sequence.toggleChunk}
+        activeFeedbackPlacement="footer"
       />
     </DeepCourseShell>
   );

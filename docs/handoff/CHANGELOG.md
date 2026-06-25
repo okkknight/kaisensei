@@ -4,6 +4,12 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Tuned the Deep success celebration down again by removing the shockwave rings and pulling the confetti back toward the card edges with shorter, slower outward motion
+- Verified the softer edge-near celebration with `npm --prefix prototype run build`
+- Reworked the Deep success celebration so the confetti now erupts from around the feedback-card edges with larger outward trajectories and dual ring shockwaves, instead of a small center burst
+- Verified the heavier success animation with `npm --prefix prototype run build`
+- Changed the Interact closing prompt to "好极了！给对话结个尾吧" to make the follow-up cue a little lighter
+- Verified the new closing prompt via a production build of the prototype
 - Centered the Interact opening prompt as a single line and switched the follow-up turn to the closing prompt "很好！给对话结个尾" once the first reply succeeds
 - Verified the prompt switch on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7`, including the handle page where the closing prompt now appears below the dialogue
 - Added a top task banner above the Interact / Step In dialogue composer so the user sees the instruction immediately after the scene card, with the docked composer now focused on actions instead of repeating the prompt

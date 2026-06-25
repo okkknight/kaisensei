@@ -459,6 +459,7 @@ export function createDeepCourseLesson(level = "Normal") {
         goal: "Keep the conversation moving.",
         dialogue: {
           scene: "You are at a desk with your laptop, and a coworker is nearby.",
+          sceneChinese: "你坐在桌边，面前是笔记本电脑，旁边还有一位同事。",
           turns: [
             {
               speaker: "system",

@@ -20,7 +20,7 @@ function SummarySection({ title, items }) {
   );
 }
 
-export function DeepInteractMilestonePage({ taskPacks = [] }) {
+export function DeepInteractMilestonePage({ taskPacks = [], photoPreviewUrl = "" }) {
   const needItems = taskPacks.map((taskPack) => ({
     title: taskPack.need.coreExpression,
     body: taskPack.need.meaningChinese,
@@ -34,6 +34,11 @@ export function DeepInteractMilestonePage({ taskPacks = [] }) {
     <div className="deep-interact-milestone">
       <div className="deep-completion-card">
         <div className="deep-completion-hero deep-interact-milestone-hero">
+          {photoPreviewUrl ? (
+            <img src={photoPreviewUrl} alt="Interact stage scene preview" className="deep-completion-photo" />
+          ) : (
+            <div className="deep-completion-photo deep-completion-photo-placeholder" />
+          )}
           <div className="deep-interact-milestone-badge">
             <IconSparkles size={18} />
           </div>

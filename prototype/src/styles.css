@@ -991,6 +991,15 @@ img {
   flex: 0 0 auto;
 }
 
+.lesson-footer-feedback-slot {
+  display: grid;
+  margin-bottom: 10px;
+}
+
+.lesson-footer-feedback-slot .deep-feedback-card {
+  width: 100%;
+}
+
 .lesson-footer-actions {
   display: flex;
   gap: 10px;
@@ -2312,6 +2321,47 @@ img {
   gap: 10px;
 }
 
+.deep-dialogue-composer-panel {
+  overflow: hidden;
+  max-height: 0;
+  padding: 0 16px;
+  border-radius: 24px 24px 20px 20px;
+  border: 1px solid rgba(20, 33, 61, 0);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 0 rgba(20, 33, 61, 0);
+  opacity: 0;
+  transform: translateY(22px);
+  pointer-events: none;
+  transition:
+    max-height 260ms cubic-bezier(0.2, 0.9, 0.22, 1),
+    padding-top 220ms ease,
+    padding-bottom 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    opacity 180ms ease,
+    transform 260ms cubic-bezier(0.2, 0.9, 0.22, 1);
+}
+
+.deep-dialogue-composer-panel.is-visible {
+  max-height: 420px;
+  padding-top: 14px;
+  padding-bottom: 12px;
+  border-color: rgba(20, 33, 61, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 -10px 30px rgba(20, 33, 61, 0.08),
+    0 6px 18px rgba(20, 33, 61, 0.04);
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.deep-dialogue-composer-panel-body {
+  display: grid;
+  gap: 12px;
+}
+
 .deep-course-footer {
   flex: 0 0 auto;
 }
@@ -2333,6 +2383,12 @@ img {
     scroll-padding-bottom: calc(92px + env(safe-area-inset-bottom));
   }
 
+  .deep-course-screen.has-footer-notice .lesson-content,
+  .deep-course-screen.has-footer-notice .deep-course-content {
+    padding-bottom: calc(184px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(184px + env(safe-area-inset-bottom));
+  }
+
   .deep-course-screen-docked .lesson-content,
   .deep-course-screen-docked .deep-course-content {
     padding-bottom: 6px;
@@ -2341,6 +2397,10 @@ img {
 
   .deep-course-screen-docked .deep-course-dock {
     padding: 0 24px 10px;
+  }
+
+  .deep-dialogue-composer-panel.is-visible {
+    max-height: min(46vh, 420px);
   }
 
   .lesson-footer {
@@ -2369,6 +2429,12 @@ img {
 
   .lesson-footer .lesson-footer-actions {
     max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deep-dialogue-composer-panel {
+    transition: none;
   }
 }
 
@@ -2710,6 +2776,7 @@ img {
 }
 
 .deep-feedback-card {
+  position: relative;
   display: grid;
   gap: 4px;
   padding: 14px 16px;
@@ -2717,6 +2784,7 @@ img {
   background: rgba(232, 248, 231, 0.85);
   color: #2f7c52;
   border: 1px solid rgba(111, 201, 111, 0.2);
+  overflow: visible;
 }
 
 .deep-feedback-card.muted {
@@ -2729,6 +2797,13 @@ img {
   align-items: center;
   justify-items: center;
   text-align: center;
+}
+
+.deep-feedback-card.success {
+  box-shadow:
+    0 18px 38px rgba(63, 160, 106, 0.18),
+    0 10px 22px rgba(111, 91, 255, 0.1);
+  animation: deep-feedback-card-pop 560ms cubic-bezier(0.2, 0.9, 0.22, 1.18);
 }
 
 .deep-feedback-card.warning {
@@ -2753,9 +2828,84 @@ img {
   line-height: 1.45;
 }
 
+.deep-feedback-burst {
+  position: absolute;
+  inset: -18px -14px -16px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.deep-feedback-card.success > strong,
+.deep-feedback-card.success > p {
+  position: relative;
+  z-index: 1;
+}
+
+.deep-feedback-burst-piece {
+  position: absolute;
+  left: var(--burst-left);
+  top: var(--burst-top);
+  width: var(--burst-size);
+  height: calc(var(--burst-size) * 0.48);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0)),
+    var(--burst-color);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.24);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--burst-rotate)) scale(0.46);
+  transform-origin: center;
+  animation: deep-feedback-burst 1180ms cubic-bezier(0.16, 0.72, 0.24, 1) forwards;
+  animation-delay: var(--burst-delay);
+}
+
 .deep-feedback-card.muted p {
   font-size: 0.97rem;
   font-weight: 500;
+}
+
+@keyframes deep-feedback-card-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(8px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.03) translateY(-2px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes deep-feedback-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--burst-rotate)) scale(0.38);
+  }
+
+  22% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--burst-dx)), calc(-50% + var(--burst-dy))) rotate(var(--burst-rotate)) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deep-feedback-card.success {
+    animation: none;
+  }
+
+  .deep-feedback-burst-piece {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .deep-exercise-actions {
@@ -2899,6 +3049,7 @@ img {
   flex: 1;
   min-height: 0;
   gap: 14px;
+  padding-bottom: 26px;
 }
 
 .deep-dialogue-flow-page-docked {
@@ -3308,7 +3459,7 @@ img {
 }
 
 .deep-interact-milestone-hero {
-  min-height: 160px;
+  aspect-ratio: 3 / 1;
   background:
     radial-gradient(circle at 24% 20%, rgba(255, 211, 77, 0.42), transparent 28%),
     radial-gradient(circle at 74% 70%, rgba(108, 78, 246, 0.26), transparent 30%),

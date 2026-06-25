@@ -215,7 +215,7 @@ export function useDeepInteractFlow(taskPacks = [], initialPageIndex = 0) {
     : 0;
   const selectionLimit = currentPage?.kind === "exercise" && currentPage.pageType === "focus" ? currentPage.answer.length : 0;
   const canAttempt = currentPage && currentPage.kind !== "guide" ? selectedChunks.length > 0 : false;
-  const isPlaybackActive = liveTurns.length > 0;
+  const isPlaybackActive = liveTurns.some((turn) => turn.isTyping || turn.speaker === "system");
 
   function clearPendingAdvance() {
     timersRef.current.forEach((timer) => {
@@ -283,6 +283,24 @@ export function useDeepInteractFlow(taskPacks = [], initialPageIndex = 0) {
       if (currentPage.kind === "dialogue") {
         clearPendingAdvance();
         setSelectedChunks([]);
+        if (currentPage.dialogueRole === "handle") {
+          setLiveTurns([
+            {
+              speaker: "user",
+              label: "You",
+              text: answerText,
+              checked: true,
+            },
+          ]);
+
+          setFeedback({
+            tone: "success",
+            title: DEEP_COPY.correct,
+            body: "You replied naturally.",
+          });
+          return;
+        }
+
         setFeedback({ tone: "idle", title: "", body: "" });
 
         if (currentPage.dialogueRole === "need") {
@@ -321,22 +339,6 @@ export function useDeepInteractFlow(taskPacks = [], initialPageIndex = 0) {
           timersRef.current = [typingTimer, advanceTimer];
           return;
         }
-
-        setLiveTurns([
-          {
-            speaker: "user",
-            label: "You",
-            text: answerText,
-            checked: true,
-          },
-        ]);
-
-        const advanceTimer = window.setTimeout(() => {
-          next();
-        }, 650);
-
-        timersRef.current = [advanceTimer];
-        return;
       }
 
       setFeedback({

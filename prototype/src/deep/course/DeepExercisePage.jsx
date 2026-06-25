@@ -134,8 +134,11 @@ export function DeepExercisePage({
   selectionLimit = 0,
   feedback,
   onToggleChunk,
+  activeFeedbackPlacement = "inline",
 }) {
   const speech = useDeepSpeech();
+  const idleBody = kind === "quickResponse" ? DEEP_COPY.buildYourAnswer : DEEP_COPY.tapChunksThenCheck;
+  const shouldRenderInlineFeedback = activeFeedbackPlacement === "inline" && feedback.tone !== "idle";
 
   return (
     <div className="deep-exercise-page">
@@ -204,7 +207,7 @@ export function DeepExercisePage({
       <div className="deep-selection-stack">
         {kind === "understand" ? (
           <>
-            <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
+            <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} emptyMessage={idleBody} />
             <ChunkRow
               items={bank}
               selectedChunks={selectedChunks}
@@ -221,7 +224,7 @@ export function DeepExercisePage({
           />
         ) : (
           <>
-            <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} />
+            <AnswerStage selectedChunks={selectedChunks} onToggleChunk={onToggleChunk} emptyMessage={idleBody} />
             <ChunkRow
               items={bank}
               selectedChunks={selectedChunks}
@@ -232,12 +235,14 @@ export function DeepExercisePage({
         )}
       </div>
 
-      <DeepFeedbackCard
-        tone={feedback.tone}
-        title={feedback.title}
-        body={feedback.body}
-        idleBody={kind === "quickResponse" ? DEEP_COPY.buildYourAnswer : DEEP_COPY.tapChunksThenCheck}
-      />
+      {shouldRenderInlineFeedback ? (
+        <DeepFeedbackCard
+          tone={feedback.tone}
+          title={feedback.title}
+          body={feedback.body}
+          idleBody={idleBody}
+        />
+      ) : null}
     </div>
   );
 }

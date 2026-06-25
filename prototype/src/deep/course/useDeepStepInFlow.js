@@ -33,13 +33,13 @@ function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
       kind: "turn",
       userPrompt:
         turn.sourceModule === "notice"
-          ? "留在场景里：先看细节"
+          ? "先看细节"
           : turn.sourceModule === "interpret"
-            ? "留在场景里：说说你的感觉"
+            ? "说说你的感觉"
             : turn.sourceModule === "interact_need"
-              ? "留在场景里：先说你的需要"
+              ? "说说你的需要"
               : turn.sourceModule === "interact_handle"
-                ? "留在场景里：自然接一句"
+                ? "自然接一句"
                 : "",
       scene,
       history,
@@ -65,7 +65,16 @@ function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
   return pages;
 }
 
-export { buildStepInPages };
+function shouldStageStepInPrompt(history) {
+  if (!Array.isArray(history) || history.length !== 1) {
+    return false;
+  }
+
+  const onlyTurn = history[0];
+  return Boolean(onlyTurn?.speaker === "system" && onlyTurn?.text);
+}
+
+export { buildStepInPages, shouldStageStepInPrompt };
 
 export function useDeepStepInFlow({
   title = "Step In",
@@ -81,6 +90,7 @@ export function useDeepStepInFlow({
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [liveTurns, setLiveTurns] = useState([]);
+  const [visibleHistory, setVisibleHistory] = useState([]);
   const timersRef = useRef([]);
 
   useEffect(() => {
@@ -89,6 +99,7 @@ export function useDeepStepInFlow({
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
+    setVisibleHistory([]);
   }, [pagesSignature, initialPageIndex]);
 
   useEffect(
@@ -111,7 +122,39 @@ export function useDeepStepInFlow({
   const isReadyToCheck = currentPage?.kind === "turn"
     ? currentPage.answer.length > 0 && selectedChunks.length === currentPage.answer.length
     : false;
-  const isPlaybackActive = liveTurns.length > 0;
+  const isPlaybackActive = liveTurns.some((turn) => turn.isTyping || turn.speaker === "system");
+
+  useEffect(() => {
+    if (currentPage?.kind !== "turn") {
+      setVisibleHistory(currentPage?.history ?? []);
+      return;
+    }
+
+    const history = Array.isArray(currentPage.history) ? currentPage.history : [];
+    const shouldStagePrompt = shouldStageStepInPrompt(history);
+
+    if (!shouldStagePrompt) {
+      setVisibleHistory(history);
+      setLiveTurns([]);
+      return;
+    }
+
+    const stableHistory = history.slice(0, -1);
+    setVisibleHistory(stableHistory);
+    setLiveTurns([
+      {
+        speaker: "system",
+        label: "System",
+        text: "",
+        isTyping: true,
+      },
+    ]);
+
+    scheduleTimer(() => {
+      setVisibleHistory(history);
+      setLiveTurns([]);
+    }, 1000);
+  }, [currentPage?.id]);
 
   function clearPendingAdvance() {
     timersRef.current.forEach((timer) => {
@@ -148,6 +191,7 @@ export function useDeepStepInFlow({
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
+    setVisibleHistory([]);
     return true;
   }
 
@@ -156,6 +200,7 @@ export function useDeepStepInFlow({
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
+    setVisibleHistory([]);
     setPageIndex((current) => current + 1);
   }
 
@@ -188,6 +233,23 @@ export function useDeepStepInFlow({
 
       clearPendingAdvance();
       setSelectedChunks([]);
+      if (!bridgeReply) {
+        setLiveTurns([
+          {
+            speaker: "user",
+            label: "You",
+            text: answerText,
+            checked: true,
+          },
+        ]);
+        setFeedback({
+          tone: "success",
+          title: DEEP_COPY.correct,
+          body: "You finished the scene conversation.",
+        });
+        return;
+      }
+
       setFeedback({ tone: "idle", title: "", body: "" });
       setLiveTurns([
         {
@@ -196,16 +258,12 @@ export function useDeepStepInFlow({
           text: answerText,
           checked: true,
         },
-        ...(bridgeReply
-          ? [
-              {
-                speaker: "system",
-                label: "System",
-                text: "",
-                isTyping: true,
-              },
-            ]
-          : []),
+        {
+          speaker: "system",
+          label: "System",
+          text: "",
+          isTyping: true,
+        },
       ]);
 
       if (bridgeReply) {
@@ -245,6 +303,7 @@ export function useDeepStepInFlow({
 
   return {
     currentPage,
+    visibleHistory,
     replayTurns,
     selectedChunks,
     feedback,

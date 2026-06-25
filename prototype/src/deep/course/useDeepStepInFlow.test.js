@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildShuffledChunkBank } from "./deep-flow-utils.js";
-import { buildStepInPages } from "./useDeepStepInFlow.js";
+import { buildStepInPages, shouldStageStepInPrompt } from "./useDeepStepInFlow.js";
 
 test("buildStepInPages shuffles turn banks instead of keeping source order", () => {
   const turns = [
@@ -69,4 +69,34 @@ test("buildStepInPages carries the next system line as a bridge reply", () => {
 
   assert.equal(pages[1].bridgeReply, "bridge reply");
   assert.equal(pages[2].bridgeReply, "");
+});
+
+test("shouldStageStepInPrompt only stages the very first system prompt", () => {
+  assert.equal(
+    shouldStageStepInPrompt([
+      {
+        speaker: "system",
+        text: "system intro",
+      },
+    ]),
+    true,
+  );
+
+  assert.equal(
+    shouldStageStepInPrompt([
+      {
+        speaker: "system",
+        text: "system intro",
+      },
+      {
+        speaker: "user",
+        text: "user reply",
+      },
+      {
+        speaker: "system",
+        text: "bridge reply",
+      },
+    ]),
+    false,
+  );
 });
