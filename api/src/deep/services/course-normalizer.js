@@ -424,10 +424,6 @@ export function normalizeStepInDialogue(dialogue, config = deepCourseDefaultConf
     });
   }
 
-  if (Object.keys(dialogue).length === 0) {
-    return {};
-  }
-
   const scene = ensureString(dialogue.scene, "modules.stepIn.dialogue.scene");
   const sceneChinese = ensureString(dialogue.sceneChinese, "modules.stepIn.dialogue.sceneChinese");
   const turns = Array.isArray(dialogue.turns) ? dialogue.turns : [];

@@ -32,6 +32,10 @@ export function getDeepStageBackground(frozenLesson = {}, stage) {
   return pickBackground(frozenLesson, keys);
 }
 
+export function getStepInFrozenBackgroundSummarySource(background = {}) {
+  return pickBackground(background, ["overview", "notice", "interpret", "interact"]);
+}
+
 export function createDeepStageContext({
   stage,
   level,

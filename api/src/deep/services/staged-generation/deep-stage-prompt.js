@@ -1,5 +1,6 @@
 import { deepCourseDefaultConfig, deepCourseDefaultFixedCopy } from "../../config/course.js";
 import { buildDeepCoursePrompt } from "../course-prompt.js";
+import { buildStepInPromptAddendum, formatStepInFrozenBackgroundSummary } from "./step-in-prompt.js";
 
 const stageOutputShape = {
   overview_notice: [
@@ -115,15 +116,33 @@ export function buildDeepStagePrompt({
     throw new Error(`Unsupported deep stage: ${String(stage)}`);
   }
 
-  return [
+  const stepInSection = stage === "step_in"
+    ? [
+        "",
+        buildStepInPromptAddendum(),
+        "",
+        formatStepInFrozenBackgroundSummary(background, level),
+      ]
+    : null;
+
+  const promptParts = [
     basePrompt,
     "",
     ...instructions,
+  ];
+
+  if (stepInSection) {
+    promptParts.push(...stepInSection);
+  }
+
+  promptParts.push(
     "",
     "FROZEN BACKGROUND:",
     JSON.stringify(background, null, 2),
     "",
     "RETURN ONLY THIS STAGE SHAPE:",
     outputShape,
-  ].join("\n");
+  );
+
+  return promptParts.join("\n");
 }

@@ -104,6 +104,13 @@ test("buildInteractPages uses the section core expression for understand page hi
   assert.equal(pages[2].englishHighlight, "task one handle");
 });
 
+test("buildInteractPages includes speakText on interact understand pages", () => {
+  const pages = buildInteractPages([makeTaskPack("task-1", "task one")]);
+
+  assert.equal(pages[1].speakText, "task one need base english");
+  assert.equal(pages[2].speakText, "task one handle base english");
+});
+
 test("buildInteractPages shuffles deep reorder banks instead of keeping source order", () => {
   const pages = buildInteractPages([makeTaskPack("task-1", "task one")]);
   const rawBank = ["task one need base understand", "task one need base understand x"];

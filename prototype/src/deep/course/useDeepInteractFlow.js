@@ -50,6 +50,7 @@ function buildInteractPages(taskPacks) {
               stepLabel: `Step ${phaseIndex + 1} of 3`,
               instruction: DEEP_COPY.interactReorderInstruction,
               englishSentence: example.english,
+              speakText: example.english,
               englishHighlight: section.coreExpression,
               chineseReference: example.chinese,
               bank: buildShuffledChunkBank(

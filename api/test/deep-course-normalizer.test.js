@@ -160,6 +160,25 @@ test("normalizeDeepCoursePayload canonicalizes stepIn sourceModule aliases", () 
   assert.equal(normalized.modules.stepIn.dialogue.turns[7].sourceModule, "interact_handle");
 });
 
+test("normalizeDeepCoursePayload rejects malformed stepIn dialogue shapes", () => {
+  const payload = buildValidDeepCoursePayload();
+
+  payload.modules.stepIn.dialogue.scene = " ";
+  assert.throws(() => normalizeDeepCoursePayload(payload), /modules\.stepIn\.dialogue\.scene/);
+
+  payload.modules.stepIn.dialogue.scene = "A desk scene with a coworker nearby";
+  payload.modules.stepIn.dialogue.sceneChinese = "";
+  assert.throws(() => normalizeDeepCoursePayload(payload), /modules\.stepIn\.dialogue\.sceneChinese/);
+
+  payload.modules.stepIn.dialogue.sceneChinese = "桌边有一位同事在旁边。";
+  payload.modules.stepIn.dialogue.turns[1].speaker = " ";
+  assert.throws(() => normalizeDeepCoursePayload(payload), /modules\.stepIn\.dialogue\.turns\[1\]\.speaker/);
+
+  payload.modules.stepIn.dialogue.turns[1].speaker = "user";
+  payload.modules.stepIn.dialogue.turns[1].text = "";
+  assert.throws(() => normalizeDeepCoursePayload(payload), /modules\.stepIn\.dialogue\.turns\[1\]\.text/);
+});
+
 test("normalizeDeepCoursePayload rejects dialogue system replies that expose the learned handle", () => {
   const payload = buildValidDeepCoursePayload();
   const handleCoreExpression = payload.modules.interact.taskPacks[0].handle.coreExpression;
@@ -207,4 +226,41 @@ test("normalizeDeepStagePayload accepts step_in fragments", () => {
   assert.equal(normalized.level, "advanced");
   assert.equal(normalized.modules.stepIn.dialogue.turns.length, 8);
   assert.equal(normalized.modules.stepIn.dialogue.turns[0].speaker, "system");
+});
+
+test("normalizeDeepStagePayload canonicalizes step_in sourceModule aliases", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.stepIn.dialogue.turns[5].sourceModule = "need";
+  payload.modules.stepIn.dialogue.turns[7].sourceModule = "handle";
+
+  const normalized = normalizeDeepStagePayload({
+    stage: "step_in",
+    payload: {
+      mode: "deep",
+      level: "Normal",
+      modules: {
+        stepIn: payload.modules.stepIn,
+      },
+    },
+  });
+
+  assert.equal(normalized.modules.stepIn.dialogue.turns[5].sourceModule, "interact_need");
+  assert.equal(normalized.modules.stepIn.dialogue.turns[7].sourceModule, "interact_handle");
+});
+
+test("normalizeDeepStagePayload rejects empty step_in dialogue shapes", () => {
+  const payload = buildValidDeepCoursePayload();
+  payload.modules.stepIn.dialogue = {};
+
+  assert.throws(() =>
+    normalizeDeepStagePayload({
+      stage: "step_in",
+      payload: {
+        mode: "deep",
+        level: "Advanced",
+        modules: {
+          stepIn: payload.modules.stepIn,
+        },
+      },
+    }), /modules\.stepIn\.dialogue\.scene/);
 });

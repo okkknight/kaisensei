@@ -220,6 +220,7 @@ test("deep jobs run staged generation serially and freeze each stage", async () 
 
   const stageOrder = calls.map((entry) => entry.stage);
   assert.deepEqual(stageOrder, ["overview_notice", "interpret", "interact", "step_in"]);
+  assert.equal(stageOrder.at(-1), "step_in");
   assert.equal(calls[1].background.notice.expressionPacks.length, 3);
   assert.equal(calls[2].background.interpret.expressionPacks.length, 3);
   assert.equal(calls[3].background.interact.taskPacks.length, 2);
@@ -323,6 +324,7 @@ test("deep jobs can resume from the failed stage with frozen background", async 
 
   const stageOrder = calls.map((entry) => entry.stage);
   assert.deepEqual(stageOrder, ["interpret", "interact", "step_in"]);
+  assert.equal(stageOrder.at(-1), "step_in");
   assert.equal(calls[0].background.overview.keywords.length, 3);
   assert.equal(calls[0].background.notice.expressionPacks.length, 3);
   assert.equal(jobStore.get(job.jobId).generation.activeStage, "complete");
