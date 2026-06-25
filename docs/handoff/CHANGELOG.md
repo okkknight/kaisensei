@@ -4,6 +4,10 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Centered the Interact opening prompt as a single line and switched the follow-up turn to the closing prompt "很好！给对话结个尾" once the first reply succeeds
+- Verified the prompt switch on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7`, including the handle page where the closing prompt now appears below the dialogue
+- Added a top task banner above the Interact / Step In dialogue composer so the user sees the instruction immediately after the scene card, with the docked composer now focused on actions instead of repeating the prompt
+- Verified the new task banner on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7` after rebuilding the prototype
 - Updated the shared Deep dialogue scene card so the Interact mock now shows the Chinese scene description as the primary line and removes the secondary Chinese caption underneath
 - Verified the scene-card copy change on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7` after rebuilding the prototype
 - Extended the docked Deep dialogue layout to Interact dialogue pages so the answer composer now lives in the separate dock layer there as well, matching Step In

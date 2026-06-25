@@ -34,6 +34,8 @@ export function DeepDialogueFlowPage({
   history = [],
   liveTurns = [],
   userPrompt = "",
+  taskPrompt = "",
+  taskPromptPlacement = "top",
   showHistory = true,
   bank = [],
   selectedChunks = [],
@@ -136,12 +138,20 @@ export function DeepDialogueFlowPage({
         </div>
       ) : null}
 
+      {!showComposer && taskPrompt && taskPromptPlacement !== "bottom" ? (
+        <p className="deep-dialogue-task-line">{taskPrompt}</p>
+      ) : null}
+
       {visibleTurns.length > 0 ? (
         <div className="deep-dialogue-history">
           {visibleTurns.map((turn, index) => (
             <DialogueTurn key={`${turn.speaker}-${index}-${turn.text ?? "typing"}`} turn={turn} />
           ))}
         </div>
+      ) : null}
+
+      {!showComposer && taskPrompt && taskPromptPlacement === "bottom" ? (
+        <p className="deep-dialogue-task-line">{taskPrompt}</p>
       ) : null}
 
       {composer}
@@ -155,6 +165,7 @@ export function DeepDialogueComposer({
   history = [],
   liveTurns = [],
   userPrompt = "",
+  showPrompt = true,
   bank = [],
   selectedChunks = [],
   feedback,
@@ -180,7 +191,7 @@ export function DeepDialogueComposer({
 
   return (
     <div className="deep-dialogue-composer">
-      {!isPlaybackActive && userPrompt ? (
+      {!isPlaybackActive && showPrompt && userPrompt ? (
         <div className="deep-dialogue-user-prompt">
           <strong>{userPrompt}</strong>
           {latestSystemTurn?.text ? (

@@ -53,13 +53,14 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
       onAdvance={onAdvance}
       dock={
         currentPage?.kind === "turn" ? (
-          <DeepDialogueComposer
-            history={currentPage.history}
-            liveTurns={flow.liveTurns}
-            userPrompt={currentPage.userPrompt}
-            bank={currentPage.bank}
-            selectedChunks={flow.selectedChunks}
-            feedback={flow.feedback}
+        <DeepDialogueComposer
+          history={currentPage.history}
+          liveTurns={flow.liveTurns}
+          userPrompt={currentPage.userPrompt}
+          showPrompt={false}
+          bank={currentPage.bank}
+          selectedChunks={flow.selectedChunks}
+          feedback={flow.feedback}
             onToggleChunk={flow.toggleChunk}
           />
         ) : null
@@ -109,7 +110,13 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
       ) : currentPage?.kind === "complete" ? (
         <DeepStepInCompletePage replayTurns={flow.replayTurns} onRestart={onRestart} onExitToCamera={onExitToCamera} />
       ) : (
-        <DeepDialogueFlowPage history={currentPage.history} liveTurns={flow.liveTurns} showComposer={false} />
+        <DeepDialogueFlowPage
+          history={currentPage.history}
+          liveTurns={flow.liveTurns}
+          taskPrompt={currentPage.userPrompt}
+          taskPromptPlacement="top"
+          showComposer={false}
+        />
       )}
     </DeepCourseShell>
   );

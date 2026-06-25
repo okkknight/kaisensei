@@ -83,6 +83,8 @@ export const DEEP_COPY = {
   challengeTitle: "任务",
   challengePrompt: "留在场景里，把对话接下去",
   challengePromptChinese: "留在场景里，把对话接下去",
+  dialogueTaskPrompt: "遇到上面的场景，你会怎么说？",
+  dialogueTaskClosePrompt: "很好！给对话结个尾",
   stepInCompleteTitle: "Conversation complete",
   stepInCompleteDescription: "You finished the final scene conversation.",
   stepInReplayTitle: "对话回顾",

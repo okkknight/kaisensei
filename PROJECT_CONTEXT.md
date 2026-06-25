@@ -45,7 +45,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Make the Interact scene card show the Chinese description only, without the secondary Chinese caption
+- Task: Center the Interact opening prompt and switch to a closing prompt after the first reply succeeds
 - Status: 已执行待验收
 
 ## Architecture or state flow

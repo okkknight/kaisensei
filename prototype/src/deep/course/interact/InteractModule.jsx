@@ -79,6 +79,10 @@ export function InteractModule({
 
   const currentPage = flow.currentPage;
   const isDialoguePage = currentPage.kind === "dialogue";
+  const dialogueTaskPrompt = currentPage.dialogueRole === "need"
+    ? DEEP_COPY.dialogueTaskPrompt
+    : DEEP_COPY.dialogueTaskClosePrompt;
+  const dialogueTaskPlacement = currentPage.dialogueRole === "handle" ? "bottom" : "top";
   const primaryActionLabel = isDialoguePage ? DEEP_COPY.send : flow.feedback.tone === "success" ? "Continue" : DEEP_COPY.check;
   const handlePrimaryAction = isDialoguePage ? flow.check : flow.feedback.tone === "success" ? flow.next : flow.check;
   const primaryActionDisabled =
@@ -104,6 +108,8 @@ export function InteractModule({
         <DeepDialogueFlowPage
           scene={currentPage.scene}
           sceneChinese={currentPage.sceneChinese}
+          taskPrompt={dialogueTaskPrompt}
+          taskPromptPlacement={dialogueTaskPlacement}
           history={currentPage.history}
           liveTurns={flow.liveTurns}
           showHistory={currentPage.showHistory !== false}
@@ -148,6 +154,7 @@ export function InteractModule({
             history={currentPage.history}
             liveTurns={flow.liveTurns}
             userPrompt={currentPage.userPrompt}
+            showPrompt={false}
             bank={currentPage.bank}
             selectedChunks={flow.selectedChunks}
             feedback={flow.feedback}
