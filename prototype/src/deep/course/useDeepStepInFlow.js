@@ -67,21 +67,29 @@ function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
 
 export { buildStepInPages };
 
-export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", sceneChinese = "", turns = [] } = {}) {
+export function useDeepStepInFlow({
+  title = "Step In",
+  goal = "",
+  scene = "",
+  sceneChinese = "",
+  turns = [],
+  initialPageIndex = 0,
+} = {}) {
   const pages = useMemo(() => buildStepInPages({ title, goal, scene, sceneChinese, turns }), [goal, scene, sceneChinese, title, turns]);
   const pagesSignature = useMemo(() => pages.map((page) => page.id).join("|"), [pages]);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(() => Math.max(0, initialPageIndex));
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [liveTurns, setLiveTurns] = useState([]);
   const timersRef = useRef([]);
 
   useEffect(() => {
-    setPageIndex(0);
+    const maxIndex = Math.max(0, pages.length - 1);
+    setPageIndex(Math.min(Math.max(0, initialPageIndex), maxIndex));
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
-  }, [pagesSignature]);
+  }, [pagesSignature, initialPageIndex]);
 
   useEffect(
     () => () => {

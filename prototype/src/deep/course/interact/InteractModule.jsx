@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
-import { DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
+import { DeepDialogueComposer, DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepInteractMilestonePage } from "../DeepInteractMilestonePage.jsx";
 import { DeepTaskPackGuidePage } from "../DeepTaskPackGuidePage.jsx";
 import { DeepExercisePage } from "../DeepExercisePage.jsx";
@@ -9,9 +9,19 @@ import { DEEP_COPY } from "../../copy.js";
 import { useDeepInteractFlow } from "../useDeepInteractFlow.js";
 import { useDeepStageWaitGate } from "../useDeepStageWaitGate.js";
 
-export function InteractModule({ interactVM, state, photoPreviewUrl, generation, onAdvance, onBack, onRetryStage, onBackToCamera }) {
+export function InteractModule({
+  interactVM,
+  state,
+  photoPreviewUrl,
+  generation,
+  initialPageIndex = 0,
+  onAdvance,
+  onBack,
+  onRetryStage,
+  onBackToCamera,
+}) {
   const taskPacks = interactVM?.taskPacks ?? [];
-  const flow = useDeepInteractFlow(taskPacks);
+  const flow = useDeepInteractFlow(taskPacks, initialPageIndex);
   const waitGate = useDeepStageWaitGate({
     generation,
     modulePhase: "interact",
@@ -96,12 +106,8 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, generation,
           sceneChinese={currentPage.sceneChinese}
           history={currentPage.history}
           liveTurns={flow.liveTurns}
-          userPrompt={currentPage.userPrompt}
           showHistory={currentPage.showHistory !== false}
-          bank={currentPage.bank}
-          selectedChunks={flow.selectedChunks}
-          feedback={flow.feedback}
-          onToggleChunk={flow.toggleChunk}
+          showComposer={false}
         />
       );
     }
@@ -136,6 +142,19 @@ export function InteractModule({ interactVM, state, photoPreviewUrl, generation,
       pageProgressTotal={currentPage.kind === "guide" ? 0 : flow.progressTotal}
       onBack={handleBack}
       onAdvance={onAdvance}
+      dock={
+        currentPage.kind === "dialogue" ? (
+          <DeepDialogueComposer
+            history={currentPage.history}
+            liveTurns={flow.liveTurns}
+            userPrompt={currentPage.userPrompt}
+            bank={currentPage.bank}
+            selectedChunks={flow.selectedChunks}
+            feedback={flow.feedback}
+            onToggleChunk={flow.toggleChunk}
+          />
+        ) : null
+      }
       footerActions={
         currentPage.kind === "guide" ? (
           <button className="primary-button" type="button" onClick={flow.next}>

@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
-import { DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
+import { DeepDialogueComposer, DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepStepInCompletePage } from "../DeepStepInCompletePage.jsx";
 import { DEEP_COPY } from "../../copy.js";
 import { useDeepStepInFlow } from "../useDeepStepInFlow.js";
 import { VoiceButton } from "../../../quick/lesson/VoiceButton.jsx";
 import { useDeepSpeech } from "../../useDeepSpeech.js";
 
-export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBack, onRestart, onExitToCamera }) {
+export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBack, onRestart, onExitToCamera, initialPageIndex = 0 }) {
   const speech = useDeepSpeech();
   const flow = useDeepStepInFlow({
     title: stepInVM?.title ?? "Step In",
@@ -15,6 +15,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
     scene: stepInVM?.scene ?? "",
     sceneChinese: stepInVM?.sceneChinese ?? "",
     turns: stepInVM?.turns ?? [],
+    initialPageIndex,
   });
 
   const currentPage = flow.currentPage;
@@ -50,6 +51,19 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
       pageProgressTotal={currentPage?.kind === "turn" ? flow.progressTotal : 0}
       onBack={handleBack}
       onAdvance={onAdvance}
+      dock={
+        currentPage?.kind === "turn" ? (
+          <DeepDialogueComposer
+            history={currentPage.history}
+            liveTurns={flow.liveTurns}
+            userPrompt={currentPage.userPrompt}
+            bank={currentPage.bank}
+            selectedChunks={flow.selectedChunks}
+            feedback={flow.feedback}
+            onToggleChunk={flow.toggleChunk}
+          />
+        ) : null
+      }
       footerActions={
         currentPage?.kind === "guide" ? (
           <button className="primary-button" type="button" onClick={flow.next}>
@@ -95,16 +109,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
       ) : currentPage?.kind === "complete" ? (
         <DeepStepInCompletePage replayTurns={flow.replayTurns} onRestart={onRestart} onExitToCamera={onExitToCamera} />
       ) : (
-        <DeepDialogueFlowPage
-          scene={stepInVM?.scene ?? ""}
-          history={currentPage.history}
-          liveTurns={flow.liveTurns}
-          userPrompt={currentPage.userPrompt}
-          bank={currentPage.bank}
-          selectedChunks={flow.selectedChunks}
-          feedback={flow.feedback}
-          onToggleChunk={flow.toggleChunk}
-        />
+        <DeepDialogueFlowPage history={currentPage.history} liveTurns={flow.liveTurns} showComposer={false} />
       )}
     </DeepCourseShell>
   );

@@ -179,21 +179,22 @@ function getHintMessage(page) {
   return `Start with "${firstChunk}".`;
 }
 
-export function useDeepInteractFlow(taskPacks = []) {
+export function useDeepInteractFlow(taskPacks = [], initialPageIndex = 0) {
   const safeTaskPacks = Array.isArray(taskPacks) ? taskPacks : [];
   const pages = useMemo(() => buildInteractPages(safeTaskPacks), [safeTaskPacks]);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(() => Math.max(0, initialPageIndex));
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
   const [liveTurns, setLiveTurns] = useState([]);
   const timersRef = useRef([]);
 
   useEffect(() => {
-    setPageIndex(0);
+    const maxIndex = Math.max(0, pages.length - 1);
+    setPageIndex(Math.min(Math.max(0, initialPageIndex), maxIndex));
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
-  }, [pages]);
+  }, [pages, initialPageIndex]);
 
   useEffect(
     () => () => {

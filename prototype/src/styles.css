@@ -2278,13 +2278,49 @@ img {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 239, 0.98));
 }
 
+.deep-course-screen-docked {
+  overflow: hidden;
+}
+
+.deep-course-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .deep-course-content {
   gap: 16px;
+}
+
+.deep-course-screen-docked .lesson-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.deep-course-dock {
+  flex: 0 0 auto;
+  padding: 0 24px 10px;
+}
+
+.deep-course-dock .deep-dialogue-composer {
+  display: grid;
+  gap: 10px;
+}
+
+.deep-course-footer {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 767px) {
   .lesson-screen {
     position: relative;
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
   .lesson-content {
@@ -2293,8 +2329,18 @@ img {
 
   .deep-course-screen .lesson-content,
   .deep-course-screen .deep-course-content {
-    padding-bottom: calc(148px + env(safe-area-inset-bottom));
-    scroll-padding-bottom: calc(148px + env(safe-area-inset-bottom));
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .deep-course-screen-docked .lesson-content,
+  .deep-course-screen-docked .deep-course-content {
+    padding-bottom: 6px;
+    scroll-padding-bottom: 6px;
+  }
+
+  .deep-course-screen-docked .deep-course-dock {
+    padding: 0 24px 10px;
   }
 
   .lesson-footer {
@@ -2308,6 +2354,17 @@ img {
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
     background: linear-gradient(180deg, rgba(255, 252, 247, 0), rgba(255, 252, 247, 0.96) 28%, rgba(255, 252, 247, 0.99));
     backdrop-filter: blur(14px);
+  }
+
+  .deep-course-screen-docked .lesson-footer {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    padding-top: 4px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .lesson-footer .lesson-footer-actions {
@@ -2844,6 +2901,28 @@ img {
   gap: 14px;
 }
 
+.deep-dialogue-flow-page-docked {
+  gap: 12px;
+}
+
+.deep-dialogue-flow-page-docked .deep-dialogue-transcript {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 2px;
+}
+
+.deep-dialogue-flow-page-docked .deep-dialogue-composer {
+  display: grid;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding-bottom: calc(2px + env(safe-area-inset-bottom));
+}
+
 .deep-dialogue-user-prompt {
   display: flex;
   align-items: center;
@@ -2857,7 +2936,12 @@ img {
 
 .deep-dialogue-flow-page .deep-selection-stack {
   margin-top: auto;
-  padding-top: clamp(14px, 4vh, 44px);
+  padding-top: clamp(12px, 3vh, 24px);
+}
+
+.deep-dialogue-flow-page-docked .deep-selection-stack {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .deep-dialogue-user-prompt strong {

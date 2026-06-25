@@ -25,6 +25,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 - The Deep frontend now consumes partial frozen snapshots while the job is still running, so `overview + notice` can render before later stages complete
 - The Deep frontend now shows a tiny waiting page after module milestones when the next stage is still pending or failed, and a staged retry route can resume from the failed stage with frozen background
 - The Deep backend and frontend now emit timing logs for per-stage completion and first visible snapshot appearance, which makes real-provider long-run timing stats easier to read
+- Interact dialogue pages now use the same docked composer layout as Step In, so the transcript scroll area and the answer composer no longer compete with the fixed footer
 - Quick Mode remains the implemented lesson flow in `prototype/` and should stay unchanged unless explicitly requested
 - Deep Mode is now split into its own feature domain with separate overview, Notice, Interpret, Interact, Step In, and completion surfaces
 - Deep Mode pack content now keeps one `coreExpression` across baseExample and variations
@@ -44,7 +45,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Keep Deep Mode chunk selections stable while the backend keeps refreshing staged generation in the background
+- Task: Keep the Deep Mode dialogue composer docked consistently across Interact and Step In
 - Status: 已执行待验收
 
 ## Architecture or state flow

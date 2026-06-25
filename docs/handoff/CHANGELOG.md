@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Extended the docked Deep dialogue layout to Interact dialogue pages so the answer composer now lives in the separate dock layer there as well, matching Step In
+- Added a DEV-only `deepMockInteractIndex` query param so the Interact mock can jump straight to a chosen page, which made direct dialogue-page verification easier
+- Verified the updated Interact dialogue layout with `npm --prefix prototype run build` and a live browser check on `http://127.0.0.1:5173/?deepMockPhase=interact&deepMockInteractIndex=7`
 - Fixed the Deep Mode chunk-selection regression by keeping exercise state stable across background generation refreshes, so Notice / Step In page rerenders no longer push selected chunks back into the candidate bank
 - Added a Playwright regression that reproduces a background generation refresh while a Notice answer is selected and verifies the selected chip stays in the answer area
 - Verified the updated prototype with `npm --prefix prototype run test:deepmode`
