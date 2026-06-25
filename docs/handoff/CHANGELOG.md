@@ -4,6 +4,9 @@ Append-only resume log.
 
 ## 2026-06-25
 
+- Fixed the Deep Mode chunk-selection regression by keeping exercise state stable across background generation refreshes, so Notice / Step In page rerenders no longer push selected chunks back into the candidate bank
+- Added a Playwright regression that reproduces a background generation refresh while a Notice answer is selected and verifies the selected chip stays in the answer area
+- Verified the updated prototype with `npm --prefix prototype run test:deepmode`
 - Fixed the production camera-page white screen by rebuilding the public site with the correct `/kaisensei/` Vite base path so the deployed HTML points at `/kaisensei/assets/*` instead of `/assets/*`
 - Shortened the synthetic Deep Mode loading progress bar from about 30 seconds to about 25 seconds so the first-response expectation feels faster
 - Verified the rebuilt frontend with `VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm --prefix prototype run build` and `npm --prefix prototype run test:deepmode`

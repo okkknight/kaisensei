@@ -69,6 +69,7 @@ export { buildStepInPages };
 
 export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", sceneChinese = "", turns = [] } = {}) {
   const pages = useMemo(() => buildStepInPages({ title, goal, scene, sceneChinese, turns }), [goal, scene, sceneChinese, title, turns]);
+  const pagesSignature = useMemo(() => pages.map((page) => page.id).join("|"), [pages]);
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
@@ -80,7 +81,7 @@ export function useDeepStepInFlow({ title = "Step In", goal = "", scene = "", sc
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
-  }, [pages]);
+  }, [pagesSignature]);
 
   useEffect(
     () => () => {

@@ -44,7 +44,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Fix the production camera-page white screen and shorten the Deep Mode synthetic loading bar to 25 seconds
+- Task: Keep Deep Mode chunk selections stable while the backend keeps refreshing staged generation in the background
 - Status: 已执行待验收
 
 ## Architecture or state flow
@@ -98,6 +98,7 @@ Deep Mode planned flow:
 - Deep Mode generation logs now also include per-stage completion timings and a first-snapshot visibility timestamp, so real-provider smoke runs can be measured directly
 - Deep Mode loading now includes a synthetic progress bar that advances to 97% over about 25 seconds, stalls with a moving sheen, then finishes to 100% once the first snapshot is ready
 - The production `/kaisensei/` deployment must be built with `VITE_KAISENSEI_BASE_PATH=/kaisensei/` or the browser will 404 `/assets/*` and the app will look blank
+- Deep Mode exercise pages now keep their selection state stable across background generation refreshes by keying resets off page signatures instead of raw array references
 - VPS prompt changes require syncing the API source under `/opt/boringmax/kaisensei/api` and restarting `kaisensei.service`; static `prototype/dist/` sync alone is not enough for backend prompt edits
 - Mobile footer layout changes need a production build and `prototype/dist/` sync, because the live VPS serves the built static assets
 - The latest Deep Mode Understand wording cleanup has been synced to the VPS API source and `kaisensei.service` was restarted; if the generated output changes again, re-run the API test and restart the service after syncing before calling it done
@@ -155,6 +156,7 @@ Deep Mode planned flow:
 - If prompt guidance changes without regression tests, the UI can silently diverge from the contract again
 - The synthetic loading bar is intentionally not a real progress measure, so it must stay visually convincing without being treated as a backend guarantee
 - The production build path matters for the public VPS site because the deployed app lives under `/kaisensei/`
+- Background stage polling can still re-render the current Deep page, so exercise state should not be reset just because new generation data arrived
 
 ## Cross-feature impact
 

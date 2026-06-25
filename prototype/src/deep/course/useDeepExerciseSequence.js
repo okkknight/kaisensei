@@ -162,6 +162,7 @@ function buildExercisePages(packs, moduleKey) {
 export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {}) {
   const safePacks = Array.isArray(packs) ? packs : [];
   const pages = useMemo(() => buildExercisePages(safePacks, moduleKey), [moduleKey, safePacks]);
+  const pagesSignature = useMemo(() => pages.map((page) => page.id).join("|"), [pages]);
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedChunks, setSelectedChunks] = useState([]);
   const [feedback, setFeedback] = useState({ tone: "idle", title: "", body: "" });
@@ -170,7 +171,7 @@ export function useDeepExerciseSequence({ packs = [], moduleKey = "notice" } = {
     setPageIndex(0);
     setSelectedChunks([]);
     setFeedback({ tone: "idle", title: "", body: "" });
-  }, [pages]);
+  }, [pagesSignature]);
 
   const currentPage = pages[pageIndex] ?? null;
   const isMilestone = !currentPage;
