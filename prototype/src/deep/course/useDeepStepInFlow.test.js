@@ -27,6 +27,7 @@ test("buildStepInPages shuffles turn banks instead of keeping source order", () 
   const expectedBank = buildShuffledChunkBank(rawBank, "step-in:1:user reply");
 
   assert.equal(pages[0].sceneChinese, "场景中文");
+  assert.equal(pages.some((page) => page.kind === "complete"), false);
   assert.deepEqual(pages[1].bank, expectedBank);
   assert.notDeepEqual(pages[1].bank, rawBank);
 });

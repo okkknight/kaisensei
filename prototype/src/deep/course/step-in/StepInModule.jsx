@@ -1,14 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { DeepCourseShell } from "../DeepCourseShell.jsx";
 import { DeepDialogueComposer, DeepDialogueFlowPage } from "../DeepDialogueFlowPage.jsx";
 import { DeepFeedbackCard } from "../DeepFeedbackCard.jsx";
-import { DeepStepInCompletePage } from "../DeepStepInCompletePage.jsx";
 import { DEEP_COPY } from "../../copy.js";
 import { useDeepStepInFlow } from "../useDeepStepInFlow.js";
 import { VoiceButton } from "../../../quick/lesson/VoiceButton.jsx";
 import { useDeepSpeech } from "../../useDeepSpeech.js";
 
-export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBack, onRestart, onExitToCamera, initialPageIndex = 0 }) {
+export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBack, initialPageIndex = 0 }) {
   const speech = useDeepSpeech();
   const flow = useDeepStepInFlow({
     title: stepInVM?.title ?? "Step In",
@@ -17,6 +16,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
     sceneChinese: stepInVM?.sceneChinese ?? "",
     turns: stepInVM?.turns ?? [],
     initialPageIndex,
+    onComplete: onAdvance,
   });
 
   const currentPage = flow.currentPage;
@@ -25,20 +25,6 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
     currentPage?.kind === "turn" && !flow.isPlaybackActive && flow.feedback.tone !== "idle" ? (
       <DeepFeedbackCard tone={flow.feedback.tone} title={flow.feedback.title} body={flow.feedback.body} />
     ) : null;
-
-  useEffect(() => {
-    if (currentPage?.kind !== "complete") {
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => {
-      onAdvance();
-    }, 1400);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [currentPage?.kind, onAdvance]);
 
   function handleBack() {
     const movedWithinModule = flow.back();
@@ -79,8 +65,6 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
           <button className="primary-button" type="button" onClick={flow.next}>
             {DEEP_COPY.startPractice} →
           </button>
-        ) : currentPage?.kind === "complete" ? (
-          <div className="lesson-footer-spacer" />
         ) : (
           <div className="lesson-footer-actions">
             <button className="secondary-button" type="button" onClick={flow.reset} disabled={currentPage?.kind === "turn" && flow.isPlaybackActive}>
@@ -100,7 +84,7 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
           </div>
         )
       }
-    >
+      >
       {currentPage?.kind === "guide" ? (
         <div className="deep-guide-page">
           <div className="deep-stage-card deep-guide-task-card deep-guide-task-card-stepin">
@@ -119,8 +103,6 @@ export function StepInModule({ stepInVM, state, photoPreviewUrl, onAdvance, onBa
             ) : null}
           </div>
         </div>
-      ) : currentPage?.kind === "complete" ? (
-        <DeepStepInCompletePage replayTurns={flow.replayTurns} onRestart={onRestart} onExitToCamera={onExitToCamera} />
       ) : (
         <DeepDialogueFlowPage
           history={flow.visibleHistory}

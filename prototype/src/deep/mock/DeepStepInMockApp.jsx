@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { DeepCourseShell } from "../course/DeepCourseShell.jsx";
 import { StepInModule } from "../course/step-in/StepInModule.jsx";
 import { createDeepCourseState } from "../state/deep-course-state.js";
 import { createDeepCourseViewModel } from "../schema/deep-course-schema.js";
@@ -44,8 +43,6 @@ export function DeepStepInMockApp({ onExitToCamera }) {
       initialPageIndex={1}
       onAdvance={() => {}}
       onBack={handleExitToCamera}
-      onRestart={handleExitToCamera}
-      onExitToCamera={handleExitToCamera}
     />
   );
 }

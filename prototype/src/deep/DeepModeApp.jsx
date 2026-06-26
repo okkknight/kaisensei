@@ -88,7 +88,7 @@ export function DeepModeApp({ initialFile = null, initialLevel = "Normal", onExi
         onBackToCamera={flow.exitToCamera}
       />
     ),
-    stepIn: <StepInModule stepInVM={flow.viewModel.stepInVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} onRestart={flow.restartCourse} onExitToCamera={flow.exitToCamera} />,
+    stepIn: <StepInModule stepInVM={flow.viewModel.stepInVM} state={flow.state} photoPreviewUrl={flow.photoPreviewUrl} onAdvance={flow.goNext} onBack={flow.goBack} />,
   }[flow.phase];
 
   return phaseContent;

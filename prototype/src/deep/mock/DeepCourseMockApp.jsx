@@ -198,8 +198,6 @@ export function DeepCourseMockApp({ initialPhase = "overview", initialInteractIn
       photoPreviewUrl={DEEP_MOCK_STEP_IN_PHOTO_URL}
       onAdvance={goNext}
       onBack={goBack}
-      onRestart={() => setPhase("overview")}
-      onExitToCamera={exitToCamera}
     />
   );
 }

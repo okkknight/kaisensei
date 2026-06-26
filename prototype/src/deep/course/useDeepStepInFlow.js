@@ -52,16 +52,6 @@ function buildStepInPages({ title, goal, scene, sceneChinese, turns }) {
     });
   });
 
-  pages.push({
-    id: "step-in-complete",
-    kind: "complete",
-    replayTurns: safeTurns.map((turn) => ({
-      speaker: turn.speaker,
-      label: turn.speaker === "system" ? "System" : "You",
-      text: turn.text,
-    })),
-  });
-
   return pages;
 }
 
@@ -83,6 +73,7 @@ export function useDeepStepInFlow({
   sceneChinese = "",
   turns = [],
   initialPageIndex = 0,
+  onComplete = null,
 } = {}) {
   const pages = useMemo(() => buildStepInPages({ title, goal, scene, sceneChinese, turns }), [goal, scene, sceneChinese, title, turns]);
   const pagesSignature = useMemo(() => pages.map((page) => page.id).join("|"), [pages]);
@@ -113,7 +104,6 @@ export function useDeepStepInFlow({
   );
 
   const currentPage = pages[pageIndex] ?? null;
-  const replayTurns = pages[pages.length - 1]?.replayTurns ?? [];
   const progressPages = pages.filter((page) => page.kind === "turn");
   const progressTotal = progressPages.length;
   const progressCurrent = currentPage?.kind === "turn"
@@ -201,6 +191,11 @@ export function useDeepStepInFlow({
     setFeedback({ tone: "idle", title: "", body: "" });
     setLiveTurns([]);
     setVisibleHistory([]);
+    if (pageIndex >= pages.length - 1) {
+      onComplete?.();
+      return;
+    }
+
     setPageIndex((current) => current + 1);
   }
 
@@ -247,6 +242,9 @@ export function useDeepStepInFlow({
           title: DEEP_COPY.correct,
           body: "You finished the scene conversation.",
         });
+        scheduleTimer(() => {
+          next();
+        }, 900);
         return;
       }
 
@@ -266,31 +264,25 @@ export function useDeepStepInFlow({
         },
       ]);
 
-      if (bridgeReply) {
-        scheduleTimer(() => {
-          setLiveTurns([
-            {
-              speaker: "user",
-              label: "You",
-              text: answerText,
-              checked: true,
-            },
-            {
-              speaker: "system",
-              label: "System",
-              text: bridgeReply,
-            },
-          ]);
-        }, 1000);
+      scheduleTimer(() => {
+        setLiveTurns([
+          {
+            speaker: "user",
+            label: "You",
+            text: answerText,
+            checked: true,
+          },
+          {
+            speaker: "system",
+            label: "System",
+            text: bridgeReply,
+          },
+        ]);
+      }, 1000);
 
-        scheduleTimer(() => {
-          next();
-        }, 1900);
-      } else {
-        scheduleTimer(() => {
-          next();
-        }, 650);
-      }
+      scheduleTimer(() => {
+        next();
+      }, 1900);
       return;
     }
 
@@ -304,7 +296,6 @@ export function useDeepStepInFlow({
   return {
     currentPage,
     visibleHistory,
-    replayTurns,
     selectedChunks,
     feedback,
     liveTurns,

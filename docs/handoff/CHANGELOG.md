@@ -2,6 +2,12 @@
 
 Append-only resume log.
 
+## 2026-06-26
+
+- Removed the internal Step In complete transition page so the final correct answer now advances straight to the global completion screen
+- Updated the Step In flow helper to auto-advance the last successful turn directly into the course completion phase, while keeping the bridge-reply turns unchanged
+- Deleted the unused Step In complete-page component and removed its dedicated copy strings
+
 ## 2026-06-25
 
 - Tuned the Deep success celebration down again by removing the shockwave rings and pulling the confetti back toward the card edges with shorter, slower outward motion

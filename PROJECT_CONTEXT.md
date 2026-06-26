@@ -45,7 +45,7 @@ It turns one scene into one short, friendly, 1-minute micro-lesson.
 
 ## Current latest task
 
-- Task: Tune the Deep success celebration so only edge-near confetti remains, without shockwave rings or long-range bursts
+- Task: Remove the internal Step In complete transition page so the final correct answer goes straight to the global completion screen
 - Status: 已执行待验收
 
 ## Architecture or state flow
