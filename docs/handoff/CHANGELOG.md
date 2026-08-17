@@ -75,7 +75,7 @@ Append-only resume log.
 - Reworked the Deep Mode Interact and Step In front-end playback so successful dialogue answers enter the chat stream directly, show a checked user bubble, and use a short typing bridge before the system reply when the page is a Need turn
 - Hid the dialogue practice footer while playback is active, and added styling for the checked bubble and typing state so the interaction reads like a real conversation instead of a success card flow
 - Verified the frontend rewrite locally with `npm --prefix prototype run build`
-- Synced the rebuilt frontend to the VPS at `89.208.242.44`, restarted `kaisensei.service`, `boringapi.service`, and `caddy`, and verified `https://boringmax.com/kaisensei/` now serves the new production asset bundle
+- Synced the rebuilt frontend to the VPS at `43.172.79.177`, restarted `kaisensei.service`, `boringapi.service`, and `caddy`, and verified `https://boringmax.com/kaisensei/` now serves the new production asset bundle
 
 ## 2026-06-22
 

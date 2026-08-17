@@ -81,12 +81,12 @@ Deep Mode planned flow:
 - `npm --prefix prototype run build`
 - `VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm --prefix prototype run build`
 - `cd prototype && VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm run build`
-- `rsync -a --delete prototype/dist/ root@89.208.242.44:/opt/boringmax/site/kaisensei/`
+- `rsync -a --delete prototype/dist/ ubuntu@43.172.79.177:/opt/boringmax/site/kaisensei/`
 - `npm run dev` from the repo root starts the local API and prototype together
 - `lsof -nP -iTCP:3001 -sTCP:LISTEN` confirmed the API is listening on `127.0.0.1:3001`
 - Latest API verification after the Deep Mode prompt quality rebuild: `npm --prefix api test`
 - Latest prompt wording verification after the Interact / Step In rewrite: `node --test api/test/deep-course-provider.test.js`
-- Latest VPS sync for the Understand wording cleanup: `rsync -a api/src/deep/services/course-prompt.js root@89.208.242.44:/opt/boringmax/kaisensei/api/src/deep/services/course-prompt.js && ssh root@89.208.242.44 'systemctl restart kaisensei.service'`
+- Latest VPS sync for the Understand wording cleanup: `rsync -a api/src/deep/services/course-prompt.js ubuntu@43.172.79.177:/opt/boringmax/kaisensei/api/src/deep/services/course-prompt.js && ssh ubuntu@43.172.79.177 'systemctl restart kaisensei.service'`
 - Latest frontend deployment verification: `curl -fsS https://boringmax.com/kaisensei/` and `curl -fsS https://boringmax.com/kaisensei/assets/index-D6csJCFz.css`
 
 ## Runtime notes

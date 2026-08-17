@@ -14,7 +14,7 @@ This document describes how to publish and verify the current `kaisensei` deploy
 ## VPS access
 
 - Hostname: `fine-bits-1.localdomain`
-- Public IP: `89.208.242.44`
+- Public IP: `43.172.79.177`
 - SSH port: `22`
 - SSH user: `root`
 - OS: `AlmaLinux 9 x86_64`
@@ -117,13 +117,13 @@ We do not sync repo source to the VPS as part of the normal publish path.
 ```bash
 cd /Users/linpeiwen/knightspace/kaisensei/prototype
 VITE_KAISENSEI_BASE_PATH=/kaisensei/ VITE_KAISENSEI_API_BASE=/kaisensei/api npm run build
-rsync -a --delete dist/ root@89.208.242.44:/opt/boringmax/site/kaisensei/
+rsync -a --delete dist/ ubuntu@43.172.79.177:/opt/boringmax/site/kaisensei/
 ```
 
 ### 2) Restart services
 
 ```bash
-ssh root@89.208.242.44 'systemctl restart kaisensei.service boringapi.service caddy'
+ssh ubuntu@43.172.79.177 'systemctl restart kaisensei.service boringapi.service caddy'
 ```
 
 ## Verification
@@ -131,13 +131,13 @@ ssh root@89.208.242.44 'systemctl restart kaisensei.service boringapi.service ca
 ### 1) Service health
 
 ```bash
-ssh root@89.208.242.44 'systemctl --no-pager --full status kaisensei.service boringapi.service caddy.service'
+ssh ubuntu@43.172.79.177 'systemctl --no-pager --full status kaisensei.service boringapi.service caddy.service'
 ```
 
 ### 2) Local API health
 
 ```bash
-ssh root@89.208.242.44 'curl -fsS http://127.0.0.1:3001/healthz'
+ssh ubuntu@43.172.79.177 'curl -fsS http://127.0.0.1:3001/healthz'
 ```
 
 Expected output:
@@ -175,8 +175,8 @@ Expected output:
 Use a real image file, for example `docs/image.png` from the repo or a new photo.
 
 ```bash
-scp docs/image.png root@89.208.242.44:/tmp/kaisensei-test.png
-ssh root@89.208.242.44 '
+scp docs/image.png ubuntu@43.172.79.177:/tmp/kaisensei-test.png
+ssh ubuntu@43.172.79.177 '
   job_json=$(curl -fsS -F image=@/tmp/kaisensei-test.png -F level=Normal https://boringmax.com/kaisensei/api/v1/lesson-jobs)
   echo "$job_json"
 '
@@ -187,7 +187,7 @@ The response should include a `jobId` and `status: queued`.
 Then poll the job:
 
 ```bash
-ssh root@89.208.242.44 '
+ssh ubuntu@43.172.79.177 '
   job_id=job_xxx
   curl -fsS "https://boringmax.com/kaisensei/api/v1/lesson-jobs/$job_id"
 '
@@ -236,8 +236,8 @@ Likely cause:
 Check:
 
 ```bash
-ssh root@89.208.242.44 'systemctl status kaisensei.service --no-pager --full'
-ssh root@89.208.242.44 'sudo -u shipnow /usr/bin/codex --version'
+ssh ubuntu@43.172.79.177 'systemctl status kaisensei.service --no-pager --full'
+ssh ubuntu@43.172.79.177 'sudo -u shipnow /usr/bin/codex --version'
 ```
 
 ## Notes
