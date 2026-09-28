@@ -2,6 +2,8 @@
 
 kaisensei 是一个移动端优先的英语学习 Web 原型：拍摄或上传一张照片，生成一节与现实场景有关的短课。Quick Mode 采用 See → Learn → Build → Use 流程；Deep Mode 提供更长的分阶段学习体验。
 
+在线体验：[kaisensei](https://boringmax.com/kaisensei/)。
+
 ## 本地运行
 
 需要 Node.js 和 npm。API 环境变量示例见 [`api/.env.example`](api/.env.example)。使用 Gemini 等外部服务时，请在本地配置自己的凭据，不要提交环境文件。
